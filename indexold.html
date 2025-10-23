@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Primary Meta Tags -->
+  <title>Cylent - Creative Agency | Premium Digital Design & Branding</title>
+  <meta name="title" content="Cylent - Creative Agency | Premium Digital Design & Branding">
+  <meta name="description" content="Cylent is a premium creative agency specializing in digital design, branding, and innovative solutions. We transform silence into spectacular visual experiences inspired by the universe and light spectrum.">
+  <meta name="keywords" content="creative agency, digital design, branding, web design, UI/UX, visual identity, Cylent">
+  <meta name="author" content="Cylent">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://cylent.com/">
+  <meta property="og:title" content="Cylent - Creative Agency | Premium Digital Design & Branding">
+  <meta property="og:description" content="Premium creative agency transforming silence into spectacular visual experiences.">
+  <meta property="og:image" content="https://cylent.com/og-image.jpg">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://cylent.com/">
+  <meta property="twitter:title" content="Cylent - Creative Agency | Premium Digital Design & Branding">
+  <meta property="twitter:description" content="Premium creative agency transforming silence into spectacular visual experiences.">
+  <meta property="twitter:image" content="https://cylent.com/og-image.jpg">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://cylent.com/">
+
+  <!-- Preconnect for fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Figtree Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="./dist/styles.css">
+
+  <!-- Preload critical assets -->
+  <link rel="preload" href="./dist/styles.css" as="style">
+  <link rel="preload" href="./dist/script.min.js" as="script">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Cylent",
+    "description": "Premium creative agency specializing in digital design and branding",
+    "url": "https://cylent.com",
+    "logo": "https://cylent.com/logo.svg",
+    "sameAs": [
+      "https://twitter.com/cylent",
+      "https://instagram.com/cylent",
+      "https://linkedin.com/company/cylent"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer service",
+      "email": "hello@cylent.com"
+    }
+  }
+  </script>
+
+  <!-- Theme Detection Script (Inline for no FOUC) -->
+  <script>
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+</head>
+<body class="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+  <!-- Header & Navigation -->
+  <header class="fixed top-6 left-0 right-0 z-50 px-6">
+    <nav class="max-w-4xl mx-auto glass-effect rounded-full px-6 py-3 flex items-center justify-between border border-gray-200/20 dark:border-gray-800/20 transition-shadow duration-300" aria-label="Main navigation">
+      <!-- Logo -->
+      <a href="#" class="text-xl font-bold gradient-text" aria-label="Cylent home">
+        Cylent
+      </a>
+
+      <!-- Desktop Navigation -->
+      <ul class="hidden md:flex items-center space-x-6">
+        <li><a href="#about" class="nav-link text-sm">About</a></li>
+        <li><a href="#services" class="nav-link text-sm">Services</a></li>
+        <li><a href="#work" class="nav-link text-sm">Work</a></li>
+      </ul>
+
+      <!-- Contact Button & Dark Mode Toggle (Desktop) -->
+      <div class="hidden md:flex items-center gap-3">
+        <a href="#contact" class="btn-primary text-sm px-5 py-2">Contact</a>
+        <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle dark mode">
+          <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+          </svg>
+          <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mobile Menu Button & Dark Mode Toggle -->
+      <div class="flex md:hidden items-center gap-2">
+        <button id="theme-toggle-mobile" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle dark mode">
+          <svg id="theme-toggle-dark-icon-mobile" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+          </svg>
+          <svg id="theme-toggle-light-icon-mobile" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+          </svg>
+        </button>
+        <button id="mobile-menu-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="Toggle mobile menu">
+          <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+          <svg id="close-icon" class="hidden w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="md:hidden hidden mt-4 mx-auto max-w-sm glass-effect rounded-2xl border border-gray-200/20 dark:border-gray-800/20 overflow-hidden">
+      <ul class="flex flex-col">
+        <li><a href="#about" class="block px-6 py-4 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">About</a></li>
+        <li><a href="#services" class="block px-6 py-4 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Services</a></li>
+        <li><a href="#work" class="block px-6 py-4 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">Work</a></li>
+        <li class="p-4"><a href="#contact" class="btn-primary text-sm px-5 py-2 w-full block text-center">Contact</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="hero" class="min-h-screen flex items-center justify-center section-padding pt-32 relative overflow-hidden">
+    <!-- Animated background elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-spectrum-violet/20 rounded-full blur-3xl animate-float"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-spectrum-cyan/20 rounded-full blur-3xl animate-float animation-delay-400"></div>
+    </div>
+
+    <div class="max-w-5xl mx-auto text-center relative z-10">
+      <h1 class="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in">
+        Where <span class="gradient-text">Silence</span><br>
+        Meets <span class="gradient-text">Spectrum</span>
+      </h1>
+      <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-400 mb-12 max-w-3xl mx-auto animate-fade-in animation-delay-200">
+        We are Cylent, a creative agency that transforms the quiet power of minimalism into spectacular visual experiences inspired by the universe and light.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in animation-delay-400">
+        <a href="#work" class="btn-primary">Explore Our Work</a>
+        <a href="#about" class="btn-secondary">Learn More</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="section-padding bg-gray-50 dark:bg-gray-900/50">
+    <div class="max-w-6xl mx-auto">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-4xl md:text-5xl font-bold mb-6">
+            Crafting <span class="gradient-text">Premium Experiences</span>
+          </h2>
+          <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
+            Cylent is a creative and technology-driven agency offering a unique blend of IT consulting, design innovation, and visual storytelling.
+            We help brands and businesses build a bold digital presence through smart technology solutions, stunning visuals, and creative strategy.
+
+            From custom websites, apps, and software solutions to graphic design, branding, commercial photography, and cinematic video production, we bring ideas to life with precision and artistry.
+          </p>
+        </div>
+        <div class="relative">
+          <div class="aspect-square rounded-2xl spectrum-gradient animate-gradient p-1">
+            <div class="w-full h-full bg-white dark:bg-gray-950 rounded-2xl flex items-center justify-center">
+              <svg class="w-3/4 h-3/4 text-gray-800 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="0.5" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="section-padding">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-4xl md:text-5xl font-bold text-center mb-4">Our <span class="gradient-text">Services</span></h2>
+      <p class="text-center text-gray-600 dark:text-gray-400 mb-16 max-w-2xl mx-auto">
+        We offer a spectrum of creative services designed to elevate your brand to cosmic heights.
+      </p>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <!-- Service 1 -->
+        <article class="card hover:scale-105">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-r from-spectrum-violet to-spectrum-indigo flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">Brand Identity</h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            We create distinctive visual identities that capture your brand's essence and resonate across the spectrum of your audience.
+          </p>
+        </article>
+
+        <!-- Service 2 -->
+        <article class="card hover:scale-105 animation-delay-200">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-r from-spectrum-blue to-spectrum-cyan flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">Digital Design</h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Premium web and digital experiences that are as functional as they are beautiful, optimized for performance and delight.
+          </p>
+        </article>
+
+        <!-- Service 3 -->
+        <article class="card hover:scale-105 animation-delay-400">
+          <div class="w-12 h-12 rounded-full bg-gradient-to-r from-spectrum-teal to-spectrum-emerald flex items-center justify-center mb-6">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <h3 class="text-2xl font-bold mb-4">Creative Strategy</h3>
+          <p class="text-gray-600 dark:text-gray-400">
+            Strategic creative direction that illuminates the path forward, transforming vision into compelling visual narratives.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Work/Portfolio Section -->
+  <section id="work" class="section-padding bg-gray-50 dark:bg-gray-900/50">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-4xl md:text-5xl font-bold text-center mb-4">Selected <span class="gradient-text">Work</span></h2>
+      <p class="text-center text-gray-600 dark:text-gray-400 mb-16 max-w-2xl mx-auto">
+        A collection of our finest creations, each one a testament to our commitment to excellence.
+      </p>
+
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- Project 1 -->
+        <article class="group cursor-pointer">
+          <div class="relative overflow-hidden rounded-2xl mb-4 aspect-[4/3] bg-gradient-to-br from-spectrum-violet to-spectrum-blue">
+            <div class="absolute inset-0 flex items-center justify-center text-white text-6xl font-bold opacity-20">
+              01
+            </div>
+          </div>
+          <h3 class="text-2xl font-bold mb-2 group-hover:gradient-text transition-all">Project Lumina</h3>
+          <p class="text-gray-600 dark:text-gray-400">Brand Identity & Digital Experience</p>
+        </article>
+
+        <!-- Project 2 -->
+        <article class="group cursor-pointer">
+          <div class="relative overflow-hidden rounded-2xl mb-4 aspect-[4/3] bg-gradient-to-br from-spectrum-cyan to-spectrum-teal">
+            <div class="absolute inset-0 flex items-center justify-center text-white text-6xl font-bold opacity-20">
+              02
+            </div>
+          </div>
+          <h3 class="text-2xl font-bold mb-2 group-hover:gradient-text transition-all">Cosmic Wave</h3>
+          <p class="text-gray-600 dark:text-gray-400">Digital Platform & UI/UX Design</p>
+        </article>
+
+        <!-- Project 3 -->
+        <article class="group cursor-pointer">
+          <div class="relative overflow-hidden rounded-2xl mb-4 aspect-[4/3] bg-gradient-to-br from-spectrum-indigo to-spectrum-cyan">
+            <div class="absolute inset-0 flex items-center justify-center text-white text-6xl font-bold opacity-20">
+              03
+            </div>
+          </div>
+          <h3 class="text-2xl font-bold mb-2 group-hover:gradient-text transition-all">Prism Studio</h3>
+          <p class="text-gray-600 dark:text-gray-400">Visual Identity & Creative Direction</p>
+        </article>
+
+        <!-- Project 4 -->
+        <article class="group cursor-pointer">
+          <div class="relative overflow-hidden rounded-2xl mb-4 aspect-[4/3] bg-gradient-to-br from-spectrum-blue to-spectrum-emerald">
+            <div class="absolute inset-0 flex items-center justify-center text-white text-6xl font-bold opacity-20">
+              04
+            </div>
+          </div>
+          <h3 class="text-2xl font-bold mb-2 group-hover:gradient-text transition-all">Stellar Brands</h3>
+          <p class="text-gray-600 dark:text-gray-400">Brand Strategy & Design System</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="section-padding">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-4xl md:text-5xl font-bold mb-6">
+        Let's Create Something <span class="gradient-text">Extraordinary</span>
+      </h2>
+      <p class="text-xl text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
+        Ready to transform your vision into a spectacular reality? Reach out and let's start a conversation.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+        <a href="mailto:hello@cylent.com" class="btn-primary text-lg px-8 py-4">
+          hello@cylent.com
+        </a>
+        <div class="flex gap-4">
+          <a href="#" class="w-12 h-12 rounded-full border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center hover:border-spectrum-violet hover:text-spectrum-violet transition-colors" aria-label="Twitter">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/>
+            </svg>
+          </a>
+          <a href="#" class="w-12 h-12 rounded-full border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center hover:border-spectrum-cyan hover:text-spectrum-cyan transition-colors" aria-label="LinkedIn">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </a>
+          <a href="#" class="w-12 h-12 rounded-full border-2 border-gray-300 dark:border-gray-700 flex items-center justify-center hover:border-spectrum-blue hover:text-spectrum-blue transition-colors" aria-label="Instagram">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"/>
+              <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/>
+              <circle cx="17.5" cy="6.5" r="1.5"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-200 dark:border-gray-800 py-12 px-6">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+        <div class="text-2xl font-bold gradient-text">Cylent</div>
+        <nav aria-label="Footer navigation">
+          <ul class="flex gap-8">
+            <li><a href="#about" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">About</a></li>
+            <li><a href="#services" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Services</a></li>
+            <li><a href="#work" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Work</a></li>
+            <li><a href="#contact" class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Contact</a></li>
+          </ul>
+        </nav>
+        <p class="text-gray-600 dark:text-gray-400">
+          &copy; 2024 Cylent. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script src="./dist/script.min.js" defer></script>
+</body>
+</html>

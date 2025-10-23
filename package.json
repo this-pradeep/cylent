@@ -1,0 +1,26 @@
+{
+  "name": "cylent-website",
+  "version": "1.0.0",
+  "description": "Static website for Cylent - A Creative Agency",
+  "scripts": {
+    "dev": "npm run build:css && npm run watch:css",
+    "watch:css": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --watch",
+    "build:css": "tailwindcss -i ./src/styles.css -o ./dist/styles.css",
+    "build:css:prod": "tailwindcss -i ./src/styles.css -o ./dist/styles.css --minify",
+    "minify:html": "html-minifier-terser --input-dir ./ --output-dir ./dist --file-ext html --collapse-whitespace --remove-comments --remove-optional-tags --remove-redundant-attributes --remove-script-type-attributes --remove-tag-whitespace --use-short-doctype --minify-css true --minify-js true",
+    "minify:js": "terser ./src/script.js -o ./dist/script.min.js --compress --mangle",
+    "build": "npm run build:css:prod && npm run minify:js && npm run copy:html",
+    "copy:html": "node -e \"require('fs').copyFileSync('./index.html', './dist/index.html')\"",
+    "serve": "npx serve dist"
+  },
+  "keywords": ["creative-agency", "static-website", "tailwindcss"],
+  "author": "Cylent",
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^10.4.16",
+    "html-minifier-terser": "^7.2.0",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0",
+    "terser": "^5.26.0"
+  }
+}
