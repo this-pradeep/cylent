@@ -1,5 +1,5 @@
 {
-  "name": "cyan-conjunction",
+  "name": "cylent-website",
   "type": "module",
   "version": "0.0.1",
   "engines": {
@@ -29,7 +29,9 @@
     "three": "^0.185.1"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.9",
     "jsdom": "^29.1.1",
+    "typescript": "^6.0.3",
     "vitest": "^4.1.10"
   }
 }
