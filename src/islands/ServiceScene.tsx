@@ -33,11 +33,26 @@ function VariantMesh({
     group.current.rotation.z = next.z;
   });
 
+  const geometry =
+    variant === 'web' ? (
+      <icosahedronGeometry args={[1.2, 1]} />
+    ) : variant === 'video' ? (
+      <cylinderGeometry args={[1, 1, 0.25, 24, 1, true]} />
+    ) : (
+      <boxGeometry args={[1.6, 1.6, 0.15]} />
+    );
+
   return (
     <group ref={group}>
       <mesh>
-        <icosahedronGeometry args={[1.2, 1]} />
-        <meshStandardMaterial color="#141414" wireframe emissive="#FF6B4A" emissiveIntensity={0.15} />
+        {geometry}
+        <meshStandardMaterial
+          color="#141414"
+          wireframe={variant === 'web'}
+          emissive="#FF6B4A"
+          emissiveIntensity={0.15}
+          side={THREE.DoubleSide}
+        />
       </mesh>
     </group>
   );

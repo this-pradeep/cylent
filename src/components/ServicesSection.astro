@@ -17,10 +17,8 @@ const rendered = await Promise.all(services.map((entry) => render(entry)));
             <p class="mt-4 text-ink/70">{service.data.shortDescription}</p>
             <div class="mt-6 text-ink/70"><Content /></div>
           </div>
-          <div class="h-[420px]" data-service-scene-slot={service.data.variant}>
-            {service.data.variant === 'web' && (
-              <ServiceScene client:visible variant="web" sectionId={sectionId} />
-            )}
+          <div class="h-[420px]">
+            <ServiceScene client:visible variant={service.data.variant} sectionId={sectionId} />
           </div>
         </div>
       );
