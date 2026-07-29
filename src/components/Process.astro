@@ -1,0 +1,32 @@
+---
+const steps = [
+  { title: 'Discover', description: 'We map goals, audience, and constraints before any design starts.' },
+  { title: 'Design', description: 'Concepts, prototypes, and direction — refined with your feedback.' },
+  { title: 'Build', description: 'Production-quality implementation, tested as we go.' },
+  { title: 'Launch & support', description: 'Ship it, then keep it healthy with ongoing support.' },
+];
+---
+<section id="process" data-process class="py-32">
+  <div class="max-w-[1400px] mx-auto px-6">
+    <h2 class="text-4xl md:text-5xl font-medium tracking-tight">How we work</h2>
+    <div class="mt-16 relative">
+      <div class="h-1 bg-ink/10 rounded-full overflow-hidden">
+        <div data-process-line class="h-full bg-accent origin-left scale-x-0"></div>
+      </div>
+      <div class="mt-10 grid md:grid-cols-4 gap-8">
+        {steps.map((step, i) => (
+          <div data-process-step class="opacity-40 transition-opacity duration-500">
+            <span class="text-sm text-accent">0{i + 1}</span>
+            <h3 class="mt-2 text-xl font-medium">{step.title}</h3>
+            <p class="mt-2 text-ink/70">{step.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+  [data-process-step].is-active {
+    opacity: 1;
+  }
+</style>
