@@ -1,12 +1,13 @@
-import { PlaceholderAsset } from "@/components/PlaceholderAsset";
+import { ImageAsset } from "@/components/ImageAsset";
 
 export function CapturePanel() {
   return (
-    <div className="flex h-full w-screen flex-shrink-0 flex-col items-center justify-center gap-8 px-10">
-      <PlaceholderAsset
+    <div className="flex h-full w-screen shrink-0 flex-col items-center justify-center gap-8 px-10">
+      {/* Unsplash License (unsplash.com/photo-1506863530036-1efeddceb993) */}
+      <ImageAsset
+        src="/images/capture-portrait.jpg"
+        alt="Black-and-white editorial studio portrait"
         aspectRatio="1:1"
-        label="Capture — brand identity still"
-        variant="photo"
         className="w-full max-w-md"
       />
       <div className="max-w-xl text-center">

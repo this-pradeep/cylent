@@ -1,13 +1,13 @@
-import { PlaceholderAsset } from "@/components/PlaceholderAsset";
+import { VideoAsset } from "@/components/VideoAsset";
 
 export function MovePanel() {
   return (
-    <div className="flex h-full w-screen flex-shrink-0 flex-col items-center justify-center gap-8 px-10">
-      <PlaceholderAsset
-        aspectRatio="16:9"
-        label="Move — video loop"
-        variant="film"
-        className="w-full max-w-3xl"
+    <div className="flex h-full w-screen shrink-0 flex-col items-center justify-center gap-8 px-10">
+      {/* Video by Trev W. Adams, Pexels License (pexels.com/video/night-traffic-in-city-13567267), 15MB — candidate for re-encoding/compression before production */}
+      <VideoAsset
+        src="/videos/move-city-night.mp4"
+        aspectRatio="9:16"
+        className="h-[60vh] max-h-130 w-auto"
       />
       <div className="max-w-xl text-center">
         <h2 className="text-4xl font-semibold text-surface">Move.</h2>

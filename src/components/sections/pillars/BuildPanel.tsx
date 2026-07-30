@@ -1,12 +1,13 @@
-import { PlaceholderAsset } from "@/components/PlaceholderAsset";
+import { ImageAsset } from "@/components/ImageAsset";
 
 export function BuildPanel() {
   return (
-    <div className="flex h-full w-screen flex-shrink-0 flex-col items-center justify-center gap-8 px-10">
-      <PlaceholderAsset
+    <div className="flex h-full w-screen shrink-0 flex-col items-center justify-center gap-8 px-10">
+      {/* Photo by Bernd Dittrich, Unsplash License (unsplash.com/photo-1774901128215-3549cc686921) */}
+      <ImageAsset
+        src="/images/build-code-workspace.jpg"
+        alt="Dark-themed code editor displaying a web project on a laptop screen"
         aspectRatio="16:9"
-        label="Build — product UI capture"
-        variant="grid"
         className="w-full max-w-3xl"
       />
       <div className="max-w-xl text-center">

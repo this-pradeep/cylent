@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { PlaceholderAsset } from "@/components/PlaceholderAsset";
+import { ImageAsset } from "@/components/ImageAsset";
 
 const PROJECTS = [
   {
@@ -12,6 +12,8 @@ const PROJECTS = [
     process: "Unified brand identity, then a fast, image-led website built around each property's character.",
     solution: "One design system, three distinct property sites, shared component library.",
     result: "Consistent premium presence across every guest touchpoint.",
+    // Unsplash License (unsplash.com/photo-1758193783649-13371d7fb8dd)
+    image: { src: "/images/proof-project-one-hotel.jpg", alt: "Elegant boutique hotel lobby interior" },
   },
   {
     name: "Project Two",
@@ -19,6 +21,8 @@ const PROJECTS = [
     process: "Combined brand photography, launch video, and a performance-first marketing site.",
     solution: "A single campaign built from one creative direction across web, video, and stills.",
     result: "A launch that felt like one story, not three separate deliverables.",
+    // Unsplash License (unsplash.com/photo-1758846946191-dfe1cd91779b)
+    image: { src: "/images/proof-project-two-architecture.jpg", alt: "Modern glass building facade reflecting the sky" },
   },
 ];
 
@@ -64,7 +68,7 @@ export function Proof() {
     <section ref={sectionRef} className="flex flex-col gap-24 bg-surface px-6 py-24">
       {PROJECTS.map((project) => (
         <div key={project.name} data-project-card className="mx-auto flex w-full max-w-4xl flex-col gap-8">
-          <PlaceholderAsset aspectRatio="16:9" label={`${project.name} — full-bleed capture`} variant="photo" />
+          <ImageAsset src={project.image.src} alt={project.image.alt} aspectRatio="16:9" />
           <div className="grid gap-6 md:grid-cols-2">
             <h3 className="text-3xl font-semibold text-ink">{project.name}</h3>
             <dl className="grid gap-4 text-sm">
