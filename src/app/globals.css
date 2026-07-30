@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface: #faf9f7;
+  --color-ink: #14120f;
+  --color-ink-muted: #5c584f;
+  --color-accent: #c9542c;
+  --font-sans: var(--font-manrope), sans-serif;
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+}
