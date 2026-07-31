@@ -7,6 +7,12 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
+let activeLenis: Lenis | null = null;
+
+export function getLenisInstance(): Lenis | null {
+  return activeLenis;
+}
+
 export function LenisProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -18,6 +24,7 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
       duration: 1.1,
       easing: (t: number) => 1 - Math.pow(1 - t, 3),
     });
+    activeLenis = lenis;
 
     const onScroll = () => ScrollTrigger.update();
     lenis.on("scroll", onScroll);
@@ -32,6 +39,7 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
       lenis.off("scroll", onScroll);
       gsap.ticker.remove(onTick);
       lenis.destroy();
+      activeLenis = null;
     };
   }, []);
 

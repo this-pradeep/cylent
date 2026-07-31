@@ -40,7 +40,11 @@ export function CallToAction() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="flex min-h-[60vh] flex-col items-center justify-center gap-6 bg-ink px-6 text-center">
+    <section
+      ref={sectionRef}
+      id="cta"
+      className="flex min-h-[60vh] flex-col items-center justify-center gap-6 bg-ink px-6 text-center"
+    >
       <div data-cta-content className="flex flex-col items-center gap-6">
         <p className="max-w-xl text-3xl font-medium text-surface md:text-4xl">
           Let&apos;s build something worth remembering.
