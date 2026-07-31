@@ -16,3 +16,10 @@ body {
   background-color: var(--color-surface);
   color: var(--color-ink);
 }
+
+@media (pointer: fine) {
+  .has-cursor,
+  .has-cursor * {
+    cursor: none !important;
+  }
+}
