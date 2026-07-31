@@ -75,18 +75,20 @@ export function LiquidGlassCursor() {
 
     const setLensSize = (w: number, h: number, r: number) => {
       if (w !== state.lastW) {
-        lens.style.width = w ? `${w}px` : "";
+        lens.style.width = `${w}px`;
         state.lastW = w;
       }
       if (h !== state.lastH) {
-        lens.style.height = h ? `${h}px` : "";
+        lens.style.height = `${h}px`;
         state.lastH = h;
       }
       if (r !== state.lastR) {
-        lens.style.borderRadius = r ? `${r}px` : "";
+        lens.style.borderRadius = `${r}px`;
         state.lastR = r;
       }
     };
+
+    setLensSize(LENS_SIZE, LENS_SIZE, LENS_RADIUS);
 
     const tick = () => {
       let tx: number;
@@ -150,7 +152,7 @@ export function LiquidGlassCursor() {
       if (leavingToEl?.closest && leavingToEl.closest(SNAP_SELECTOR) === state.snapEl) return;
       state.snapEl = null;
       cursor.classList.remove("snapped");
-      setLensSize(0, 0, 0);
+      setLensSize(LENS_SIZE, LENS_SIZE, LENS_RADIUS);
       const base = refractionUrl ?? "";
       if (base) {
         lens.style.backdropFilter = base;
@@ -202,14 +204,10 @@ export function LiquidGlassCursor() {
   if (!active) return null;
 
   return (
-    <div
-      ref={cursorRef}
-      aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-[9999] opacity-0 transition-opacity duration-300 [&.on]:opacity-100"
-    >
+    <div ref={cursorRef} aria-hidden="true" className="liquid-cursor">
       <div
         ref={lensRef}
-        className="absolute left-0 top-0 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/30 bg-white/5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_6px_24px_rgba(0,0,0,0.35)] transition-[width,height,border-radius,transform,background-color] duration-300 [.pressing_&]:scale-90 [.snapped_&]:border-white/40 [.snapped_&]:bg-white/10"
+        className="liquid-cursor-lens"
         style={{
           width: LENS_SIZE,
           height: LENS_SIZE,

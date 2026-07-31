@@ -23,3 +23,95 @@ body {
     cursor: none !important;
   }
 }
+
+/* Liquid glass cursor */
+.liquid-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  will-change: transform;
+}
+
+.liquid-cursor.on {
+  opacity: 1;
+}
+
+.liquid-cursor-lens {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 999px;
+  transform: translate(-50%, -50%) scale(var(--lens-scale, 1));
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.45),
+    inset 0 -6px 12px rgba(255, 255, 255, 0.06),
+    0 6px 24px rgba(0, 0, 0, 0.35);
+  transition:
+    width 0.34s cubic-bezier(0.25, 1, 0.35, 1),
+    height 0.34s cubic-bezier(0.25, 1, 0.35, 1),
+    border-radius 0.34s cubic-bezier(0.25, 1, 0.35, 1),
+    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 0.3s;
+}
+
+.liquid-cursor-lens::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  padding: 1.6px;
+  background: conic-gradient(
+    from 140deg,
+    rgba(255, 92, 168, 0.65),
+    rgba(255, 199, 110, 0.5),
+    rgba(140, 255, 214, 0.45),
+    rgba(78, 214, 232, 0.65),
+    rgba(139, 123, 255, 0.6),
+    rgba(255, 140, 240, 0.5),
+    rgba(255, 92, 168, 0.65)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+
+.liquid-cursor.pressing .liquid-cursor-lens {
+  --lens-scale: 0.9;
+}
+
+.liquid-cursor.snapped .liquid-cursor-lens {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 4px 22px rgba(139, 123, 255, 0.22),
+    0 6px 24px rgba(0, 0, 0, 0.3);
+}
+
+.liquid-cursor.snapped .liquid-cursor-lens::after {
+  opacity: 1;
+}
+
+.liquid-cursor.snapped.pressing .liquid-cursor-lens {
+  --lens-scale: 0.97;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .liquid-cursor-lens {
+    transition: none;
+  }
+}
