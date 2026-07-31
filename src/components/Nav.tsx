@@ -20,6 +20,8 @@ export function Nav() {
   const [backdropFilter, setBackdropFilter] = useState(FALLBACK_BACKDROP);
   const [reducedMotion, setReducedMotion] = useState(false);
   const highlightRef = useRef<HTMLDivElement>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof CSS !== "undefined" && CSS.supports("backdrop-filter", FILTER_BACKDROP)) {
@@ -81,6 +83,59 @@ export function Nav() {
     };
   }, []);
 
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    if (!sheet) return;
+
+    if (mobileOpen) {
+      gsap.set(sheet, { display: "block" });
+      gsap.fromTo(
+        sheet,
+        { height: 0, opacity: 0 },
+        { height: "auto", opacity: 1, duration: reducedMotion ? 0 : 0.4, ease: "power2.out" }
+      );
+    } else {
+      gsap.to(sheet, {
+        height: 0,
+        opacity: 0,
+        duration: reducedMotion ? 0 : 0.3,
+        ease: "power2.out",
+        onComplete: () => gsap.set(sheet, { display: "none" }),
+      });
+    }
+  }, [mobileOpen, reducedMotion]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(event.target as Node)) {
+        setMobileOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768 && mobileOpen) {
+        setMobileOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [mobileOpen]);
+
   return (
     <header className="fixed inset-x-0 top-4 z-50 flex flex-col items-center gap-2 px-4 md:top-6">
       <nav
@@ -140,7 +195,53 @@ export function Nav() {
         >
           Contact
         </button>
+
+        <button
+          type="button"
+          onClick={() => setMobileOpen((open) => !open)}
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-nav-sheet"
+          className="inline-flex flex-col items-center justify-center gap-1 rounded-full p-2 md:hidden"
+        >
+          <span className="sr-only">Toggle menu</span>
+          <span className="h-0.5 w-5 bg-ink" />
+          <span className="h-0.5 w-5 bg-ink" />
+        </button>
       </nav>
+
+      <div
+        ref={sheetRef}
+        id="mobile-nav-sheet"
+        className="w-full max-w-3xl overflow-hidden rounded-3xl border border-ink/10 md:hidden"
+        style={{
+          display: "none",
+          backdropFilter,
+          WebkitBackdropFilter: backdropFilter,
+          background: "color-mix(in srgb, var(--color-surface) 90%, transparent)",
+        }}
+      >
+        <ul className="flex flex-col gap-4 px-6 py-6">
+          {SERVICE_LINKS.map((link) => (
+            <li key={link.href}>
+              <Link href={link.href} onClick={() => setMobileOpen(false)} className="text-base font-medium text-ink">
+                {link.label}
+              </Link>
+            </li>
+          ))}
+          <li>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileOpen(false);
+                scrollToId("cta");
+              }}
+              className="w-full rounded-full bg-ink px-5 py-3 text-sm font-medium text-surface"
+            >
+              Contact
+            </button>
+          </li>
+        </ul>
+      </div>
     </header>
   );
 }
