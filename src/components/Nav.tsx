@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { scrollToId } from "@/lib/motion/scroll-to";
 import { getCondenseProgress } from "@/lib/motion/nav-scroll";
+import { useLiquidGlassRefraction } from "@/lib/glass/useLiquidGlassRefraction";
 
 const SERVICE_LINKS = [
   { label: "Build", href: "/build" },
@@ -12,21 +13,22 @@ const SERVICE_LINKS = [
   { label: "Move", href: "/move" },
 ];
 
-const FILTER_BACKDROP = "url(#liquid-glass-nav) blur(20px) saturate(1.3)";
 const FALLBACK_BACKDROP = "blur(20px) saturate(1.3)";
+const CHROMATIC_GLASS_OPTIONS = { depth: 24, sat: 1.65, band: 12, ca: 0.35 };
 
 export function Nav() {
   const navRef = useRef<HTMLElement>(null);
-  const [backdropFilter, setBackdropFilter] = useState(FALLBACK_BACKDROP);
+  const [canRefract, setCanRefract] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const highlightRef = useRef<HTMLDivElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
 
+  const refractionUrl = useLiquidGlassRefraction(navRef, CHROMATIC_GLASS_OPTIONS, canRefract);
+  const backdropFilter = refractionUrl ?? FALLBACK_BACKDROP;
+
   useEffect(() => {
-    if (typeof CSS !== "undefined" && CSS.supports("backdrop-filter", FILTER_BACKDROP)) {
-      setBackdropFilter(FILTER_BACKDROP);
-    }
+    setCanRefract(typeof CSS !== "undefined" && CSS.supports("backdrop-filter", "url(#x)"));
   }, []);
 
   useEffect(() => {
@@ -163,14 +165,6 @@ export function Nav() {
           />
         )}
 
-        <svg aria-hidden="true" className="absolute h-0 w-0">
-          <filter id="liquid-glass-nav">
-            <feTurbulence type="fractalNoise" baseFrequency="0.008" numOctaves="2" seed="7" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G" />
-            <feGaussianBlur stdDeviation="0.4" />
-          </filter>
-        </svg>
-
         <Link href="/" className="text-lg font-semibold tracking-tight text-ink">
           Cylent
         </Link>
@@ -215,8 +209,8 @@ export function Nav() {
         className="w-full max-w-3xl overflow-hidden rounded-3xl border border-ink/10 md:hidden"
         style={{
           display: "none",
-          backdropFilter,
-          WebkitBackdropFilter: backdropFilter,
+          backdropFilter: FALLBACK_BACKDROP,
+          WebkitBackdropFilter: FALLBACK_BACKDROP,
           background: "color-mix(in srgb, var(--color-surface) 90%, transparent)",
         }}
       >
