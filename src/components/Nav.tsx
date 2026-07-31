@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { scrollToId } from "@/lib/motion/scroll-to";
 import { getCondenseProgress } from "@/lib/motion/nav-scroll";
-import { useLiquidGlassRefraction } from "@/lib/glass/useLiquidGlassRefraction";
 
 const SERVICE_LINKS = [
   { label: "Build", href: "/build" },
@@ -13,57 +12,17 @@ const SERVICE_LINKS = [
   { label: "Move", href: "/move" },
 ];
 
-const FALLBACK_BACKDROP = "blur(20px) saturate(1.3)";
-const CHROMATIC_GLASS_OPTIONS = { depth: 24, sat: 1.65, band: 12, ca: 0.35 };
+const GLASS_BACKDROP = "blur(24px) saturate(1.6) brightness(1.05)";
 
 export function Nav() {
   const navRef = useRef<HTMLElement>(null);
-  const [canRefract, setCanRefract] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const highlightRef = useRef<HTMLDivElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
-
-  const refractionUrl = useLiquidGlassRefraction(navRef, CHROMATIC_GLASS_OPTIONS, canRefract);
-  const backdropFilter = refractionUrl ?? FALLBACK_BACKDROP;
-
-  useEffect(() => {
-    setCanRefract(typeof CSS !== "undefined" && CSS.supports("backdrop-filter", "url(#x)"));
-  }, []);
 
   useEffect(() => {
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
-
-  useEffect(() => {
-    const nav = navRef.current;
-    const highlight = highlightRef.current;
-    if (!nav || !highlight || reducedMotion) return;
-
-    gsap.set(highlight, { x: nav.clientWidth / 2, y: nav.clientHeight / 2 });
-
-    const moveX = gsap.quickTo(highlight, "x", { duration: 0.5, ease: "power3.out" });
-    const moveY = gsap.quickTo(highlight, "y", { duration: 0.5, ease: "power3.out" });
-
-    const handlePointerMove = (event: PointerEvent) => {
-      const rect = nav.getBoundingClientRect();
-      moveX(event.clientX - rect.left);
-      moveY(event.clientY - rect.top);
-    };
-
-    const handlePointerLeave = () => {
-      moveX(nav.clientWidth / 2);
-      moveY(nav.clientHeight / 2);
-    };
-
-    nav.addEventListener("pointermove", handlePointerMove);
-    nav.addEventListener("pointerleave", handlePointerLeave);
-
-    return () => {
-      nav.removeEventListener("pointermove", handlePointerMove);
-      nav.removeEventListener("pointerleave", handlePointerLeave);
-    };
-  }, [reducedMotion]);
 
   useEffect(() => {
     const nav = navRef.current;
@@ -142,11 +101,11 @@ export function Nav() {
     <header className="fixed inset-x-0 top-4 z-50 flex flex-col items-center gap-2 px-4 md:top-6">
       <nav
         ref={navRef}
-        className="relative flex w-full max-w-3xl items-center justify-between gap-6 rounded-full border border-ink/10 px-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6)]"
+        className="relative flex w-full max-w-3xl items-center justify-between gap-6 rounded-full border border-ink/10 px-6 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5),inset_0_1px_1px_rgba(255,255,255,0.7),0_8px_30px_rgba(20,18,15,0.12)]"
         style={{
-          backdropFilter,
-          WebkitBackdropFilter: backdropFilter,
-          background: "color-mix(in srgb, var(--color-surface) 12%, transparent)",
+          backdropFilter: GLASS_BACKDROP,
+          WebkitBackdropFilter: GLASS_BACKDROP,
+          background: "color-mix(in srgb, var(--color-surface) 18%, transparent)",
           paddingTop: "calc(0.75rem - var(--nav-condense, 0) * 0.25rem)",
           paddingBottom: "calc(0.75rem - var(--nav-condense, 0) * 0.25rem)",
         }}
@@ -157,14 +116,6 @@ export function Nav() {
           style={{ opacity: "calc(0.08 + var(--nav-condense, 0) * 0.15)" }}
         />
 
-        {!reducedMotion && (
-          <div
-            ref={highlightRef}
-            aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-0 h-24 w-24 -ml-12 -mt-12 rounded-full bg-accent/15 blur-2xl"
-          />
-        )}
-
         <Link href="/" className="text-lg font-semibold tracking-tight text-ink">
           Cylent
         </Link>
@@ -174,7 +125,7 @@ export function Nav() {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className="text-sm font-medium text-ink-muted transition-colors hover:text-ink"
+                className="rounded-full px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-ink/5 hover:text-ink"
               >
                 {link.label}
               </Link>
@@ -206,18 +157,22 @@ export function Nav() {
       <div
         ref={sheetRef}
         id="mobile-nav-sheet"
-        className="w-full max-w-3xl overflow-hidden rounded-3xl border border-ink/10 md:hidden"
+        className="w-full max-w-3xl overflow-hidden rounded-3xl border border-ink/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5),0_8px_30px_rgba(20,18,15,0.12)] md:hidden"
         style={{
           display: "none",
-          backdropFilter: FALLBACK_BACKDROP,
-          WebkitBackdropFilter: FALLBACK_BACKDROP,
+          backdropFilter: GLASS_BACKDROP,
+          WebkitBackdropFilter: GLASS_BACKDROP,
           background: "color-mix(in srgb, var(--color-surface) 55%, transparent)",
         }}
       >
         <ul className="flex flex-col gap-4 px-6 py-6">
           {SERVICE_LINKS.map((link) => (
             <li key={link.href}>
-              <Link href={link.href} onClick={() => setMobileOpen(false)} className="text-base font-medium text-ink">
+              <Link
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-full px-3 py-1.5 text-base font-medium text-ink"
+              >
                 {link.label}
               </Link>
             </li>
