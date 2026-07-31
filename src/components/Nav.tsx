@@ -146,7 +146,7 @@ export function Nav() {
         style={{
           backdropFilter,
           WebkitBackdropFilter: backdropFilter,
-          background: "color-mix(in srgb, var(--color-surface) 78%, transparent)",
+          background: "color-mix(in srgb, var(--color-surface) 12%, transparent)",
           paddingTop: "calc(0.75rem - var(--nav-condense, 0) * 0.25rem)",
           paddingBottom: "calc(0.75rem - var(--nav-condense, 0) * 0.25rem)",
         }}
@@ -154,7 +154,7 @@ export function Nav() {
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-surface"
-          style={{ opacity: "calc(var(--nav-condense, 0) * 0.15)" }}
+          style={{ opacity: "calc(0.08 + var(--nav-condense, 0) * 0.15)" }}
         />
 
         {!reducedMotion && (
@@ -211,7 +211,7 @@ export function Nav() {
           display: "none",
           backdropFilter: FALLBACK_BACKDROP,
           WebkitBackdropFilter: FALLBACK_BACKDROP,
-          background: "color-mix(in srgb, var(--color-surface) 90%, transparent)",
+          background: "color-mix(in srgb, var(--color-surface) 55%, transparent)",
         }}
       >
         <ul className="flex flex-col gap-4 px-6 py-6">
