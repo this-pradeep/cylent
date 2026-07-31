@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { scrollToId } from "@/lib/motion/scroll-to";
+import { getCondenseProgress } from "@/lib/motion/nav-scroll";
 
 const SERVICE_LINKS = [
   { label: "Build", href: "/build" },
@@ -60,17 +61,45 @@ export function Nav() {
     };
   }, [reducedMotion]);
 
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+
+    const CONDENSE_THRESHOLD_PX = 24;
+
+    const update = () => {
+      const progress = getCondenseProgress(window.scrollY, CONDENSE_THRESHOLD_PX);
+      gsap.to(nav, { "--nav-condense": progress, duration: 0.3, ease: "power2.out", overwrite: true });
+    };
+
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", update);
+      gsap.killTweensOf(nav);
+    };
+  }, []);
+
   return (
     <header className="fixed inset-x-0 top-4 z-50 flex flex-col items-center gap-2 px-4 md:top-6">
       <nav
         ref={navRef}
-        className="relative flex w-full max-w-3xl items-center justify-between gap-6 rounded-full border border-ink/10 px-6 py-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6)]"
+        className="relative flex w-full max-w-3xl items-center justify-between gap-6 rounded-full border border-ink/10 px-6 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.6)]"
         style={{
           backdropFilter,
           WebkitBackdropFilter: backdropFilter,
           background: "color-mix(in srgb, var(--color-surface) 78%, transparent)",
+          paddingTop: "calc(0.75rem - var(--nav-condense, 0) * 0.25rem)",
+          paddingBottom: "calc(0.75rem - var(--nav-condense, 0) * 0.25rem)",
         }}
       >
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-surface"
+          style={{ opacity: "calc(var(--nav-condense, 0) * 0.15)" }}
+        />
+
         {!reducedMotion && (
           <div
             ref={highlightRef}
