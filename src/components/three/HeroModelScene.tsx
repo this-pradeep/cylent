@@ -198,50 +198,68 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
       holder.scale.setScalar(TARGET_SIZE / longest);
       root.add(holder);
 
+      // The export's shell material carries no pbrMetallicRoughness block, so glTF
+      // defaults apply: opaque, fully metallic, fully rough. That renders a dead
+      // white box which also hides everything inside it. The shell is rebuilt here
+      // as actual glass so the model does not depend on how it was exported.
       model.traverse((child) => {
         const mesh = child as THREE.Mesh;
         if (!mesh.isMesh) return;
-        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        for (const material of materials) {
+
+        const vertexCount = mesh.geometry?.getAttribute("position")?.count ?? 0;
+        const isShell = vertexCount < 200;
+        const previous = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+
+        if (isShell) {
+          mesh.material = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            metalness: 0,
+            roughness: 0.04,
+            transmission: 1,
+            thickness: 1.4,
+            ior: 1.52,
+            clearcoat: 1,
+            clearcoatRoughness: 0.03,
+            // A faint chromatic bloom in the glass — the prism's own version of the
+            // conic ring the cursor and loader already use.
+            iridescence: 0.55,
+            iridescenceIOR: 1.32,
+            envMapIntensity: 1.5,
+            // Deliberately not `transparent`: transmission is the physical route and
+            // wants the opaque pass, where it can sample the buffer behind it.
+            transparent: false,
+            side: THREE.FrontSide,
+          });
+          mesh.renderOrder = 2;
+          for (const material of previous) material?.dispose();
+          return;
+        }
+
+        // The content: lifted off black so it stays legible through the glass.
+        for (const material of previous) {
           const std = material as THREE.MeshStandardMaterial;
-          std.envMapIntensity = 1.15;
-          // Anything the author left near-transparent should read as glass rather
-          // than as a hole: keep it transparent but stop it z-fighting with itself.
-          if (std.transparent && std.opacity < 0.2) {
-            std.depthWrite = false;
-            std.opacity = Math.max(std.opacity, 0.08);
-          }
+          std.envMapIntensity = 1.2;
+          std.metalness = 0.15;
+          std.roughness = 0.42;
+          std.emissive = new THREE.Color(0x7a6cff);
+          std.emissiveIntensity = 0.18;
           std.needsUpdate = true;
         }
+        mesh.renderOrder = 1;
       });
 
-      // Fade in so nothing pops. Each material keeps its authored opacity as the
-      // ceiling — the near-transparent one was deliberately set to 0.024 and must
-      // not be faded up to solid.
-      const fading: THREE.Material[] = [];
-      root.traverse((child) => {
-        const mesh = child as THREE.Mesh;
-        if (!mesh.isMesh) return;
-        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        for (const material of materials) {
-          material.userData.baseOpacity = material.transparent ? material.opacity : 1;
-          material.transparent = true;
-          material.opacity = 0;
-          fading.push(material);
-        }
-      });
+      // Light thrown from inside the prism, so the content reads through the glass
+      // rather than being lit only from outside and swallowed by refraction.
+      const core = new THREE.PointLight(0xffffff, 14, 9, 2);
+      const rim = new THREE.DirectionalLight(0xffffff, 0.9);
+      rim.position.set(1.2, -0.6, -3);
+      holder.add(core);
+      root.add(rim);
 
-      const fadeStart = performance.now();
-      const fade = () => {
-        if (disposed) return;
-        const p = Math.min(1, (performance.now() - fadeStart) / 900);
-        const eased = 1 - Math.pow(1 - p, 3);
-        for (const material of fading) {
-          material.opacity = (material.userData.baseOpacity as number) * eased;
-        }
-        if (p < 1) requestAnimationFrame(fade);
-      };
-      fade();
+      // No per-material fade. Three renders only opaque objects into the buffer that
+      // transmission samples, so marking the content `transparent` to fade it would
+      // erase it from inside the glass — the exact thing this scene exists to show.
+      // The entrance is handled by Hero, which tweens the wrapper's CSS opacity.
 
       resize();
       if (reduced) render();
