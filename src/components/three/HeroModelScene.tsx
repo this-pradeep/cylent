@@ -177,8 +177,11 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
       ]);
       if (disposed) return;
 
-      envTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+      // Blur 0 keeps the environment's bright panels sharp, so the glass has crisp
+      // highlights to reflect rather than a soft grey wash.
+      envTexture = pmrem.fromScene(new RoomEnvironment(), 0).texture;
       scene.environment = envTexture;
+      scene.environmentIntensity = 1.4;
 
       const gltf = await new GLTFLoader().loadAsync(MODEL_URL);
       if (disposed) return;
@@ -214,17 +217,25 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
           mesh.material = new THREE.MeshPhysicalMaterial({
             color: 0xffffff,
             metalness: 0,
-            roughness: 0.04,
+            // Sharp glass. Any roughness here blurs both the reflections and the
+            // model inside, which is the whole reason the volume exists.
+            roughness: 0,
             transmission: 1,
-            thickness: 1.4,
-            ior: 1.52,
+            // A volume, not a shell. Dispersion is computed through thickness, so
+            // this must be non-zero or the chromatic split never happens.
+            thickness: 2.4,
+            attenuationDistance: 8,
+            attenuationColor: new THREE.Color(0xf2f4ff),
+            ior: 1.55,
+            // The actual chromatic aberration: each wavelength refracts at its own
+            // angle through the volume. Real crown glass sits near 0.3; this is
+            // pushed well past it so the split reads at hero scale, the same
+            // exaggeration the line-traced prism needed. This is the dial to turn.
+            dispersion: 3.2,
             clearcoat: 1,
-            clearcoatRoughness: 0.03,
-            // A faint chromatic bloom in the glass — the prism's own version of the
-            // conic ring the cursor and loader already use.
-            iridescence: 0.55,
-            iridescenceIOR: 1.32,
-            envMapIntensity: 1.5,
+            clearcoatRoughness: 0,
+            specularIntensity: 1,
+            envMapIntensity: 2,
             // Deliberately not `transparent`: transmission is the physical route and
             // wants the opaque pass, where it can sample the buffer behind it.
             transparent: false,
