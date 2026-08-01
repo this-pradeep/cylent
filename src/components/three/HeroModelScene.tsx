@@ -251,12 +251,21 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
 
         if (isShell && authored) {
           if (authoredAsGlass) {
-            // Keep the veil exactly as exported. The one necessary change is
-            // depthWrite: a transparent shell that writes depth occludes whatever
-            // is inside it, which would hide the very thing it encloses.
+            // Keep the veil as exported. Two repairs only.
+            //
+            // depthWrite: a transparent shell that writes depth occludes whatever is
+            // inside it, which would hide the very thing it encloses.
             authored.depthWrite = false;
             authored.side = THREE.DoubleSide;
             authored.envMapIntensity = 1;
+
+            // Metalness: glTF defaults metallicFactor to 1.0 when the exporter omits
+            // it, and a fully metallic surface cannot be transparent — metals have no
+            // transmission, so the veil turns into an opaque-looking grey haze with
+            // no specular. A see-through shell reading as metal is a defaulting
+            // artifact rather than a choice, so it is forced back to dielectric.
+            if (authored.metalness > 0.5) authored.metalness = 0;
+
             authored.needsUpdate = true;
             mesh.renderOrder = 2;
             return;
