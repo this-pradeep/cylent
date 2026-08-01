@@ -2,7 +2,7 @@ import { ImageAsset } from "@/components/ImageAsset";
 
 export function CapturePanel() {
   return (
-    <div className="flex h-full w-screen shrink-0 flex-col items-center justify-center gap-8 px-10">
+    <div id="graphics" className="flex h-full w-screen shrink-0 flex-col items-center justify-center gap-8 px-10">
       {/* Unsplash License (unsplash.com/photo-1506863530036-1efeddceb993) */}
       <ImageAsset
         src="/images/capture-portrait.jpg"

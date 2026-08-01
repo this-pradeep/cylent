@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { scrollToId } from "@/lib/motion/scroll-to";
+import { scrollToId, scrollToPillar } from "@/lib/motion/scroll-to";
 import { getCondenseProgress } from "@/lib/motion/nav-scroll";
+import { useMagneticHover } from "@/lib/motion/useMagneticHover";
 
 const SERVICE_LINKS = [
-  { label: "Build", href: "/build" },
-  { label: "Capture", href: "/capture" },
-  { label: "Move", href: "/move" },
+  { label: "Web", id: "web" },
+  { label: "Video", id: "video" },
+  { label: "Graphics", id: "graphics" },
 ];
 
 const GLASS_BACKDROP = "blur(24px) saturate(1.6) brightness(1.05)";
@@ -19,6 +20,9 @@ export function Nav() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const contactRef = useRef<HTMLButtonElement>(null);
+
+  useMagneticHover(contactRef, reducedMotion);
 
   useEffect(() => {
     setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -122,21 +126,23 @@ export function Nav() {
 
         <ul className="hidden items-center gap-6 md:flex">
           {SERVICE_LINKS.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
+            <li key={link.id}>
+              <button
+                type="button"
+                onClick={() => scrollToPillar(link.id)}
                 className="rounded-full px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-ink/5 hover:text-ink"
               >
                 {link.label}
-              </Link>
+              </button>
             </li>
           ))}
         </ul>
 
         <button
+          ref={contactRef}
           type="button"
           onClick={() => scrollToId("cta")}
-          className="hidden rounded-full bg-ink px-5 py-2 text-sm font-medium text-surface transition-opacity hover:opacity-90 md:inline-flex"
+          className="hidden rounded-full bg-accent px-5 py-2 text-sm font-medium text-surface transition-opacity hover:opacity-90 md:inline-flex"
         >
           Contact
         </button>
@@ -167,14 +173,17 @@ export function Nav() {
       >
         <ul className="flex flex-col gap-4 px-6 py-6">
           {SERVICE_LINKS.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className="block rounded-full px-3 py-1.5 text-base font-medium text-ink"
+            <li key={link.id}>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  scrollToPillar(link.id);
+                }}
+                className="block w-full rounded-full px-3 py-1.5 text-left text-base font-medium text-ink"
               >
                 {link.label}
-              </Link>
+              </button>
             </li>
           ))}
           <li>
@@ -184,7 +193,7 @@ export function Nav() {
                 setMobileOpen(false);
                 scrollToId("cta");
               }}
-              className="w-full rounded-full bg-ink px-5 py-3 text-sm font-medium text-surface"
+              className="w-full rounded-full bg-accent px-5 py-3 text-sm font-medium text-surface"
             >
               Contact
             </button>

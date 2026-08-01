@@ -115,3 +115,36 @@ body {
     transition: none;
   }
 }
+
+/* Chromatic ring: same conic-gradient border used by the liquid glass cursor */
+.chromatic-ring {
+  position: relative;
+}
+
+.chromatic-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  padding: 1.4px;
+  opacity: var(--ring-opacity, 1);
+  background: conic-gradient(
+    from 140deg,
+    rgba(255, 92, 168, 0.65),
+    rgba(255, 199, 110, 0.5),
+    rgba(140, 255, 214, 0.45),
+    rgba(78, 214, 232, 0.65),
+    rgba(139, 123, 255, 0.6),
+    rgba(255, 140, 240, 0.5),
+    rgba(255, 92, 168, 0.65)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}

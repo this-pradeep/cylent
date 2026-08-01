@@ -2,7 +2,7 @@ import { ImageAsset } from "@/components/ImageAsset";
 
 export function BuildPanel() {
   return (
-    <div className="flex h-full w-screen shrink-0 flex-col items-center justify-center gap-8 px-10">
+    <div id="web" className="flex h-full w-screen shrink-0 flex-col items-center justify-center gap-8 px-10">
       {/* Photo by Bernd Dittrich, Unsplash License (unsplash.com/photo-1774901128215-3549cc686921) */}
       <ImageAsset
         src="/images/build-code-workspace.jpg"

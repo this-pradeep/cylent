@@ -4,6 +4,7 @@ import { LenisProvider } from "@/lib/motion/LenisProvider";
 import { Nav } from "@/components/Nav";
 import { GlassDefsPool } from "@/components/GlassDefsPool";
 import { LiquidGlassCursor } from "@/components/LiquidGlassCursor";
+import { Loader } from "@/components/Loader";
 import "./globals.css";
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${manrope.variable} font-sans antialiased`}>
         <GlassDefsPool />
         <LiquidGlassCursor />
+        <Loader />
         <LenisProvider>
           <Nav />
           {children}

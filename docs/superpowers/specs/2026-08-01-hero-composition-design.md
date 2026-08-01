@@ -101,13 +101,15 @@ Ranking is 4:1.7:1 across H1 → deck → paragraph. Nothing in the frame sits a
 
 Retains its current mechanic: measure the incoming content's natural width, restore the locked width, then tween to the target (`power3.out`) while the content crossfades. Retains `WebIcon` / `VideoIcon` / `GraphicsIcon`.
 
-Changes:
+**The existing glass treatment is kept**: `chromatic-ring`, `bg-ink/5` and the `shadow-[inset…,inset…,0 8px 24px…]` stack all stay as they are today.
 
-- Fill `--color-ink`; text and icon `--color-surface` via `currentColor`.
-- Remove `chromatic-ring`, `bg-ink/5`, and the `shadow-[inset…,inset…,0 8px 24px…]` stack.
-- Padding tuned so the pill sits on the H1 baseline rather than displacing it.
+An ink-filled pill was proposed and rejected. The argument for ink was P7 — "overused glassmorphism" and "heavy shadows" are named under Depth Without Clutter — and the counter-argument is that the glass pill is a deliberate, consistent material shared with the cursor lens and the loader (`Loader.tsx:194`), not a generic glassmorphic default. Consistency of a bespoke material across the site is the stronger claim. Recorded as a design decision, not an oversight.
 
-Rationale: it becomes the densest, darkest mark in a pale frame — the strongest element on the screen, which is the impact the current glass pill is reaching for and missing. It also removes the P7 violation. `chromatic-ring` stays in `globals.css`; `Loader.tsx:194` still uses it.
+Changes that do apply:
+
+- Fixed `text-4xl md:text-5xl` sizing removed so the pill inherits the H1's `clamp()`.
+- Padding and gap converted to `em` so the pill scales with the headline at every viewport instead of stepping at one breakpoint.
+- Line 1's mask wrapper gets `0.3em` top and `0.5em` bottom of clip padding, cancelled by equal negative margins. The pill is taller than its line box and casts a 24px blur; without the extra room `overflow: hidden` crops the ring and the shadow during the reveal.
 
 ---
 
@@ -201,7 +203,19 @@ Cursor parallax on the slot at **±3%**. motion-system.md specifies 5–20%; the
 Two obligations that apply in **all** modes, not just reduced motion — both are consequences of keeping the rotation, and neither is currently handled:
 
 - **Stable accessible name.** The rotating word sits inside the `h1`, so today the page's primary heading changes every rotation and assistive tech re-announces it. The visual rotator gets `aria-hidden="true"`; the `h1` gets one fixed, visually-hidden accessible name covering all three states — "Websites, videos and brands worth remembering. Three disciplines. One studio. No hand-offs."
-- **Pause on hover and focus.** WCAG 2.2 SC 2.2.2 (Pause, Stop, Hide) applies to any auto-updating content that starts automatically, runs beyond five seconds and sits alongside other content. An indefinitely cycling rotator qualifies regardless of the motion preference. Hovering or keyboard-focusing the pill pauses the interval; leaving resumes it. This is the standard mitigation and costs almost nothing.
+- **Pause mechanism.** WCAG 2.2 SC 2.2.2 (Pause, Stop, Hide) applies to any auto-updating content that starts automatically, runs beyond five seconds and sits alongside other content. An indefinitely cycling rotator qualifies regardless of the motion preference.
+
+  The pill itself cannot be the keyboard control: it lives inside the `aria-hidden` subtree, and a focusable element inside `aria-hidden` is itself a violation. So the mechanism is split — **hovering the pill** pauses for pointer users, and a **visually-hidden toggle button**, placed outside the `aria-hidden` subtree and revealed on focus, serves keyboard users. Both write to the same paused flag.
+
+### 7.6 Implementation constraints
+
+Three things the build has to get right from the start rather than retrofit:
+
+- **Gate the first rotation on `document.fonts.ready`.** `Manrope` is loaded via `next/font/google`, which defaults to `font-display: swap` — a fallback face paints first and the real face swaps in afterwards. The pill measures its rendered width to compute the tween target, so a measurement taken before the swap animates to a stale value and the pill visibly resettles. This defect exists in the current code; it is simply hard to see at `text-4xl`.
+
+- **Headline line breaks are authored, not wrapped.** The masked line reveal (`overflow: hidden` + `yPercent: 110 → 0`) requires each line to be its own wrapper element. Two wrappers are used — `[pill] worth` and `remembering.` — and the first is allowed to wrap internally on narrow viewports, where it reveals as a single two-line unit. Because the whole wrapper translates inside its own clip, wrapping does not tear the mask.
+
+- **Layout is flow-based, not absolutely positioned.** The composition is expressed as a bottom-justified flex column rather than four absolutely-positioned corners. The shared baseline between the headline block and the support paragraph comes from `items-end` on the flex row, which is exactly equivalent, and the flow version cannot overlap itself on short viewports the way stacked `bottom:` offsets can.
 
 ---
 

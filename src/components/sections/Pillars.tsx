@@ -31,6 +31,7 @@ export function Pillars() {
     const distance = track.scrollWidth - section.clientWidth;
 
     const trigger = ScrollTrigger.create({
+      id: "pillars",
       trigger: section,
       start: "top top",
       end: () => `+=${distance}`,
