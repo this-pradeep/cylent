@@ -15,6 +15,9 @@ import {
 const MIN_DURATION_MS = 2600;
 const MAX_DURATION_MS = 4600;
 
+const STUDIO_LOCATION = "Indore, India";
+const STUDIO_TIME_ZONE = "Asia/Kolkata";
+
 export function Loader() {
   const containerRef = useRef<HTMLDivElement>(null);
   const metaRef = useRef<HTMLDivElement>(null);
@@ -31,13 +34,15 @@ export function Loader() {
   useEffect(() => {
     setGreeting(greetingForHour(new Date().getHours()));
 
-    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
-    const city = zone.split("/").pop()?.replace(/_/g, " ") ?? "";
+    // The studio's clock, not the visitor's. Deriving a city from the visitor's
+    // time zone was wrong in principle — a zone names a zone, not a city, so every
+    // Indian visitor resolved to "Calcutta" wherever they actually were.
     const time = new Intl.DateTimeFormat(undefined, {
       hour: "2-digit",
       minute: "2-digit",
+      timeZone: STUDIO_TIME_ZONE,
     }).format(new Date());
-    setClock(city ? `${time} · ${city}` : time);
+    setClock(`${time} · ${STUDIO_LOCATION}`);
   }, []);
 
   useEffect(() => {
@@ -261,7 +266,7 @@ export function Loader() {
               than a scaled one: scaleX would compress the gradient, so at 10% you'd
               see the whole spectrum squeezed into a sliver. Clipping keeps the colour
               ramp true at every value, and neither property triggers layout. */}
-          <span className="mt-3 block h-[2px] w-full overflow-hidden rounded-full bg-ink/10">
+          <span className="mt-3 block h-0.5 w-full overflow-hidden rounded-full bg-ink/10">
             <span
               ref={fillRef}
               className="block h-full w-full rounded-full bg-[linear-gradient(90deg,#ff5ca8,#ffc76e,#8cffd6,#4ed6e8,#8b7bff,#ff8cf0)]"
