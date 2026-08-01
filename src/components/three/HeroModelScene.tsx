@@ -23,7 +23,7 @@ const POINTER_TILT = 0.42;
 const DRAG_SENSITIVITY = 0.005;
 
 /** Wavelengths traced through the glass. Each is one ray of the emergent fan. */
-const WAVELENGTHS = 20;
+const WAVELENGTHS = 34;
 /** Where the light comes from. Fixed in world space, so the prism turns under it. */
 const LIGHT_DIR = { x: 0.22, y: -1, z: 0.16 };
 const BEAM_LEAD = 3.4;
@@ -92,7 +92,7 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower ? 1.5 : 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.92;
+    renderer.toneMappingExposure = 1;
 
     // The model ships no textures and no lights, so a generated room environment does
     // the work: it gives the glossy and near-transparent materials something to
@@ -218,7 +218,7 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
 
       const BEAM_INK: [number, number, number] = [0.36, 0.34, 0.31];
       push(tmpOrigin.x, tmpOrigin.y, tmpOrigin.z, BEAM_INK, 0);
-      push(entry.x, entry.y, entry.z, BEAM_INK, 0.34);
+      push(entry.x, entry.y, entry.z, BEAM_INK, 0.5);
 
       for (let i = 0; i < WAVELENGTHS; i++) {
         const t = i / (WAVELENGTHS - 1);
@@ -246,9 +246,9 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
         const out = refract3(inside, exitNormal, ior);
         if (!out) continue;
 
-        push(entry.x, entry.y, entry.z, colour, 0.26);
-        push(exit.x, exit.y, exit.z, colour, 0.5);
-        push(exit.x, exit.y, exit.z, colour, 0.62);
+        push(entry.x, entry.y, entry.z, colour, 0.4);
+        push(exit.x, exit.y, exit.z, colour, 0.72);
+        push(exit.x, exit.y, exit.z, colour, 0.92);
         push(
           exit.x + out.x * FAN_REACH,
           exit.y + out.y * FAN_REACH,
@@ -274,7 +274,7 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
     const gridMaterial = new THREE.LineBasicMaterial({
       color: 0x14120f,
       transparent: true,
-      opacity: 0.06,
+      opacity: 0.11,
     });
     const gridPoints: number[] = [];
     const EXTENT = 9;
@@ -420,6 +420,25 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
       // dispersion — without those, transmission alone renders a flat pane. Those
       // are added on top here rather than replacing the authored material, so the
       // colour and roughness chosen in Blender survive.
+      /**
+       * Ink edges along the pyramid's silhouette and creases. Clear glass on a
+       * near-white page has almost nothing separating it from the background — the
+       * form only reads once its edges are drawn. Done here, inside the traverse,
+       * where the mesh is known to be a mesh.
+       */
+      const addEdges = (mesh: THREE.Mesh) => {
+        const edgeLines = new THREE.LineSegments(
+          new THREE.EdgesGeometry(mesh.geometry, 25),
+          new THREE.LineBasicMaterial({
+            color: 0x14120f,
+            transparent: true,
+            opacity: 0.38,
+          }),
+        );
+        edgeLines.renderOrder = 3;
+        mesh.add(edgeLines);
+      };
+
       model.traverse((child) => {
         const mesh = child as THREE.Mesh;
         if (!mesh.isMesh) return;
@@ -452,6 +471,7 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
           authored.needsUpdate = true;
           mesh.renderOrder = 2;
           shellMesh = mesh;
+          addEdges(mesh);
           return;
         }
 
@@ -485,6 +505,7 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
           });
           mesh.renderOrder = 2;
           shellMesh = mesh;
+          addEdges(mesh);
           for (const material of previous) material?.dispose();
           return;
         }
