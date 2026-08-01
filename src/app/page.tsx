@@ -1,6 +1,6 @@
 import { Hero } from "@/components/sections/Hero";
 import { Problem } from "@/components/sections/Problem";
-import { Philosophy } from "@/components/sections/Philosophy";
+import { Spine } from "@/components/sections/Spine";
 import { Pillars } from "@/components/sections/Pillars";
 import { Process } from "@/components/sections/Process";
 import { Proof } from "@/components/sections/Proof";
@@ -13,7 +13,7 @@ export default function HomePage() {
     <main>
       <Hero />
       <Problem />
-      <Philosophy />
+      <Spine />
       <Pillars />
       <Process />
       <Proof />

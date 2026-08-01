@@ -136,7 +136,8 @@ export function Hero() {
       });
 
       tl.to(lines, { yPercent: 0, duration: 1.05, stagger: 0.14 }, 0);
-      if (creative) tl.to(creative, { opacity: 1, scale: 1, duration: 1.2 }, 0.3);
+      if (creative)
+        tl.to(creative, { opacity: 1, scale: 1, duration: 1.2 }, 0.3);
       tl.to(deck, { opacity: 1, y: 0, duration: 0.7 }, 0.85)
         .to(support, { opacity: 1, y: 0, duration: 0.7 }, 1.0)
         .to(rail, { opacity: 1, duration: 0.5, ease: "power2.out" }, 1.45);
@@ -279,8 +280,8 @@ export function Hero() {
             data-hero-support
             className="mt-5 text-[clamp(0.8125rem,1.15vw,1rem)] leading-[1.6] tracking-[-0.005em] text-ink-muted md:mt-0 md:w-[24%] md:max-w-[28ch] md:text-right"
           >
-            Cylent Solutions merges technology, visuals, and storytelling into
-            one creative process.
+            Cylent is a small studio building websites, video, and visual
+            identity for brands who care how they&rsquo;re experienced.
           </p>
         </div>
 
