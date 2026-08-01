@@ -192,8 +192,16 @@ Cursor parallax on the slot at **±3%**. motion-system.md specifies 5–20%; the
 
 - No entrance timeline — all elements set to final state.
 - No parallax.
-- **Rotation stops entirely.** The pill settles on "Websites" and does not cycle. This is a change from current behaviour, where `startRotation()` runs regardless of `prefers-reduced-motion` — a text element that swaps itself every 1.5s is exactly what the preference exists to suppress.
-- Creative slot renders its static fallback.
+- **Rotation continues.** `prefers-reduced-motion` asks for less *movement* — sliding, spinning, scaling, parallax, the things that trigger vestibular responses. A word being replaced by another word is a content change, not a movement. Suppressing the rotation entirely would discard the hero's strongest beat for a stricter reading than the preference requires. Current behaviour (rotation runs regardless) is correct on this point and is kept.
+- **The animation around the rotation stops.** The pill's width snaps to the new value instead of tweening; the content crossfades on opacity only, with no `y` offset. Opacity is not a vestibular trigger and is the standard reduced-motion-safe transition.
+- Creative slot renders its static fallback and **holds a single pose** — it does not change state with the index. A hero-scale form snapping between geometries is precisely the large-area movement the preference exists to suppress, and it cannot be softened to an opacity crossfade the way the pill can. The pill carries the rotation alone in this mode.
+
+### 7.5 Accessibility of the rotator
+
+Two obligations that apply in **all** modes, not just reduced motion — both are consequences of keeping the rotation, and neither is currently handled:
+
+- **Stable accessible name.** The rotating word sits inside the `h1`, so today the page's primary heading changes every rotation and assistive tech re-announces it. The visual rotator gets `aria-hidden="true"`; the `h1` gets one fixed, visually-hidden accessible name covering all three states — "Websites, videos and brands worth remembering. Three disciplines. One studio. No hand-offs."
+- **Pause on hover and focus.** WCAG 2.2 SC 2.2.2 (Pause, Stop, Hide) applies to any auto-updating content that starts automatically, runs beyond five seconds and sits alongside other content. An indefinitely cycling rotator qualifies regardless of the motion preference. Hovering or keyboard-focusing the pill pauses the interval; leaving resumes it. This is the standard mitigation and costs almost nothing.
 
 ---
 
