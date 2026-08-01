@@ -230,17 +230,44 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
       holder.scale.setScalar(TARGET_SIZE / longest);
       root.add(holder);
 
-      // The export's shell material carries no pbrMetallicRoughness block, so glTF
-      // defaults apply: opaque, fully metallic, fully rough. That renders a dead
-      // white box which also hides everything inside it. The shell is rebuilt here
-      // as actual glass so the model does not depend on how it was exported.
+      // The export now carries KHR_materials_transmission, so the shell arrives as
+      // real glass. What glTF does not carry is volume, index of refraction or
+      // dispersion — without those, transmission alone renders a flat pane. Those
+      // are added on top here rather than replacing the authored material, so the
+      // colour and roughness chosen in Blender survive.
       model.traverse((child) => {
         const mesh = child as THREE.Mesh;
         if (!mesh.isMesh) return;
 
         const vertexCount = mesh.geometry?.getAttribute("position")?.count ?? 0;
-        const isShell = vertexCount < 200;
         const previous = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        const authored = previous[0] as THREE.MeshPhysicalMaterial | undefined;
+        // Prefer what the export says; fall back to "the low-poly one" for models
+        // that lose their transmission on the way out, as an earlier export did.
+        const isShell =
+          (authored?.transmission ?? 0) > 0 || vertexCount < 200;
+
+        if (isShell && authored?.isMeshPhysicalMaterial) {
+          authored.transmission = 1;
+          // Dispersion is integrated through the volume: with zero thickness there
+          // is no path length, and no wavelength split.
+          authored.thickness = 2.4;
+          authored.ior = 1.55;
+          authored.dispersion = 3.2;
+          authored.attenuationDistance = 8;
+          authored.attenuationColor = new THREE.Color(0xf2f4ff);
+          authored.roughness = Math.min(authored.roughness, 0.02);
+          authored.metalness = 0;
+          authored.clearcoat = 1;
+          authored.clearcoatRoughness = 0;
+          authored.specularIntensity = 1;
+          authored.envMapIntensity = 1.1;
+          authored.transparent = false;
+          authored.side = THREE.DoubleSide;
+          authored.needsUpdate = true;
+          mesh.renderOrder = 2;
+          return;
+        }
 
         if (isShell) {
           mesh.material = new THREE.MeshPhysicalMaterial({
