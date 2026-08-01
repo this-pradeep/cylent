@@ -230,11 +230,13 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
       holder.scale.setScalar(TARGET_SIZE / longest);
       root.add(holder);
 
-      // The export now carries KHR_materials_transmission, so the shell arrives as
-      // real glass. What glTF does not carry is volume, index of refraction or
-      // dispersion — without those, transmission alone renders a flat pane. Those
-      // are added on top here rather than replacing the authored material, so the
-      // colour and roughness chosen in Blender survive.
+      // Respect what was authored; only repair what glTF cannot express.
+      //
+      // This export defines the shell as an alpha-blended veil at 6% opacity and
+      // gives the contents a strong colour of their own. Both are deliberate, so
+      // neither is overwritten. Earlier exports arrived with no material block at
+      // all, which glTF defaults turn into opaque rough metal — that case, and only
+      // that case, still gets a glass material substituted.
       model.traverse((child) => {
         const mesh = child as THREE.Mesh;
         if (!mesh.isMesh) return;
@@ -242,58 +244,37 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
         const vertexCount = mesh.geometry?.getAttribute("position")?.count ?? 0;
         const previous = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
         const authored = previous[0] as THREE.MeshPhysicalMaterial | undefined;
-        // Prefer what the export says; fall back to "the low-poly one" for models
-        // that lose their transmission on the way out, as an earlier export did.
-        const isShell =
-          (authored?.transmission ?? 0) > 0 || vertexCount < 200;
 
-        if (isShell && authored?.isMeshPhysicalMaterial) {
-          authored.transmission = 1;
-          // Dispersion is integrated through the volume: with zero thickness there
-          // is no path length, and no wavelength split.
-          authored.thickness = 2.4;
-          authored.ior = 1.55;
-          authored.dispersion = 3.2;
-          authored.attenuationDistance = 8;
-          authored.attenuationColor = new THREE.Color(0xf2f4ff);
-          authored.roughness = Math.min(authored.roughness, 0.02);
-          authored.metalness = 0;
-          authored.clearcoat = 1;
-          authored.clearcoatRoughness = 0;
-          authored.specularIntensity = 1;
-          authored.envMapIntensity = 1.1;
-          authored.transparent = false;
-          authored.side = THREE.DoubleSide;
-          authored.needsUpdate = true;
-          mesh.renderOrder = 2;
-          return;
-        }
+        const authoredAsGlass =
+          (authored?.transmission ?? 0) > 0 || authored?.transparent === true;
+        const isShell = authoredAsGlass || vertexCount < 200;
 
-        if (isShell) {
+        if (isShell && authored) {
+          if (authoredAsGlass) {
+            // Keep the veil exactly as exported. The one necessary change is
+            // depthWrite: a transparent shell that writes depth occludes whatever
+            // is inside it, which would hide the very thing it encloses.
+            authored.depthWrite = false;
+            authored.side = THREE.DoubleSide;
+            authored.envMapIntensity = 1;
+            authored.needsUpdate = true;
+            mesh.renderOrder = 2;
+            return;
+          }
+
+          // No usable material came through: rebuild it as glass so a broken export
+          // does not render as a dead metal box.
           mesh.material = new THREE.MeshPhysicalMaterial({
             color: 0xffffff,
             metalness: 0,
-            // Sharp glass. Any roughness here blurs both the reflections and the
-            // model inside, which is the whole reason the volume exists.
             roughness: 0,
             transmission: 1,
-            // A volume, not a shell. Dispersion is computed through thickness, so
-            // this must be non-zero or the chromatic split never happens.
             thickness: 2.4,
-            attenuationDistance: 8,
-            attenuationColor: new THREE.Color(0xf2f4ff),
             ior: 1.55,
-            // The actual chromatic aberration: each wavelength refracts at its own
-            // angle through the volume. Real crown glass sits near 0.3; this is
-            // pushed well past it so the split reads at hero scale, the same
-            // exaggeration the line-traced prism needed. This is the dial to turn.
             dispersion: 3.2,
             clearcoat: 1,
-            clearcoatRoughness: 0,
             specularIntensity: 1,
             envMapIntensity: 1.1,
-            // Deliberately not `transparent`: transmission is the physical route and
-            // wants the opaque pass, where it can sample the buffer behind it.
             transparent: false,
             side: THREE.DoubleSide,
           });
@@ -302,25 +283,21 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
           return;
         }
 
-        // The content: lifted off black so it stays legible through the glass.
+        // The contents keep their authored colour. Only the environment response is
+        // set, so they sit in the same light as everything else.
         for (const material of previous) {
           const std = material as THREE.MeshStandardMaterial;
-          std.envMapIntensity = 0.55;
-          std.metalness = 0.15;
-          std.roughness = 0.62;
-          std.emissive = new THREE.Color(0x7a6cff);
-          std.emissiveIntensity = 0.09;
+          std.envMapIntensity = 0.9;
           std.needsUpdate = true;
         }
         mesh.renderOrder = 1;
       });
 
-      // Light thrown from inside the prism, so the content reads through the glass
-      // rather than being lit only from outside and swallowed by refraction.
-      const core = new THREE.PointLight(0xffffff, 6, 9, 2);
+      // A rim from behind separates the form from a pale background. The interior
+      // point light that used to sit here is gone: the contents are opaque in this
+      // export, so a light at their centre is trapped inside and lights nothing.
       const rim = new THREE.DirectionalLight(0xffffff, 0.9);
       rim.position.set(1.2, -0.6, -3);
-      holder.add(core);
       root.add(rim);
 
       // No per-material fade. Three renders only opaque objects into the buffer that
