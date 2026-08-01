@@ -16,6 +16,15 @@ const IDLE_SPEED = 0.055;
 const POINTER_TILT = 0.42;
 const DRAG_SENSITIVITY = 0.005;
 
+/**
+ * Backdrop dials. POOL_SIZE is deliberately smaller than the frustum at this depth:
+ * a pool wider than the viewport would put a dark field behind the ink headline and
+ * make it unreadable. Kept as a tight halo around the prism instead, so the rest of
+ * the hero stays on the page's own surface colour.
+ */
+const POOL_SIZE = 5.6;
+const POOL_DISTANCE = 3.4;
+
 function detectWebGLSupport(): boolean {
   try {
     const canvas = document.createElement("canvas");
@@ -80,34 +89,64 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
     const root = new THREE.Group();
     scene.add(root);
 
-    // A backdrop inside the scene, because transmission samples the scene — not the
-    // page. With a transparent clear colour there is nothing behind the glass to
-    // bend, so it refracts blank space and composites to a flat white shape. This
-    // grid is nearly invisible directly (ink at 6%) but the volume magnifies,
-    // displaces and disperses it, which is what actually reads as glass. Structure
-    // and grids are also the Build pillar's own visual language.
-    const gridGroup = new THREE.Group();
-    const gridMaterial = new THREE.LineBasicMaterial({
-      color: 0x14120f,
-      transparent: true,
-      opacity: 0.06,
-    });
-    const gridPoints: number[] = [];
-    const EXTENT = 9;
-    const STEP = 0.55;
-    for (let v = -EXTENT; v <= EXTENT; v += STEP) {
-      gridPoints.push(-EXTENT, v, 0, EXTENT, v, 0);
-      gridPoints.push(v, -EXTENT, 0, v, EXTENT, 0);
+    // ---- studio backdrop -------------------------------------------------
+    // Glass is only visible through what is behind it. On a near-white page there
+    // is nothing to refract, which is why the prism read as a flat shape.
+    //
+    // Everything here is OPAQUE on purpose: three's transmission pass samples the
+    // opaque and transmissive lists only, so a translucent backdrop would be
+    // invisible to the glass no matter how it looked on screen.
+
+    // A pool of deep tone directly behind the prism, fading to exactly the page
+    // colour at its rim so it dissolves into the hero rather than sitting on it as
+    // a visible disc.
+    const poolCanvas = document.createElement("canvas");
+    poolCanvas.width = 512;
+    poolCanvas.height = 512;
+    const poolCtx = poolCanvas.getContext("2d");
+    if (poolCtx) {
+      const gradient = poolCtx.createRadialGradient(256, 256, 0, 256, 256, 256);
+      gradient.addColorStop(0, "rgb(24, 22, 19)");
+      gradient.addColorStop(0.42, "rgb(58, 55, 50)");
+      gradient.addColorStop(0.72, "rgb(176, 172, 165)");
+      gradient.addColorStop(1, "rgb(250, 249, 247)");
+      poolCtx.fillStyle = gradient;
+      poolCtx.fillRect(0, 0, 512, 512);
     }
-    const gridGeometry = new THREE.BufferGeometry();
-    gridGeometry.setAttribute(
-      "position",
-      new THREE.Float32BufferAttribute(gridPoints, 3),
+    const poolTexture = new THREE.CanvasTexture(poolCanvas);
+    poolTexture.colorSpace = THREE.SRGBColorSpace;
+
+    const pool = new THREE.Mesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({ map: poolTexture, toneMapped: false }),
     );
-    const grid = new THREE.LineSegments(gridGeometry, gridMaterial);
-    grid.position.z = -3.2;
-    gridGroup.add(grid);
-    scene.add(gridGroup);
+    pool.scale.setScalar(POOL_SIZE);
+    pool.position.set(0, 0, -POOL_DISTANCE);
+    pool.renderOrder = -2;
+    scene.add(pool);
+
+    // Bright bars raking across the pool. Glass reads as glass largely through the
+    // streaks it draws from hard light sources, and these give the volume something
+    // with edges to bend, reflect and split.
+    const barMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      toneMapped: false,
+    });
+    const bars = new THREE.Group();
+    const BAR_LAYOUT: Array<[number, number, number, number, number]> = [
+      // x, y, width, height, rotation
+      [-1.35, 0.95, 0.1, 5.2, 0.42],
+      [0.55, -0.2, 0.055, 4.4, -0.3],
+      [1.5, 1.15, 0.075, 3.6, 0.62],
+    ];
+    for (const [x, y, w, h, rotation] of BAR_LAYOUT) {
+      const bar = new THREE.Mesh(new THREE.PlaneGeometry(w, h), barMaterial);
+      bar.position.set(x, y, -POOL_DISTANCE + 0.35);
+      bar.rotation.z = rotation;
+      bar.renderOrder = -1;
+      bars.add(bar);
+    }
+    scene.add(bars);
 
     const pointer = { x: 0, y: 0 };
     const target = { rx: 0, ry: 0, px: 0, py: 0 };
@@ -376,6 +415,7 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
         for (const material of materials) material?.dispose();
       });
       envTexture?.dispose();
+      poolTexture.dispose();
       pmrem.dispose();
       renderer.dispose();
     };
