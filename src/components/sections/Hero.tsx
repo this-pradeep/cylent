@@ -13,7 +13,6 @@ import {
   VideoIcon,
   GraphicsIcon,
 } from "@/components/icons/ServiceIcons";
-import { HeroCreativeSlot } from "@/components/sections/hero/HeroCreativeSlot";
 import {
   REDUCED_MOTION_FADE_S,
   ROTATE_INTERVAL_MS,
@@ -64,11 +63,14 @@ export function Hero() {
     const lines = root.querySelectorAll<HTMLSpanElement>(
       "[data-hero-line] > span",
     );
+    // Optional: the hero composition stands without a creative, and the scene is
+    // currently unmounted. Everything below skips its step rather than bailing out,
+    // so the entrance still runs and remounting the scene needs no motion changes.
     const creative = root.querySelector("[data-hero-creative]");
     const deck = root.querySelector("[data-hero-deck]");
     const support = root.querySelector("[data-hero-support]");
     const rail = root.querySelector("[data-hero-rail]");
-    if (!lines.length || !creative || !deck || !support || !rail) return;
+    if (!lines.length || !deck || !support || !rail) return;
 
     let cancelled = false;
     let intervalId: ReturnType<typeof setInterval> | undefined;
@@ -102,7 +104,10 @@ export function Hero() {
 
     if (prefersReducedMotion) {
       gsap.set(lines, { yPercent: 0 });
-      gsap.set([creative, deck, support, rail], { opacity: 1, y: 0 });
+      gsap.set([deck, support, rail, ...(creative ? [creative] : [])], {
+        opacity: 1,
+        y: 0,
+      });
       startWhenFontsReady();
       return () => {
         cancelled = true;
@@ -113,7 +118,7 @@ export function Hero() {
     // Set the pre-entrance state immediately rather than inside the loader callback,
     // so the hero is never briefly visible in its final state before revealing.
     gsap.set(lines, { yPercent: 110, willChange: "transform" });
-    gsap.set(creative, { opacity: 0, scale: 0.94 });
+    if (creative) gsap.set(creative, { opacity: 0, scale: 0.94 });
     gsap.set([deck, support], { opacity: 0, y: 16 });
     gsap.set(rail, { opacity: 0 });
 
@@ -130,9 +135,9 @@ export function Hero() {
         },
       });
 
-      tl.to(lines, { yPercent: 0, duration: 1.05, stagger: 0.14 }, 0)
-        .to(creative, { opacity: 1, scale: 1, duration: 1.2 }, 0.3)
-        .to(deck, { opacity: 1, y: 0, duration: 0.7 }, 0.85)
+      tl.to(lines, { yPercent: 0, duration: 1.05, stagger: 0.14 }, 0);
+      if (creative) tl.to(creative, { opacity: 1, scale: 1, duration: 1.2 }, 0.3);
+      tl.to(deck, { opacity: 1, y: 0, duration: 0.7 }, 0.85)
         .to(support, { opacity: 1, y: 0, duration: 0.7 }, 1.0)
         .to(rail, { opacity: 1, duration: 0.5, ease: "power2.out" }, 1.45);
     });
@@ -206,11 +211,14 @@ export function Hero() {
       ref={containerRef}
       className="relative isolate flex min-h-svh flex-col justify-end overflow-hidden bg-surface pb-[4vh] md:pb-[5.5vh]"
     >
-      {/* Cropped by the top edge; the headline's cap-height crosses its lower edge. */}
-      <HeroCreativeSlot
-        index={index}
-        className="left-1/2 top-[-6vh] aspect-square w-[130vw] -translate-x-1/2 md:left-[52%] md:top-[-14vh] md:w-[60vw]"
-      />
+      {/* The prism scene is built and tested but unmounted for now. To bring it back,
+          restore the line below — nothing else needs changing, the entrance timeline
+          picks up [data-hero-creative] when it is present.
+
+          <PrismScene index={index} className="inset-0" />
+
+          Full-bleed rather than a square slot: the dispersed fan needs the width of
+          the section to travel across. */}
 
       <div className="relative z-10 mb-[6vh] px-6 md:mb-[7vh] md:px-[6vw]">
         <div className="md:flex md:items-end md:justify-between md:gap-[6vw]">
