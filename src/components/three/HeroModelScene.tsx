@@ -11,7 +11,7 @@ type HeroModelSceneProps = {
 
 const MODEL_URL = "/images/hero-model.glb";
 /** Longest edge of the model, in world units, after normalising. */
-const TARGET_SIZE = 2.5;
+const TARGET_SIZE = 2.1;
 const IDLE_SPEED = 0.055;
 const POINTER_TILT = 0.42;
 const DRAG_SENSITIVITY = 0.005;
@@ -63,7 +63,7 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower ? 1.5 : 2));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
+    renderer.toneMappingExposure = 0.92;
 
     // The model ships no textures and no lights, so a generated room environment does
     // the work: it gives the glossy and near-transparent materials something to
@@ -79,6 +79,35 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
 
     const root = new THREE.Group();
     scene.add(root);
+
+    // A backdrop inside the scene, because transmission samples the scene — not the
+    // page. With a transparent clear colour there is nothing behind the glass to
+    // bend, so it refracts blank space and composites to a flat white shape. This
+    // grid is nearly invisible directly (ink at 6%) but the volume magnifies,
+    // displaces and disperses it, which is what actually reads as glass. Structure
+    // and grids are also the Build pillar's own visual language.
+    const gridGroup = new THREE.Group();
+    const gridMaterial = new THREE.LineBasicMaterial({
+      color: 0x14120f,
+      transparent: true,
+      opacity: 0.06,
+    });
+    const gridPoints: number[] = [];
+    const EXTENT = 9;
+    const STEP = 0.55;
+    for (let v = -EXTENT; v <= EXTENT; v += STEP) {
+      gridPoints.push(-EXTENT, v, 0, EXTENT, v, 0);
+      gridPoints.push(v, -EXTENT, 0, v, EXTENT, 0);
+    }
+    const gridGeometry = new THREE.BufferGeometry();
+    gridGeometry.setAttribute(
+      "position",
+      new THREE.Float32BufferAttribute(gridPoints, 3),
+    );
+    const grid = new THREE.LineSegments(gridGeometry, gridMaterial);
+    grid.position.z = -3.2;
+    gridGroup.add(grid);
+    scene.add(gridGroup);
 
     const pointer = { x: 0, y: 0 };
     const target = { rx: 0, ry: 0, px: 0, py: 0 };
@@ -181,7 +210,7 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
       // highlights to reflect rather than a soft grey wash.
       envTexture = pmrem.fromScene(new RoomEnvironment(), 0).texture;
       scene.environment = envTexture;
-      scene.environmentIntensity = 1.4;
+      scene.environmentIntensity = 0.85;
 
       const gltf = await new GLTFLoader().loadAsync(MODEL_URL);
       if (disposed) return;
@@ -235,11 +264,11 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
             clearcoat: 1,
             clearcoatRoughness: 0,
             specularIntensity: 1,
-            envMapIntensity: 2,
+            envMapIntensity: 1.1,
             // Deliberately not `transparent`: transmission is the physical route and
             // wants the opaque pass, where it can sample the buffer behind it.
             transparent: false,
-            side: THREE.FrontSide,
+            side: THREE.DoubleSide,
           });
           mesh.renderOrder = 2;
           for (const material of previous) material?.dispose();
@@ -249,11 +278,11 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
         // The content: lifted off black so it stays legible through the glass.
         for (const material of previous) {
           const std = material as THREE.MeshStandardMaterial;
-          std.envMapIntensity = 1.2;
+          std.envMapIntensity = 0.55;
           std.metalness = 0.15;
-          std.roughness = 0.42;
+          std.roughness = 0.62;
           std.emissive = new THREE.Color(0x7a6cff);
-          std.emissiveIntensity = 0.18;
+          std.emissiveIntensity = 0.09;
           std.needsUpdate = true;
         }
         mesh.renderOrder = 1;
@@ -261,7 +290,7 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
 
       // Light thrown from inside the prism, so the content reads through the glass
       // rather than being lit only from outside and swallowed by refraction.
-      const core = new THREE.PointLight(0xffffff, 14, 9, 2);
+      const core = new THREE.PointLight(0xffffff, 6, 9, 2);
       const rim = new THREE.DirectionalLight(0xffffff, 0.9);
       rim.position.set(1.2, -0.6, -3);
       holder.add(core);
@@ -310,11 +339,13 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
       host.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", onPointerUp);
 
+      // Meshes and lines both hold GPU resources — checking isMesh alone would leak
+      // the backdrop grid every time this section unmounts.
       scene.traverse((child) => {
-        const mesh = child as THREE.Mesh;
-        if (!mesh.isMesh) return;
-        mesh.geometry?.dispose();
-        const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        const node = child as THREE.Mesh | THREE.LineSegments;
+        if (!node.geometry && !node.material) return;
+        node.geometry?.dispose();
+        const materials = Array.isArray(node.material) ? node.material : [node.material];
         for (const material of materials) material?.dispose();
       });
       envTexture?.dispose();
