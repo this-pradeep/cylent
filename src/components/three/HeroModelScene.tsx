@@ -4,8 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 type HeroModelSceneProps = {
-  /** 0 = Websites, 1 = Videos, 2 = Designs. Gives each discipline its own resting angle. */
-  index: number;
+  /**
+   * Accepted so Hero can pass the rotator state, but deliberately unused: driving
+   * rotation from it made the model snap on every word change.
+   */
+  index?: number;
   className?: string;
 };
 
@@ -16,6 +19,14 @@ const IDLE_SPEED = 0.055;
 const POINTER_TILT = 0.42;
 const DRAG_SENSITIVITY = 0.005;
 
+/**
+ * Resting position, as a fraction of the visible half-height, so the model holds the
+ * same place in the composition at any viewport width. Sits right of centre, clear
+ * of the headline, in the open field beside it.
+ */
+const HOME_X = 0.315;
+const HOME_Y = -0.06;
+
 function detectWebGLSupport(): boolean {
   try {
     const canvas = document.createElement("canvas");
@@ -25,13 +36,10 @@ function detectWebGLSupport(): boolean {
   }
 }
 
-export function HeroModelScene({ index, className }: HeroModelSceneProps) {
+export function HeroModelScene({ className }: HeroModelSceneProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const indexRef = useRef(index);
   const [mode, setMode] = useState<"loading" | "webgl" | "static">("loading");
-
-  indexRef.current = index;
 
   useEffect(() => {
     setMode(detectWebGLSupport() ? "webgl" : "static");
@@ -153,12 +161,19 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
       window.addEventListener("pointerup", onPointerUp);
     }
 
+    // Half the visible height at the model's depth, used to place it in fractions of
+    // the frame rather than in absolute units that drift as the viewport changes.
+    let halfHeight = 1;
+    let viewAspect = 1;
+
     const resize = () => {
       const rect = host.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return;
       renderer.setSize(rect.width, rect.height, false);
       camera.aspect = rect.width / rect.height;
       camera.updateProjectionMatrix();
+      viewAspect = camera.aspect;
+      halfHeight = Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
     };
     resize();
 
@@ -172,13 +187,16 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
       current.px += (target.px - current.px) * k;
       current.py += (target.py - current.py) * k;
 
+      // Continuous, unbroken rotation. There used to be a per-discipline offset
+      // added here, which meant the model snapped by 0.3rad every time the hero's
+      // rotator advanced — a jump every three seconds, which is what read as flicker.
       const idle = reduced ? 0 : t * IDLE_SPEED;
-      const seat = (indexRef.current - 1) * 0.3;
 
-      root.rotation.y = current.ry + idle + seat;
+      root.rotation.y = current.ry + idle;
       root.rotation.x = current.rx;
-      root.position.x = current.px;
-      root.position.y = current.py + (reduced ? 0 : Math.sin(t * 0.5) * 0.05);
+      root.position.x = HOME_X * halfHeight * viewAspect + current.px;
+      root.position.y =
+        HOME_Y * halfHeight + current.py + (reduced ? 0 : Math.sin(t * 0.5) * 0.05);
 
       renderer.render(scene, camera);
     };
