@@ -18,6 +18,7 @@ import {
   ROTATE_INTERVAL_MS,
   SLIDE_DURATION_S,
 } from "@/lib/motion/rotator-timing";
+import { HeroModelScene } from "@/components/three/HeroModelScene";
 import { onLoaderReady } from "@/lib/motion/loader-ready";
 
 const ROTATOR_ITEMS = [
@@ -63,9 +64,9 @@ export function Hero() {
     const lines = root.querySelectorAll<HTMLSpanElement>(
       "[data-hero-line] > span",
     );
-    // Optional: the hero composition stands without a creative, and the scene is
-    // currently unmounted. Everything below skips its step rather than bailing out,
-    // so the entrance still runs and remounting the scene needs no motion changes.
+    // Optional by design: the composition stands without a creative, so every step
+    // below skips rather than bails out. That lets the scene be swapped or removed
+    // without the entrance silently breaking.
     const creative = root.querySelector("[data-hero-creative]");
     const deck = root.querySelector("[data-hero-deck]");
     const support = root.querySelector("[data-hero-support]");
@@ -212,14 +213,10 @@ export function Hero() {
       ref={containerRef}
       className="relative isolate flex min-h-svh flex-col justify-end overflow-hidden bg-surface pb-[4vh] md:pb-[5.5vh]"
     >
-      {/* The prism scene is built and tested but unmounted for now. To bring it back,
-          restore the line below — nothing else needs changing, the entrance timeline
-          picks up [data-hero-creative] when it is present.
-
-          <PrismScene index={index} className="inset-0" />
-
-          Full-bleed rather than a square slot: the dispersed fan needs the width of
-          the section to travel across. */}
+      {/* Background creative. The entrance timeline picks this up automatically via
+          [data-hero-creative]. The line-traced PrismScene remains in the repo,
+          unmounted, if we want to return to it. */}
+      <HeroModelScene index={index} className="inset-0" />
 
       <div className="relative z-10 mb-[6vh] px-6 md:mb-[7vh] md:px-[6vw]">
         <div className="md:flex md:items-end md:justify-between md:gap-[6vw]">
