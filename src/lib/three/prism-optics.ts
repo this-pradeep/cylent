@@ -165,3 +165,40 @@ export function tracePrism(
 
   return { entry: entryHit.point, exit: exitHit.point, outDir };
 }
+
+// ---------------------------------------------------------------------------
+// 3D refraction, for tracing a real beam through the hero model's pyramid.
+// The 2D routines above solve a cross-section; these work against actual faces,
+// so the spectrum responds to the model turning in any axis.
+// ---------------------------------------------------------------------------
+
+export type Vec3 = { x: number; y: number; z: number };
+
+export function dot3(a: Vec3, b: Vec3): number {
+  return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+export function normalize3(a: Vec3): Vec3 {
+  const l = Math.hypot(a.x, a.y, a.z);
+  return l === 0 ? { x: 0, y: 0, z: 0 } : { x: a.x / l, y: a.y / l, z: a.z / l };
+}
+
+/**
+ * Snell's law in three dimensions. `normal` must oppose `incident`. Returns null
+ * on total internal reflection, which is a visible state here rather than an error:
+ * as the pyramid turns, wavelengths drop out of the fan one at a time.
+ */
+export function refract3(incident: Vec3, normal: Vec3, eta: number): Vec3 | null {
+  const i = normalize3(incident);
+  const n = normalize3(normal);
+  const cosi = -dot3(n, i);
+  const sin2t = eta * eta * (1 - cosi * cosi);
+  if (sin2t > 1) return null;
+  const cost = Math.sqrt(1 - sin2t);
+  const k = eta * cosi - cost;
+  return normalize3({
+    x: i.x * eta + n.x * k,
+    y: i.y * eta + n.y * k,
+    z: i.z * eta + n.z * k,
+  });
+}
