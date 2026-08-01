@@ -25,7 +25,12 @@ const DRAG_SENSITIVITY = 0.005;
  * of the headline, in the open field beside it.
  */
 const HOME_X = 0.315;
-const HOME_Y = -0.06;
+const HOME_Y = 0.06;
+/**
+ * Orientation the model holds the moment it appears. Rotation accumulates from here,
+ * so this is the face a visitor always sees first.
+ */
+const HOME_ROTATION_Y = 0;
 
 function detectWebGLSupport(): boolean {
   try {
@@ -177,9 +182,13 @@ export function HeroModelScene({ className }: HeroModelSceneProps) {
     };
     resize();
 
-    const start = performance.now();
+    // Set when the model is actually added, not when the effect runs. The GLTF load
+    // is async, so anchoring here would mean the idle rotation had already been
+    // running for however long the download took — and the model would face a
+    // different way on every load depending on cache and connection.
+    let animStart = performance.now();
     const render = () => {
-      const t = (performance.now() - start) / 1000;
+      const t = (performance.now() - animStart) / 1000;
       const k = reduced ? 1 : 0.07;
 
       current.rx += (target.rx + dragRx - current.rx) * k;
@@ -192,7 +201,7 @@ export function HeroModelScene({ className }: HeroModelSceneProps) {
       // rotator advanced — a jump every three seconds, which is what read as flicker.
       const idle = reduced ? 0 : t * IDLE_SPEED;
 
-      root.rotation.y = current.ry + idle;
+      root.rotation.y = HOME_ROTATION_Y + current.ry + idle;
       root.rotation.x = current.rx;
       root.position.x = HOME_X * halfHeight * viewAspect + current.px;
       root.position.y =
@@ -355,6 +364,9 @@ export function HeroModelScene({ className }: HeroModelSceneProps) {
       // transmission samples, so marking the content `transparent` to fade it would
       // erase it from inside the glass — the exact thing this scene exists to show.
       // The entrance is handled by Hero, which tweens the wrapper's CSS opacity.
+
+      // Model is on screen now: this is t = 0 for the rotation.
+      animStart = performance.now();
 
       resize();
       if (reduced) render();
