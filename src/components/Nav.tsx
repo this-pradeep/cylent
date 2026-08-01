@@ -120,7 +120,7 @@ export function Nav() {
       <div className="flex w-full max-w-4xl items-stretch justify-center gap-2.5">
         <nav
           ref={navRef}
-          className="relative flex flex-1 items-center justify-between gap-6 rounded-full bg-ink px-7 shadow-[0_8px_30px_rgba(20,18,15,0.18)]"
+          className="relative flex flex-1 items-center justify-between gap-6 rounded-full border border-ink/10 bg-surface px-7 shadow-[0_8px_30px_rgba(20,18,15,0.10)]"
           style={{
             paddingTop: "calc(0.82rem - var(--nav-condense, 0) * 0.25rem)",
             paddingBottom: "calc(0.82rem - var(--nav-condense, 0) * 0.25rem)",
@@ -128,7 +128,7 @@ export function Nav() {
         >
           <Link
             href="/"
-            className="text-[1.12rem] font-bold tracking-tight text-surface"
+            className="text-[1.12rem] font-bold tracking-tight text-ink"
           >
             Cylent
           </Link>
@@ -139,7 +139,7 @@ export function Nav() {
                 <button
                   type="button"
                   onClick={() => goTo(link)}
-                  className="rounded-full px-3.5 py-1.5 text-[0.95rem] font-medium text-surface/68 transition-colors hover:bg-surface/10 hover:text-surface"
+                  className="rounded-full px-3.5 py-1.5 text-[0.95rem] font-medium text-ink/68 transition-colors hover:bg-ink/5 hover:text-ink"
                 >
                   {link.label}
                 </button>
@@ -155,8 +155,8 @@ export function Nav() {
             className="inline-flex flex-col items-center justify-center gap-1 rounded-full p-2 md:hidden"
           >
             <span className="sr-only">Toggle menu</span>
-            <span className="h-0.5 w-5 bg-surface" />
-            <span className="h-0.5 w-5 bg-surface" />
+            <span className="h-0.5 w-5 bg-ink" />
+            <span className="h-0.5 w-5 bg-ink" />
           </button>
         </nav>
 
@@ -166,7 +166,7 @@ export function Nav() {
           ref={contactRef}
           type="button"
           onClick={() => scrollToId("cta")}
-          className="hidden shrink-0 items-center rounded-full bg-ink px-7 text-[0.95rem] font-semibold text-surface shadow-[0_8px_30px_rgba(20,18,15,0.18)] transition-colors hover:bg-[#211d18] md:inline-flex"
+          className="hidden shrink-0 items-center rounded-full border border-ink/10 bg-surface px-7 text-[0.95rem] font-semibold text-ink shadow-[0_8px_30px_rgba(20,18,15,0.10)] transition-colors hover:bg-ink/5 md:inline-flex"
         >
           Contact
         </button>
@@ -175,7 +175,7 @@ export function Nav() {
       <div
         ref={sheetRef}
         id="mobile-nav-sheet"
-        className="w-full max-w-4xl overflow-hidden rounded-3xl bg-ink shadow-[0_8px_30px_rgba(20,18,15,0.18)] md:hidden"
+        className="w-full max-w-4xl overflow-hidden rounded-3xl border border-ink/10 bg-surface shadow-[0_8px_30px_rgba(20,18,15,0.10)] md:hidden"
         style={{ display: "none" }}
       >
         <ul className="flex flex-col gap-2 px-5 py-5">
@@ -187,7 +187,7 @@ export function Nav() {
                   setMobileOpen(false);
                   goTo(link);
                 }}
-                className="block w-full rounded-full px-4 py-2.5 text-left text-base font-medium text-surface/68 transition-colors hover:bg-surface/10 hover:text-surface"
+                className="block w-full rounded-full px-4 py-2.5 text-left text-base font-medium text-ink/68 transition-colors hover:bg-ink/5 hover:text-ink"
               >
                 {link.label}
               </button>
@@ -200,7 +200,7 @@ export function Nav() {
                 setMobileOpen(false);
                 scrollToId("cta");
               }}
-              className="mt-1 w-full rounded-full bg-surface px-5 py-3 text-sm font-semibold text-ink"
+              className="mt-1 w-full rounded-full border border-ink/10 bg-surface px-5 py-3 text-sm font-semibold text-ink"
             >
               Contact
             </button>
