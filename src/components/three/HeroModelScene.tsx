@@ -2,12 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import {
-  prismLineFragmentShader,
-  prismLineVertexShader,
-} from "@/lib/three/prism-shaders";
-import { CHROMATIC_PALETTE } from "@/lib/three/palette";
-import { dot3, iorAt, refract3 } from "@/lib/three/prism-optics";
 
 type HeroModelSceneProps = {
   /** 0 = Websites, 1 = Videos, 2 = Designs. Gives each discipline its own resting angle. */
@@ -21,29 +15,6 @@ const TARGET_SIZE = 2.1;
 const IDLE_SPEED = 0.055;
 const POINTER_TILT = 0.42;
 const DRAG_SENSITIVITY = 0.005;
-
-/** Wavelengths traced through the glass. Each is one ray of the emergent fan. */
-const WAVELENGTHS = 20;
-/** Where the light comes from. Fixed in world space, so the prism turns under it. */
-const LIGHT_DIR = { x: 0.22, y: -1, z: 0.16 };
-const BEAM_LEAD = 3.4;
-const FAN_REACH = 5.5;
-
-/** Red through violet — the palette the cursor lens and loader bar already use. */
-const SPECTRUM = CHROMATIC_PALETTE.slice(0, 5);
-
-function spectrumAt(t: number): [number, number, number] {
-  const x = Math.min(0.9999, Math.max(0, t)) * (SPECTRUM.length - 1);
-  const i = Math.floor(x);
-  const f = x - i;
-  const a = SPECTRUM[i];
-  const b = SPECTRUM[i + 1];
-  return [
-    a[0] + (b[0] - a[0]) * f,
-    a[1] + (b[1] - a[1]) * f,
-    a[2] + (b[2] - a[2]) * f,
-  ];
-}
 
 function detectWebGLSupport(): boolean {
   try {
@@ -108,161 +79,6 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
 
     const root = new THREE.Group();
     scene.add(root);
-
-    // The beam and the spectrum it becomes. Added to the scene, NOT to root: the
-    // light source is fixed in the world and the prism turns underneath it. Parenting
-    // this to the model would carry the light around with the glass, which is what
-    // makes drawn-on fans read as fake.
-    let shellMesh: THREE.Mesh | null = null;
-    const raycaster = new THREE.Raycaster();
-    const lightDir = new THREE.Vector3(LIGHT_DIR.x, LIGHT_DIR.y, LIGHT_DIR.z).normalize();
-    const normalMatrix = new THREE.Matrix3();
-
-    // one incoming beam + per wavelength an interior and an exterior segment
-    const BEAM_VERTS = (1 + WAVELENGTHS * 2) * 2;
-    const beamPos = new Float32Array(BEAM_VERTS * 3);
-    const beamCol = new Float32Array(BEAM_VERTS * 3);
-    const beamAlpha = new Float32Array(BEAM_VERTS);
-
-    const beamGeometry = new THREE.BufferGeometry();
-    const beamPosAttr = new THREE.BufferAttribute(beamPos, 3).setUsage(
-      THREE.DynamicDrawUsage,
-    );
-    const beamColAttr = new THREE.BufferAttribute(beamCol, 3).setUsage(
-      THREE.DynamicDrawUsage,
-    );
-    const beamAlphaAttr = new THREE.BufferAttribute(beamAlpha, 1).setUsage(
-      THREE.DynamicDrawUsage,
-    );
-    beamGeometry.setAttribute("position", beamPosAttr);
-    beamGeometry.setAttribute("aColor", beamColAttr);
-    beamGeometry.setAttribute("aAlpha", beamAlphaAttr);
-
-    const beamMaterial = new THREE.ShaderMaterial({
-      vertexShader: prismLineVertexShader,
-      fragmentShader: prismLineFragmentShader,
-      uniforms: { uOpacity: { value: 1 } },
-      transparent: true,
-      depthTest: false,
-      depthWrite: false,
-    });
-    const beam = new THREE.LineSegments(beamGeometry, beamMaterial);
-    beam.frustumCulled = false;
-    beam.renderOrder = 4;
-    scene.add(beam);
-
-    // Reused every frame: traceBeam runs at 60fps and must not allocate.
-    const tmpDir = new THREE.Vector3();
-    const tmpOrigin = new THREE.Vector3();
-    const tmpCentre = new THREE.Vector3();
-    const entryNormalVec = new THREE.Vector3();
-    const exitNormalVec = new THREE.Vector3();
-
-    /**
-     * Trace the beam through the pyramid for real: refract in at the face it hits,
-     * cross the glass at a per-wavelength index, refract out at whichever face it
-     * reaches. Total internal reflection simply drops that wavelength, so the fan
-     * loses and regains colours as the model turns — which is the tell that it is
-     * being computed rather than drawn.
-     */
-    const traceBeam = () => {
-      let v = 0;
-      const push = (
-        x: number,
-        y: number,
-        z: number,
-        colour: [number, number, number],
-        alpha: number,
-      ) => {
-        beamPos[v * 3] = x;
-        beamPos[v * 3 + 1] = y;
-        beamPos[v * 3 + 2] = z;
-        beamCol.set(colour, v * 3);
-        beamAlpha[v] = alpha;
-        v++;
-      };
-      const blank = () => {
-        while (v < BEAM_VERTS) push(0, 0, 0, [0, 0, 0], 0);
-      };
-
-      if (!shellMesh) {
-        blank();
-        beamPosAttr.needsUpdate = true;
-        beamColAttr.needsUpdate = true;
-        beamAlphaAttr.needsUpdate = true;
-        return;
-      }
-
-      scene.updateMatrixWorld(true);
-      shellMesh.getWorldPosition(tmpCentre);
-      tmpOrigin.copy(tmpCentre).addScaledVector(lightDir, -BEAM_LEAD);
-
-      raycaster.set(tmpOrigin, lightDir);
-      const entryHits = raycaster.intersectObject(shellMesh, false);
-      if (entryHits.length === 0 || !entryHits[0].normal) {
-        blank();
-        beamPosAttr.needsUpdate = true;
-        beamColAttr.needsUpdate = true;
-        beamAlphaAttr.needsUpdate = true;
-        return;
-      }
-
-      const entry = entryHits[0].point;
-      normalMatrix.getNormalMatrix(shellMesh.matrixWorld);
-      const entryNormal = entryNormalVec
-        .copy(entryHits[0].normal!)
-        .applyMatrix3(normalMatrix)
-        .normalize();
-      // Snell's law needs the surface normal facing the incoming ray.
-      if (entryNormal.dot(lightDir) > 0) entryNormal.negate();
-
-      const BEAM_INK: [number, number, number] = [0.36, 0.34, 0.31];
-      push(tmpOrigin.x, tmpOrigin.y, tmpOrigin.z, BEAM_INK, 0);
-      push(entry.x, entry.y, entry.z, BEAM_INK, 0.34);
-
-      for (let i = 0; i < WAVELENGTHS; i++) {
-        const t = i / (WAVELENGTHS - 1);
-        const ior = iorAt(t);
-        const colour = spectrumAt(t);
-
-        const inside = refract3(lightDir, entryNormal, 1 / ior);
-        if (!inside) continue;
-
-        tmpDir.set(inside.x, inside.y, inside.z);
-        raycaster.set(
-          tmpOrigin.copy(entry).addScaledVector(tmpDir, 1e-4),
-          tmpDir,
-        );
-        const exitHits = raycaster.intersectObject(shellMesh, false);
-        if (exitHits.length === 0 || !exitHits[0].normal) continue;
-
-        const exit = exitHits[0].point;
-        const exitNormal = exitNormalVec
-          .copy(exitHits[0].normal!)
-          .applyMatrix3(normalMatrix)
-          .normalize();
-        if (dot3(exitNormal, inside) > 0) exitNormal.negate();
-
-        const out = refract3(inside, exitNormal, ior);
-        if (!out) continue;
-
-        push(entry.x, entry.y, entry.z, colour, 0.26);
-        push(exit.x, exit.y, exit.z, colour, 0.5);
-        push(exit.x, exit.y, exit.z, colour, 0.62);
-        push(
-          exit.x + out.x * FAN_REACH,
-          exit.y + out.y * FAN_REACH,
-          exit.z + out.z * FAN_REACH,
-          colour,
-          0,
-        );
-      }
-
-      blank();
-      beamPosAttr.needsUpdate = true;
-      beamColAttr.needsUpdate = true;
-      beamAlphaAttr.needsUpdate = true;
-    };
 
     // A backdrop inside the scene, because transmission samples the scene — not the
     // page. With a transparent clear colour there is nothing behind the glass to
@@ -364,7 +180,6 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
       root.position.x = current.px;
       root.position.y = current.py + (reduced ? 0 : Math.sin(t * 0.5) * 0.05);
 
-      traceBeam();
       renderer.render(scene, camera);
     };
 
@@ -451,7 +266,6 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
           authored.side = THREE.DoubleSide;
           authored.needsUpdate = true;
           mesh.renderOrder = 2;
-          shellMesh = mesh;
           return;
         }
 
@@ -484,7 +298,6 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
             side: THREE.DoubleSide,
           });
           mesh.renderOrder = 2;
-          shellMesh = mesh;
           for (const material of previous) material?.dispose();
           return;
         }
