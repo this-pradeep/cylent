@@ -210,6 +210,9 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
       // highlights to reflect rather than a soft grey wash.
       envTexture = pmrem.fromScene(new RoomEnvironment(), 0).texture;
       scene.environment = envTexture;
+      // Back to neutral. The brain uses the environment again, so raising this
+      // would brighten it too — the glass gets its extra reflection from its own
+      // envMapIntensity instead, which affects nothing else.
       scene.environmentIntensity = 0.85;
 
       const gltf = await new GLTFLoader().loadAsync(MODEL_URL);
@@ -251,22 +254,37 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
 
         if (isShell && authored) {
           if (authoredAsGlass) {
-            // Keep the veil as exported. Two repairs only.
+            // Promoted to a physical material so the box can carry a clearcoat: that
+            // is the layer that produces the crisp specular sheen a pane of glass
+            // has. A standard material has no such lobe, so the shell could only ever
+            // look like tinted haze.
             //
-            // depthWrite: a transparent shell that writes depth occludes whatever is
-            // inside it, which would hide the very thing it encloses.
-            authored.depthWrite = false;
-            authored.side = THREE.DoubleSide;
-            authored.envMapIntensity = 1;
-
-            // Metalness: glTF defaults metallicFactor to 1.0 when the exporter omits
-            // it, and a fully metallic surface cannot be transparent — metals have no
-            // transmission, so the veil turns into an opaque-looking grey haze with
-            // no specular. A see-through shell reading as metal is a defaulting
-            // artifact rather than a choice, so it is forced back to dielectric.
-            if (authored.metalness > 0.5) authored.metalness = 0;
-
-            authored.needsUpdate = true;
+            // The authored colour and opacity are carried across untouched; what
+            // changes is only how the surface responds to light.
+            const glass = new THREE.MeshPhysicalMaterial({
+              color: authored.color.clone(),
+              opacity: authored.opacity,
+              transparent: true,
+              // The export omitted roughnessFactor, so glTF defaulted it to 1.0 —
+              // fully rough, which cannot reflect anything sharply. Glass needs the
+              // opposite end of that scale.
+              roughness: 0.03,
+              // Likewise metallicFactor defaults to 1.0 when omitted, and metals do
+              // not transmit, so a see-through metal shell is a defaulting artifact.
+              metalness: 0,
+              ior: 1.5,
+              clearcoat: 1,
+              clearcoatRoughness: 0.02,
+              specularIntensity: 1,
+              // Reflections are the point here, so the box takes far more of the
+              // environment than anything else in the scene.
+              envMapIntensity: 2.6,
+              side: THREE.DoubleSide,
+              // A transparent shell that writes depth would occlude its own contents.
+              depthWrite: false,
+            });
+            mesh.material = glass;
+            for (const material of previous) material?.dispose();
             mesh.renderOrder = 2;
             return;
           }
@@ -292,8 +310,14 @@ export function HeroModelScene({ index, className }: HeroModelSceneProps) {
           return;
         }
 
-        // The contents keep their authored colour. Only the environment response is
-        // set, so they sit in the same light as everything else.
+        // The contents keep their authored material as exported — colour, roughness
+        // and metalness all left alone, so the brain keeps the sheen it was given in
+        // Blender. Only the environment response is set, and only so it sits in the
+        // same light as the rest of the scene.
+        //
+        // The difference between the two is made on the box's side, not by dulling
+        // this one: the shell gets a clearcoat and a much stronger environment, which
+        // is what separates a pane of glass from a glossy solid.
         for (const material of previous) {
           const std = material as THREE.MeshStandardMaterial;
           std.envMapIntensity = 0.9;
