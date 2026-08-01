@@ -77,9 +77,11 @@ export function Loader() {
 
     const applyProgress = (percent: number, instant = false) => {
       if (counterRef.current) {
-        counterRef.current.textContent = `${Math.round(percent)}%`;
+        counterRef.current.textContent = String(Math.round(percent));
       }
-      gsap.set(fill, { scaleX: percent / 100 });
+      gsap.set(fill, {
+        clipPath: `inset(0 ${100 - percent}% 0 0)`,
+      });
 
       const count = wordsRevealed(percent);
       for (let i = 0; i < count; i++) revealWord(i, instant);
@@ -107,7 +109,7 @@ export function Loader() {
     gsap.set(greetingEl, { yPercent: 110 });
     gsap.set(words, { yPercent: 115, opacity: 0 });
     gsap.set(progressRowRef.current, { opacity: 0 });
-    gsap.set(fill, { scaleX: 0, transformOrigin: "left center" });
+    gsap.set(fill, { clipPath: "inset(0 100% 0 0)" });
 
     const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
     intro
@@ -237,16 +239,34 @@ export function Loader() {
           ))}
         </span>
 
-        <div ref={progressRowRef} className="mt-[2.6em]">
-          <span className="block h-px w-full bg-ink/12">
-            <span ref={fillRef} className="block h-px w-full bg-ink" />
-          </span>
-          <div className="mt-3 flex justify-between text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-ink-muted">
-            <span>Loading</span>
-            <span ref={counterRef} className="tabular-nums">
-              0%
+        <div ref={progressRowRef} className="mt-[2.4rem]">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[0.6875rem] font-medium uppercase tracking-[0.2em] text-ink-muted">
+              Loading
+            </span>
+            <span className="font-semibold leading-none tracking-[-0.03em] text-ink">
+              <span
+                ref={counterRef}
+                className="text-[clamp(1.75rem,3.6vw,3.25rem)] tabular-nums"
+              >
+                0
+              </span>
+              <span className="ml-[0.06em] text-[clamp(0.85rem,1.7vw,1.5rem)] text-ink-muted">
+                %
+              </span>
             </span>
           </div>
+
+          {/* The fill is a full-width chromatic bar revealed by an inset clip rather
+              than a scaled one: scaleX would compress the gradient, so at 10% you'd
+              see the whole spectrum squeezed into a sliver. Clipping keeps the colour
+              ramp true at every value, and neither property triggers layout. */}
+          <span className="mt-3 block h-[2px] w-full overflow-hidden rounded-full bg-ink/10">
+            <span
+              ref={fillRef}
+              className="block h-full w-full rounded-full bg-[linear-gradient(90deg,#ff5ca8,#ffc76e,#8cffd6,#4ed6e8,#8b7bff,#ff8cf0)]"
+            />
+          </span>
         </div>
       </div>
     </div>
