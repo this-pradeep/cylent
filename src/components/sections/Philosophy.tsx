@@ -46,6 +46,7 @@ export function Philosophy() {
   return (
     <section
       ref={sectionRef}
+      id="about"
       className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-surface px-6 py-24"
     >
       <div className="relative flex w-full max-w-3xl items-center justify-center">

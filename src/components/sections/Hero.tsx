@@ -24,14 +24,14 @@ import { onLoaderReady } from "@/lib/motion/loader-ready";
 const ROTATOR_ITEMS = [
   { label: "Websites", Icon: WebIcon },
   { label: "Videos", Icon: VideoIcon },
-  { label: "Brands", Icon: GraphicsIcon },
+  { label: "Designs", Icon: GraphicsIcon },
 ];
 
 // The rotating word lives inside the h1, so the heading's accessible name would
 // otherwise change on every cycle and be re-announced. The visual headline is
 // aria-hidden; this is the stable name assistive tech reads instead.
 const HEADLINE_LABEL =
-  "Websites, videos and brands worth remembering. Three disciplines. One studio. No hand-offs.";
+  "Websites, videos and designs worth remembering. Three disciplines. One studio. No hand-offs.";
 
 const ETHOS = ["Imagine", "Build", "Inspire"];
 
@@ -250,9 +250,11 @@ export function Hero() {
                 </span>
                 <span
                   data-hero-line
-                  className="mb-[-0.14em] block overflow-hidden pb-[0.14em]"
+                  className="mb-[-0.14em] block  pb-[0.14em]"
                 >
-                  <span className="block"> worth remembering.</span>
+                  <span className="block whitespace-nowrap">
+                    Worth Remembering.
+                  </span>
                 </span>
               </span>
             </h1>
@@ -261,7 +263,7 @@ export function Hero() {
               data-hero-deck
               className="mt-[0.6em] text-[clamp(1.0625rem,2.1vw,1.75rem)] font-semibold leading-[1.2] tracking-[-0.02em] text-ink"
             >
-              Three disciplines. One studio. No hand-offs.
+              Three disciplines. One studio. Great experience.
             </p>
           </div>
 
