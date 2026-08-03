@@ -3,31 +3,9 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { scrollToId, scrollToPillar } from "@/lib/motion/scroll-to";
 import { getCondenseProgress } from "@/lib/motion/nav-scroll";
 import { useMagneticHover } from "@/lib/motion/useMagneticHover";
-
-type NavLink = {
-  label: string;
-  id: string;
-  /** Pillar panels live inside a pinned horizontal track and need the mapped scroll. */
-  pillar?: boolean;
-};
-
-const NAV_LINKS: NavLink[] = [
-  { label: "About", id: "about" },
-  { label: "Web", id: "web", pillar: true },
-  { label: "Videos", id: "video", pillar: true },
-  { label: "Design", id: "graphics", pillar: true },
-];
-
-function goTo(link: NavLink) {
-  if (link.pillar) {
-    scrollToPillar(link.id);
-    return;
-  }
-  scrollToId(link.id);
-}
+import { CONTACT_LINK, NAV_LINKS, goTo } from "@/lib/site/nav-links";
 
 export function Nav() {
   const navRef = useRef<HTMLElement>(null);
@@ -165,7 +143,7 @@ export function Nav() {
         <button
           ref={contactRef}
           type="button"
-          onClick={() => scrollToId("cta")}
+          onClick={() => goTo(CONTACT_LINK)}
           className="hidden shrink-0 items-center rounded-full border border-ink/10 bg-surface px-7 text-[0.95rem] font-semibold text-ink shadow-[0_8px_30px_rgba(20,18,15,0.10)] transition-colors hover:bg-ink/5 md:inline-flex"
         >
           Contact
@@ -198,7 +176,7 @@ export function Nav() {
               type="button"
               onClick={() => {
                 setMobileOpen(false);
-                scrollToId("cta");
+                goTo(CONTACT_LINK);
               }}
               className="mt-1 w-full rounded-full border border-ink/10 bg-surface px-5 py-3 text-sm font-semibold text-ink"
             >

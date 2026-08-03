@@ -216,6 +216,119 @@ body {
   }
 }
 
+/* Footer — the circular button.
+   No transform transition on .cbtn itself: useMagneticHover writes x/y there every frame,
+   and a transition on top of that smooths each write and makes the pull feel like it is
+   dragging. The three animations sit on three different elements on purpose — transform on
+   the anchor, rotation on the ring child, the hand-off on the arrow grandchildren. */
+.cbtn {
+  will-change: transform;
+}
+
+@keyframes ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ring-spin {
+  animation: ring-spin 18s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+.cbtn-core {
+  transition: background-color 0.45s ease;
+}
+
+.cbtn-arrow {
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.45s ease;
+}
+
+/* The second arrow waits off-centre and arrives as the first one leaves. */
+.cbtn-arrow-two {
+  transform: translate(-140%, 140%);
+}
+
+/* Index rows: the dotted leader resolves into a solid accent rule, left to right. */
+.fx-leader {
+  position: relative;
+}
+
+.fx-leader::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 1px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The statement swap: the biggest line on the page answers the row you are pointing at. */
+.fx-pitch,
+.fx-alt {
+  transition:
+    opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fx-alt {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cbtn:hover .ring-spin {
+    animation-duration: 8s;
+  }
+
+  .cbtn:hover .cbtn-core {
+    background-color: var(--color-accent);
+    color: var(--color-surface);
+  }
+
+  .cbtn:hover .cbtn-arrow-one {
+    transform: translate(140%, -140%);
+  }
+
+  .cbtn:hover .cbtn-arrow-two {
+    transform: translate(0, 0);
+  }
+
+  .fx-row:hover .fx-leader::after {
+    transform: scaleX(1);
+  }
+}
+
+/* Driven by React state, so it works for focus as well as hover — keyboard users get the
+   same answer pointer users do. */
+.fx-stage[data-swapped="true"] .fx-pitch {
+  opacity: 0;
+  transform: translateY(-14px);
+}
+
+.fx-stage[data-swapped="true"] .fx-alt {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ring-spin {
+    animation: none;
+  }
+
+  .cbtn-core,
+  .cbtn-arrow,
+  .fx-leader::after,
+  .fx-pitch,
+  .fx-alt {
+    transition: none;
+  }
+}
+
 /* Chromatic ring: same conic-gradient border used by the liquid glass cursor */
 .chromatic-ring {
   position: relative;
