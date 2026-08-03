@@ -8,7 +8,13 @@
   --color-panel: #edeae3;
   --color-ink: #14120f;
   --color-ink-muted: #5c584f;
-  --color-accent: #c9542c;
+  /* The one accent in the interface. Derived from the violet stop of the chromatic gradient
+     — rgb(139,123,255), the same family as the cursor lens and the loader bar — darkened in
+     OKLCH until it clears WCAG AA on the darkest light ground, so it is safe on all three:
+     5.14:1 on surface, 4.88:1 on paper, 4.50:1 on panel. The raw stop is 3.13:1 and cannot
+     carry text.
+     Rule: this is the only accent, everywhere. Buttons are always ink, never accent. */
+  --color-accent: #6a55d6;
   --font-sans: var(--font-manrope), sans-serif;
 }
 
@@ -285,8 +291,10 @@ body {
     animation-duration: 8s;
   }
 
+  /* Buttons stay monochrome. The core fills ink so the whole disc goes solid black with the
+     ring text and arrow in paper — the accent never fills a control. */
   .cbtn:hover .cbtn-core {
-    background-color: var(--color-accent);
+    background-color: var(--color-ink);
     color: var(--color-surface);
   }
 

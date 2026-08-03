@@ -306,6 +306,43 @@ Maintain consistency throughout the website.
 
 ---
 
+## Color Tokens
+
+Defined once in `src/app/globals.css` under `@theme`. Never hard-code these values.
+
+| Token | Value | Role |
+| --- | --- | --- |
+| `--color-surface` | `#faf9f7` | Page ground |
+| `--color-paper` | `#f5f3ef` | Cards sitting on the surface |
+| `--color-panel` | `#edeae3` | Panels inside cards |
+| `--color-ink` | `#14120f` | Text, and every button |
+| `--color-ink-muted` | `#5c584f` | Secondary text |
+| `--color-accent` | `#6a55d6` | The only accent |
+
+### The accent rule
+
+There is **one** accent, used everywhere an accent is needed. Do not introduce a second one,
+and do not vary it by section or by page. Scattered colour reads as a template; restraint is
+what reads premium.
+
+`#6a55d6` is the violet stop of the chromatic gradient — `rgb(139,123,255)`, the same family
+as the cursor lens and the loader bar — darkened in OKLCH until it clears WCAG AA against the
+*darkest* of the three light grounds, so it is safe on all of them: 5.14:1 on surface, 4.88:1
+on paper, 4.50:1 on panel. The raw stop is 3.13:1 and cannot carry text.
+
+If the accent ever changes, re-derive it the same way and check it against `--color-panel`,
+not just the surface. Any gradient stop used raw will fail contrast.
+
+### Buttons are always ink
+
+Buttons use `--color-ink`, never the accent. That keeps the accent to text, states and
+hairlines, so it never has to carry a large fill.
+
+The chromatic gradient itself stays reserved for the cursor lens, the loader and the
+chromatic ring. It is a material, not a palette.
+
+---
+
 # Imagery Principles
 
 Imagery should feel:
