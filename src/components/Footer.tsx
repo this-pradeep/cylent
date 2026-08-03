@@ -5,8 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CircularButton } from "@/components/CircularButton";
 import { FOOTER_LINKS, goTo, type NavLink } from "@/lib/site/nav-links";
-
-const EMAIL = "hello@cylentsolutions.com";
+import { CONTACT_CHANNELS, CONTACT_EMAIL, mailtoHref } from "@/lib/site/contact";
 
 /**
  * Hovering an index row rewrites the largest line on the page. Split into two spans rather
@@ -123,17 +122,40 @@ export function Footer() {
           </nav>
 
           <div className="flex flex-col items-start gap-[clamp(20px,2.8vw,28px)]">
-            <CircularButton label="Start a conversation" href={`mailto:${EMAIL}`} size={150} />
+            <CircularButton
+              label="Start a conversation"
+              href={mailtoHref(CONTACT_EMAIL, "New project")}
+              size={150}
+            />
             <p className="m-0 max-w-[30ch] text-[0.9rem] leading-[1.72] text-ink-muted">
               Tell us what it is for and who has to feel something. We will tell you whether we are
               the right studio for it.
             </p>
-            <a
-              href={`mailto:${EMAIL}`}
-              className="border-b border-ink/10 pb-0.5 font-mono text-[0.7rem] tracking-[0.08em] text-ink transition-colors hover:border-accent hover:text-accent"
-            >
-              {EMAIL}
-            </a>
+
+            {/* Three ways in, quieter than the button so it stays the primary action. */}
+            <div className="flex w-full max-w-[34ch] flex-col">
+              <p className="m-0 mb-1.5 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-ink-muted">
+                Or reach us direct
+              </p>
+              {CONTACT_CHANNELS.map((channel) => (
+                <a
+                  key={channel.label}
+                  href={channel.href}
+                  data-cursor
+                  {...(channel.external
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                  className="group flex items-baseline justify-between gap-4 border-b border-ink/[0.07] py-2.5"
+                >
+                  <span className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-ink-muted transition-colors group-hover:text-accent">
+                    {channel.label}
+                  </span>
+                  <span className="font-mono text-[0.72rem] tracking-[0.04em] text-ink transition-colors group-hover:text-accent">
+                    {channel.value}
+                  </span>
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </div>

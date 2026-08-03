@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import { LenisProvider } from "@/lib/motion/LenisProvider";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { SITE_URL } from "@/lib/site/contact";
 import { GlassDefsPool } from "@/components/GlassDefsPool";
 import { LiquidGlassCursor } from "@/components/LiquidGlassCursor";
 import { Loader } from "@/components/Loader";
@@ -11,6 +12,7 @@ import "./globals.css";
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-manrope" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Cylent Solutions",
   description: "We create digital experiences.",
 };
