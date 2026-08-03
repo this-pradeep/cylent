@@ -6,6 +6,22 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CircularButton } from "@/components/CircularButton";
 import { FOOTER_LINKS, goTo, type NavLink } from "@/lib/site/nav-links";
 import { CONTACT_CHANNELS, CONTACT_EMAIL, mailtoHref } from "@/lib/site/contact";
+import { MailIcon, PhoneIcon, WhatsAppIcon } from "@/components/icons/ContactIcons";
+
+/**
+ * Both rows share these tracks, so the statement lines up above the index and the circular
+ * button lines up above the contact block. The right column is a fixed width rather than a
+ * fraction: as a fraction its narrower content floated in the middle of the track and left
+ * dead space against the page edge.
+ */
+const ROW =
+  "grid gap-[clamp(28px,4vw,64px)] min-[860px]:grid-cols-[1fr_23rem] min-[860px]:items-start";
+
+const CHANNEL_ICONS = {
+  mail: MailIcon,
+  whatsapp: WhatsAppIcon,
+  phone: PhoneIcon,
+};
 
 /**
  * Hovering an index row rewrites the largest line on the page. Split into two spans rather
@@ -72,8 +88,11 @@ export function Footer() {
           Index
         </p>
 
+      {/* Row one and row two run on identical grid tracks, so the statement lines up with
+          the index and the circular button lines up with the contact block. */}
+      <div className={ROW}>
         <div
-          className="fx-stage relative min-h-[clamp(120px,20vw,230px)]"
+          className="fx-stage relative min-h-[clamp(110px,17vw,200px)]"
           data-swapped={blurb ? "true" : "false"}
         >
           <div className="overflow-hidden">
@@ -99,8 +118,15 @@ export function Footer() {
           </p>
         </div>
 
-        <div className="grid gap-[clamp(26px,5vw,72px)] pb-[clamp(22px,3vw,34px)] pt-[clamp(32px,4.5vw,58px)] min-[860px]:grid-cols-[1.15fr_0.85fr] min-[860px]:items-start">
-          <nav aria-label="Site index" className="flex flex-col">
+        <CircularButton
+          label="Start a conversation"
+          href={mailtoHref(CONTACT_EMAIL, "New project")}
+          size={150}
+        />
+      </div>
+
+      <div className={`${ROW} pb-[clamp(22px,3vw,34px)] pt-[clamp(30px,4.5vw,56px)]`}>
+        <nav aria-label="Site index" className="flex flex-col">
             {FOOTER_LINKS.map((link, index) => (
               <button
                 key={link.id}
@@ -124,45 +150,37 @@ export function Footer() {
             ))}
           </nav>
 
-          <div className="flex flex-col items-start gap-[clamp(30px,4vw,44px)]">
-            {/* Button and its sentence belong together; the channels are a separate block. */}
-            <div className="flex flex-col gap-[clamp(18px,2.4vw,24px)]">
-              <CircularButton
-                label="Start a conversation"
-                href={mailtoHref(CONTACT_EMAIL, "New project")}
-                size={150}
-              />
-              <p className="m-0 max-w-[30ch] text-[0.9rem] leading-[1.68] text-ink-muted">
-                Tell us what it is for and who has to feel something. We will tell you whether we
-                are the right studio for it.
-              </p>
-            </div>
+        <div className="flex flex-col gap-[clamp(24px,3vw,32px)]">
+          <p className="m-0 max-w-[32ch] text-[0.9rem] leading-[1.68] text-ink-muted">
+            Tell us what it is for and who has to feel something. We will tell you whether we are
+            the right studio for it.
+          </p>
 
-            {/* Quieter than the button, so the button stays the primary action. Labels are a
-                narrow fixed column so the values line up instead of being flung to the far
-                edge, which left a dead gap through the middle. */}
-            <div className="flex w-full max-w-92 flex-col">
-              <p className="m-0 mb-3 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-ink-muted">
-                Or reach us direct
-              </p>
-              {CONTACT_CHANNELS.map((channel) => (
+          {/* Dedicated control per channel. Each carries one thing — the address, or what
+              tapping it does — because pairing a label with a value read as a spreadsheet. */}
+          <div className="flex flex-col gap-2.5">
+            <p className="m-0 mb-0.5 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-ink-muted">
+              Or reach us direct
+            </p>
+            {CONTACT_CHANNELS.map((channel) => {
+              const Icon = CHANNEL_ICONS[channel.icon];
+              return (
                 <a
                   key={channel.label}
                   href={channel.href}
+                  aria-label={channel.label}
                   data-cursor
                   {...(channel.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                  className="group flex items-center gap-4 border-b border-ink/[0.07] py-3"
+                  className="group flex items-center gap-3.5 rounded-full border border-ink/15 px-5 py-3.5 transition-colors duration-300 hover:border-ink hover:bg-ink"
                 >
-                  <span className="w-19 shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-ink-muted transition-colors group-hover:text-accent">
-                    {channel.label}
-                  </span>
-                  <span className="flex-1 text-[0.95rem] font-medium tracking-[-0.01em] text-ink transition-colors group-hover:text-accent">
+                  <Icon className="h-[1.05rem] w-[1.05rem] shrink-0 text-ink-muted transition-colors duration-300 group-hover:text-surface" />
+                  <span className="flex-1 text-[clamp(1rem,1.3vw,1.15rem)] font-medium tracking-[-0.015em] text-ink transition-colors duration-300 group-hover:text-surface">
                     {channel.value}
                   </span>
                   <svg
                     viewBox="0 0 24 24"
                     aria-hidden="true"
-                    className="h-3.5 w-3.5 shrink-0 -translate-x-1.5 text-accent opacity-0 transition-[transform,opacity] duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:translate-x-0 group-hover:opacity-100"
+                    className="h-3.5 w-3.5 shrink-0 -translate-x-1.5 text-surface opacity-0 transition-[transform,opacity] duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:translate-x-0 group-hover:opacity-100"
                   >
                     <path
                       d="M7 17 L17 7 M9 7 H17 V15"
@@ -173,10 +191,11 @@ export function Footer() {
                     />
                   </svg>
                 </a>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
+      </div>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-x-7 gap-y-2.5 border-t border-ink/10 px-6 py-[clamp(16px,2vw,22px)] font-mono text-[0.6rem] uppercase tracking-[0.13em] text-ink-muted md:px-[6vw]">

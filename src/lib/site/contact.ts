@@ -44,10 +44,12 @@ export const CONTACT_EMAIL = "contact@cylent.in";
 export const CONTACT_PHONE = "+91 00000 00000";
 
 export type ContactChannel = {
+  /** Accessible name for the button. */
   label: string;
-  /** What the visitor reads. */
+  /** The actionable thing itself, shown on the button. */
   value: string;
   href: string;
+  icon: "mail" | "whatsapp" | "phone";
   /** Phone-based channels should open in a new tab; mail and tel should not. */
   external?: boolean;
 };
@@ -55,23 +57,32 @@ export type ContactChannel = {
 /**
  * Built as a list so a channel with no destination drops out instead of rendering a dead
  * link. Order is deliberate: email first, because it is the one we actually answer well.
+ *
+ * Each button shows one thing — the address, or what tapping it does. Pairing a label with
+ * a value made these read as a spreadsheet rather than as controls.
  */
-export const CONTACT_CHANNELS: ContactChannel[] = [
+const ALL_CHANNELS: ContactChannel[] = [
   {
-    label: "Email",
+    label: "Email us",
     value: CONTACT_EMAIL,
-    href: mailtoHref(CONTACT_EMAIL),
+    href: mailtoHref(CONTACT_EMAIL, "New project"),
+    icon: "mail",
   },
   {
-    // Not the number again — printing it on both rows read as filler.
-    label: "WhatsApp",
-    value: "Message us",
+    label: "Message us on WhatsApp",
+    value: "Message on WhatsApp",
     href: whatsappHref(CONTACT_PHONE, "Hi Cylent — we have a project in mind."),
+    icon: "whatsapp",
     external: true,
   },
   {
-    label: "Call",
+    label: "Call us",
     value: CONTACT_PHONE,
     href: telHref(CONTACT_PHONE),
+    icon: "phone",
   },
-].filter((channel) => channel.href !== "");
+];
+
+export const CONTACT_CHANNELS: ContactChannel[] = ALL_CHANNELS.filter(
+  (channel) => channel.href !== "",
+);
