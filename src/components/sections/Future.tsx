@@ -11,7 +11,9 @@ export function Future() {
     const copy = section?.querySelector("[data-future-copy]");
     if (!section || !copy) return;
 
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (prefersReducedMotion) {
       gsap.set(copy, { opacity: 1, scale: 1 });
       return;
@@ -30,7 +32,7 @@ export function Future() {
           start: "top 70%",
           toggleActions: "play none none reverse",
         },
-      }
+      },
     );
 
     return () => {
@@ -39,8 +41,14 @@ export function Future() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="flex min-h-[70vh] flex-col items-center justify-center bg-surface px-6 text-center">
-      <p data-future-copy className="max-w-2xl text-3xl font-medium text-ink md:text-4xl">
+    <section
+      ref={sectionRef}
+      className="flex min-h-[70vh] flex-col items-center justify-center bg-surface px-6 text-center"
+    >
+      <p
+        data-future-copy
+        className="max-w-5xl text-3xl font-medium text-ink md:text-6xl"
+      >
         What could we create for your brand?
       </p>
     </section>

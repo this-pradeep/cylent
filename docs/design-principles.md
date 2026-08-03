@@ -317,29 +317,49 @@ Defined once in `src/app/globals.css` under `@theme`. Never hard-code these valu
 | `--color-panel` | `#edeae3` | Panels inside cards |
 | `--color-ink` | `#14120f` | Text, and every button |
 | `--color-ink-muted` | `#5c584f` | Secondary text |
-| `--color-accent` | `#6a55d6` | The only accent |
+| `--gradient-accent` | `linear-gradient(100deg, #a93b9d, #6853d4, #08737f)` | The accent |
+| `--color-accent` | `#6853d4` | The gradient's middle stop, for where a ramp cannot go |
 
 ### The accent rule
 
-There is **one** accent, used everywhere an accent is needed. Do not introduce a second one,
-and do not vary it by section or by page. Scattered colour reads as a template; restraint is
-what reads premium.
+The accent is **one gradient**, used everywhere an accent is needed. Do not introduce a second
+one and do not vary it by section or page. Scattered colour reads as a template; the restraint
+is what reads premium.
 
-`#6a55d6` is the violet stop of the chromatic gradient — `rgb(139,123,255)`, the same family
-as the cursor lens and the loader bar — darkened in OKLCH until it clears WCAG AA against the
-*darkest* of the three light grounds, so it is safe on all of them: 5.14:1 on surface, 4.88:1
-on paper, 4.50:1 on panel. The raw stop is 3.13:1 and cannot carry text.
+Its three stops are magenta, violet and cyan taken from our own chromatic gradient — the same
+family as the cursor lens and the loader bar — each darkened in OKLCH against `--color-panel`,
+the darkest of the three light grounds. Every point along the ramp clears WCAG AA in both sRGB
+and OKLab interpolation, worst case 4.57:1.
 
-If the accent ever changes, re-derive it the same way and check it against `--color-panel`,
-not just the surface. Any gradient stop used raw will fail contrast.
+**Never use a gradient stop raw.** Straight off the chromatic gradient they bottom out at
+1.00:1 against panel — the mint and gold are effectively invisible on light. If the accent
+ever changes, re-derive every stop the same way and re-check the whole ramp, not just the
+endpoints: interpolation can dip below both of them.
+
+### Where the gradient goes, and where it does not
+
+Apply it with the `.text-gradient` utility, or as a `background` on a rule.
+
+Use the gradient for:
+
+- Display-scale type
+- Hairlines and rules
+
+Use the solid `--color-accent` for:
+
+- Small text. Across a handful of 9px characters a ramp reads as an arbitrary colour, not as
+  a gradient.
+- Anything that transitions colour. `background-image` does not interpolate, so a colour
+  cannot animate into a gradient. Where a smooth hover matters, stack a gradient copy over
+  the solid one and cross-fade opacity — see the footer index labels.
 
 ### Buttons are always ink
 
-Buttons use `--color-ink`, never the accent. That keeps the accent to text, states and
-hairlines, so it never has to carry a large fill.
+Buttons use `--color-ink`. Never the accent, never the gradient. That keeps the accent to
+type, states and hairlines so it never has to carry a large fill.
 
-The chromatic gradient itself stays reserved for the cursor lens, the loader and the
-chromatic ring. It is a material, not a palette.
+The raw chromatic gradient stays reserved for the cursor lens, the loader and the chromatic
+ring. Undarkened, it is a material, not a palette.
 
 ---
 

@@ -8,18 +8,46 @@
   --color-panel: #edeae3;
   --color-ink: #14120f;
   --color-ink-muted: #5c584f;
-  /* The one accent in the interface. Derived from the violet stop of the chromatic gradient
-     — rgb(139,123,255), the same family as the cursor lens and the loader bar — darkened in
-     OKLCH until it clears WCAG AA on the darkest light ground, so it is safe on all three:
-     5.14:1 on surface, 4.88:1 on paper, 4.50:1 on panel. The raw stop is 3.13:1 and cannot
-     carry text.
-     Rule: this is the only accent, everywhere. Buttons are always ink, never accent. */
-  --color-accent: #6a55d6;
+  /* The accent is the gradient below. This solid is its middle stop, used wherever a gradient
+     cannot go: text too small to show a ramp, and colour transitions (background-image does
+     not interpolate, so a hover cannot fade to a gradient without cross-fading two layers).
+     5.28:1 on surface, 5.02:1 on paper, 4.63:1 on panel. */
+  --color-accent: #6853d4;
   --font-sans: var(--font-manrope), sans-serif;
+}
+
+:root {
+  /* The accent, as a gradient. Three stops from our own chromatic gradient — magenta, violet
+     and cyan — each darkened in OKLCH against --color-panel, the darkest light ground. Every
+     point along the ramp clears WCAG AA in both sRGB and OKLab interpolation (worst case
+     4.57:1), so it can legally carry text. Used raw, those stops bottom out at 1.00:1.
+     Buttons never use this. It is for display type and hairlines. */
+  --gradient-accent: linear-gradient(100deg, #a93b9d 0%, #6853d4 52%, #08737f 100%);
 }
 
 html {
   scroll-behavior: auto;
+}
+
+/*
+ * Gradient text. Deliberately not applied to small type: across a handful of 9px characters a
+ * ramp reads as an arbitrary colour rather than as a gradient, so small text keeps the solid
+ * --color-accent instead.
+ *
+ * The solid colour is the fallback, and only becomes transparent where the clip is actually
+ * supported — otherwise unsupported browsers render invisible text.
+ */
+.text-gradient {
+  color: var(--color-accent);
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .text-gradient {
+    background-image: var(--gradient-accent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 }
 
 body {
@@ -267,7 +295,9 @@ body {
   position: absolute;
   inset: auto 0 -1px 0;
   height: 1px;
-  background: var(--color-accent);
+  /* The rule sweeps the full gradient as it fills — a hairline is the one place a ramp costs
+     nothing and reads instantly. */
+  background: var(--gradient-accent);
   transform: scaleX(0);
   transform-origin: 0 50%;
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);

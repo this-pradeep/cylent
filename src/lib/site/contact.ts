@@ -29,7 +29,9 @@ export function whatsappHref(phone: string, message = ""): string {
 export function mailtoHref(email: string, subject = ""): string {
   if (!email) return "";
   const trimmed = subject.trim();
-  return trimmed ? `mailto:${email}?subject=${encodeURIComponent(trimmed)}` : `mailto:${email}`;
+  return trimmed
+    ? `mailto:${email}?subject=${encodeURIComponent(trimmed)}`
+    : `mailto:${email}`;
 }
 
 export const SITE_DOMAIN = "cylent.in";
@@ -37,11 +39,8 @@ export const SITE_URL = `https://${SITE_DOMAIN}`;
 
 export const CONTACT_EMAIL = "contact@cylent.in";
 
-/**
- * PLACEHOLDER — not a real number, and deliberately unreachable so nothing here can dial a
- * stranger. Replace with the studio line; every channel below derives from it.
- */
-export const CONTACT_PHONE = "+91 00000 00000";
+/** The studio line. Every phone-based channel below derives from it. */
+export const CONTACT_PHONE = "+91 7470407696";
 
 export type ContactChannel = {
   /** Accessible name for the button. */
