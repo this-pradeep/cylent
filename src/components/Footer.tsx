@@ -27,7 +27,7 @@ const SOCIALS = [
 ];
 
 export function Footer() {
-  const pitchRef = useRef<HTMLParagraphElement>(null);
+  const pitchRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<NavLink | null>(null);
 
   useEffect(() => {
@@ -77,12 +77,15 @@ export function Footer() {
           data-swapped={blurb ? "true" : "false"}
         >
           <div className="overflow-hidden">
-            <p
-              ref={pitchRef}
-              className="fx-pitch m-0 max-w-[15ch] text-[clamp(2rem,7.4vw,5.6rem)] font-semibold leading-[0.98] tracking-[-0.045em] text-ink"
-            >
-              Let&apos;s build something <span className="text-ink-muted">worth remembering.</span>
-            </p>
+            {/* The entrance tween owns this wrapper; the hover swap owns the <p> inside it.
+                On one element GSAP's inline opacity would beat the swap's CSS rule and the
+                old heading would never leave — which is exactly what it did. */}
+            <div ref={pitchRef}>
+              <p className="fx-pitch m-0 max-w-[15ch] text-[clamp(2rem,7.4vw,5.6rem)] font-semibold leading-[0.98] tracking-[-0.045em] text-ink">
+                Let&apos;s build something{" "}
+                <span className="text-ink-muted">worth remembering.</span>
+              </p>
+            </div>
           </div>
           <p
             aria-hidden="true"
@@ -121,20 +124,25 @@ export function Footer() {
             ))}
           </nav>
 
-          <div className="flex flex-col items-start gap-[clamp(20px,2.8vw,28px)]">
-            <CircularButton
-              label="Start a conversation"
-              href={mailtoHref(CONTACT_EMAIL, "New project")}
-              size={150}
-            />
-            <p className="m-0 max-w-[30ch] text-[0.9rem] leading-[1.72] text-ink-muted">
-              Tell us what it is for and who has to feel something. We will tell you whether we are
-              the right studio for it.
-            </p>
+          <div className="flex flex-col items-start gap-[clamp(30px,4vw,44px)]">
+            {/* Button and its sentence belong together; the channels are a separate block. */}
+            <div className="flex flex-col gap-[clamp(18px,2.4vw,24px)]">
+              <CircularButton
+                label="Start a conversation"
+                href={mailtoHref(CONTACT_EMAIL, "New project")}
+                size={150}
+              />
+              <p className="m-0 max-w-[30ch] text-[0.9rem] leading-[1.68] text-ink-muted">
+                Tell us what it is for and who has to feel something. We will tell you whether we
+                are the right studio for it.
+              </p>
+            </div>
 
-            {/* Three ways in, quieter than the button so it stays the primary action. */}
-            <div className="flex w-full max-w-[34ch] flex-col">
-              <p className="m-0 mb-1.5 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-ink-muted">
+            {/* Quieter than the button, so the button stays the primary action. Labels are a
+                narrow fixed column so the values line up instead of being flung to the far
+                edge, which left a dead gap through the middle. */}
+            <div className="flex w-full max-w-92 flex-col">
+              <p className="m-0 mb-3 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-ink-muted">
                 Or reach us direct
               </p>
               {CONTACT_CHANNELS.map((channel) => (
@@ -142,17 +150,28 @@ export function Footer() {
                   key={channel.label}
                   href={channel.href}
                   data-cursor
-                  {...(channel.external
-                    ? { target: "_blank", rel: "noopener noreferrer" }
-                    : {})}
-                  className="group flex items-baseline justify-between gap-4 border-b border-ink/[0.07] py-2.5"
+                  {...(channel.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  className="group flex items-center gap-4 border-b border-ink/[0.07] py-3"
                 >
-                  <span className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-ink-muted transition-colors group-hover:text-accent">
+                  <span className="w-19 shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.16em] text-ink-muted transition-colors group-hover:text-accent">
                     {channel.label}
                   </span>
-                  <span className="font-mono text-[0.72rem] tracking-[0.04em] text-ink transition-colors group-hover:text-accent">
+                  <span className="flex-1 text-[0.95rem] font-medium tracking-[-0.01em] text-ink transition-colors group-hover:text-accent">
                     {channel.value}
                   </span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    className="h-3.5 w-3.5 shrink-0 -translate-x-1.5 text-accent opacity-0 transition-[transform,opacity] duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:translate-x-0 group-hover:opacity-100"
+                  >
+                    <path
+                      d="M7 17 L17 7 M9 7 H17 V15"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.8}
+                      strokeLinecap="square"
+                    />
+                  </svg>
                 </a>
               ))}
             </div>

@@ -63,8 +63,9 @@ export const CONTACT_CHANNELS: ContactChannel[] = [
     href: mailtoHref(CONTACT_EMAIL),
   },
   {
+    // Not the number again — printing it on both rows read as filler.
     label: "WhatsApp",
-    value: CONTACT_PHONE,
+    value: "Message us",
     href: whatsappHref(CONTACT_PHONE, "Hi Cylent — we have a project in mind."),
     external: true,
   },

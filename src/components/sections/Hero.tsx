@@ -275,7 +275,7 @@ export function Hero() {
 
           <p
             data-hero-support
-            className="mt-5 text-[clamp(0.8125rem,1.15vw,1rem)] leading-[1.6] tracking-[-0.005em] text-ink-muted md:mt-0 md:w-[24%] md:max-w-[28ch] md:text-right"
+            className="mt-5 text-[clamp(0.8125rem,1.15vw,1rem)] leading-[1.6] tracking-[-0.005em] md:mt-0 md:w-[24%] md:max-w-[28ch] md:text-right"
           >
             Cylent is a small studio building websites, video, and visual
             identity for brands who care how they&rsquo;re experienced.
