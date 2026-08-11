@@ -1380,84 +1380,59 @@
           <button class="category-filter-btn active" data-category="all">
             <span>All Work</span>
           </button>
-          <button class="category-filter-btn" data-category="it-software">
-            <span>Software Development</span>
+          <button class="category-filter-btn" data-category="data-ai">
+            <span>Data &amp; AI</span>
           </button>
         </div>
 
         <!-- Projects Grid -->
         <div id="projects-grid" class="grid md:grid-cols-2 gap-8">
-          <!-- Project 1 — Featured Full-Width -->
+          <!-- Project 1 — Zen Data Shastra (Featured Full-Width) -->
           <article
             class="project-item md:col-span-2 group cursor-pointer"
-            data-category="it-software"
+            data-category="data-ai"
           >
-            <!-- Image area: featured, wider aspect -->
-            <div
-              class="proj-img mb-5 aspect-[16/7]"
-              style="
-                background: linear-gradient(
-                  135deg,
-                  #0b1220 0%,
-                  #0f1e35 55%,
-                  #0b1628 100%
-                );
-              "
+            <!-- Image area: live site preview -->
+            <a
+              href="https://zendatashastra.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Visit the Zen Data Shastra website"
+              class="proj-img proj-shot block mb-5 aspect-[16/7]"
             >
-              <!-- Subtle grid -->
-              <div
-                class="absolute inset-0"
-                style="
-                  background-image:
-                    linear-gradient(
-                      rgba(6, 182, 212, 0.05) 1px,
-                      transparent 1px
-                    ),
-                    linear-gradient(
-                      90deg,
-                      rgba(6, 182, 212, 0.05) 1px,
-                      transparent 1px
-                    );
-                  background-size: 40px 40px;
-                "
-              ></div>
-              <!-- Glow -->
-              <div
-                class="absolute -bottom-20 right-0 w-[500px] h-[500px] pointer-events-none"
-                style="
-                  background: radial-gradient(
-                    circle,
-                    rgba(6, 182, 212, 0.1) 0%,
-                    transparent 65%
-                  );
-                "
-              ></div>
-              <div
-                class="absolute top-0 left-0 w-[300px] h-[300px] pointer-events-none"
-                style="
-                  background: radial-gradient(
-                    circle,
-                    rgba(139, 92, 246, 0.07) 0%,
-                    transparent 70%
-                  );
-                "
-              ></div>
+              <img
+                src="./src/img/zendatashastra.jpg"
+                alt="Zen Data Shastra website shown on desktop, laptop, tablet and mobile"
+                loading="lazy"
+                decoding="async"
+                width="1600"
+                height="777"
+                class="absolute inset-0 w-full h-full object-contain"
+              />
               <!-- Number -->
               <div
                 class="absolute bottom-6 left-8 proj-num"
-                style="font-size: 8rem"
+                style="font-size: 8rem; color: rgba(11, 27, 58, 0.06)"
               >
                 01
               </div>
               <!-- Category badge -->
               <div class="absolute top-6 left-8">
-                <span class="proj-cat">Software Dev</span>
+                <span
+                  class="proj-cat"
+                  style="
+                    color: #ffffff;
+                    background: rgba(11, 27, 58, 0.9);
+                    border-color: rgba(11, 27, 58, 0.9);
+                  "
+                  >Data &amp; AI</span
+                >
               </div>
               <!-- Year badge -->
               <div
-                class="absolute top-6 right-6 font-mono text-xs text-white/30 tracking-widest"
+                class="absolute top-6 right-6 font-mono text-xs text-gray-400 tracking-widest"
               >
-                2025
+                2026
               </div>
               <!-- Overlay -->
               <div class="proj-overlay">
@@ -1484,37 +1459,42 @@
                   View Project
                 </div>
               </div>
-            </div>
+            </a>
             <div class="flex items-start justify-between gap-4">
               <div class="space-y-2">
                 <h3
                   class="text-2xl md:text-3xl font-bold group-hover:translate-x-1.5 transition-transform duration-300 text-gray-900 dark:text-white"
                 >
-                  E-Commerce Platform
+                  Zen Data Shastra
                 </h3>
                 <p class="text-gray-500 dark:text-gray-400">
-                  Full-Stack Web Application
+                  AI, ML &amp; Analytics Consulting — Marketing Website
                 </p>
                 <div class="flex flex-wrap gap-2 pt-1">
                   <span
                     class="tech-pill"
                     style="font-size: 11px; padding: 4px 12px"
-                    >React</span
+                    >Web Design</span
                   >
                   <span
                     class="tech-pill"
                     style="font-size: 11px; padding: 4px 12px"
-                    >Node.js</span
+                    >Web Development</span
                   >
                   <span
                     class="tech-pill"
                     style="font-size: 11px; padding: 4px 12px"
-                    >PostgreSQL</span
+                    >Responsive UI</span
                   >
                 </div>
               </div>
-              <a href="#work" class="proj-meta-link flex-shrink-0 mt-1">
-                Case Study
+              <a
+                href="https://zendatashastra.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="proj-meta-link flex-shrink-0 mt-1"
+              >
+                Visit Site
                 <svg
                   class="w-3.5 h-3.5"
                   fill="none"
@@ -1529,124 +1509,6 @@
                   />
                 </svg>
               </a>
-            </div>
-          </article>
-
-          <!-- Project 2 -->
-          <article
-            class="project-item group cursor-pointer"
-            data-category="it-software"
-          >
-            <div
-              class="proj-img mb-5 aspect-[4/3]"
-              style="
-                background: linear-gradient(
-                  135deg,
-                  #0b1a14 0%,
-                  #0d1f1a 60%,
-                  #0b1a12 100%
-                );
-              "
-            >
-              <div
-                class="absolute inset-0"
-                style="
-                  background-image:
-                    linear-gradient(
-                      rgba(40, 200, 64, 0.04) 1px,
-                      transparent 1px
-                    ),
-                    linear-gradient(
-                      90deg,
-                      rgba(40, 200, 64, 0.04) 1px,
-                      transparent 1px
-                    );
-                  background-size: 36px 36px;
-                "
-              ></div>
-              <div
-                class="absolute bottom-0 right-0 w-72 h-72 pointer-events-none"
-                style="
-                  background: radial-gradient(
-                    circle,
-                    rgba(40, 200, 64, 0.09) 0%,
-                    transparent 65%
-                  );
-                "
-              ></div>
-              <div
-                class="absolute bottom-5 left-6 proj-num"
-                style="font-size: 6rem"
-              >
-                02
-              </div>
-              <div class="absolute top-5 left-6">
-                <span
-                  class="proj-cat"
-                  style="
-                    color: #28c840;
-                    background: rgba(40, 200, 64, 0.1);
-                    border-color: rgba(40, 200, 64, 0.3);
-                  "
-                  >SaaS Platform</span
-                >
-              </div>
-              <div
-                class="absolute top-5 right-5 font-mono text-xs text-white/25 tracking-widest"
-              >
-                2025
-              </div>
-              <div class="proj-overlay">
-                <div class="proj-view-btn">
-                  <svg
-                    class="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                  View Project
-                </div>
-              </div>
-            </div>
-            <div class="space-y-2">
-              <h3
-                class="text-2xl font-bold group-hover:translate-x-1.5 transition-transform duration-300 text-gray-900 dark:text-white"
-              >
-                Cloud Analytics Dashboard
-              </h3>
-              <p class="text-gray-500 dark:text-gray-400">
-                SaaS Management Platform
-              </p>
-              <div class="flex gap-2 pt-1">
-                <span
-                  class="tech-pill"
-                  style="font-size: 11px; padding: 4px 12px"
-                  >Vue.js</span
-                >
-                <span
-                  class="tech-pill"
-                  style="font-size: 11px; padding: 4px 12px"
-                  >AWS</span
-                >
-                <span
-                  class="tech-pill"
-                  style="font-size: 11px; padding: 4px 12px"
-                  >Docker</span
-                >
-              </div>
             </div>
           </article>
         </div>
