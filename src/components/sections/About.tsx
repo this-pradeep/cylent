@@ -226,10 +226,16 @@ export function About() {
             </ul>
 
             {/* Deliberately off the index column the rows are set to. The grid holds for the
-                four; the thing they become is what breaks it. */}
+                four; the thing they become is what breaks it.
+
+                It fills the block the four crafts vacated rather than sitting on the last
+                row's line — at this size its baseline could never have matched theirs, and
+                occupying the whole space is the point being made. The measure is tight
+                enough to break it over two lines, which is what gives it the weight to
+                answer the numeral across the spread. */}
             <p
               data-about-resolve
-              className="text-gradient absolute left-0 top-0 m-0 motion-reduce:static motion-reduce:mt-10 text-[clamp(1.8rem,4.2vw,3.2rem)] font-semibold leading-[1.1] tracking-[-0.04em] will-change-transform"
+              className="text-gradient absolute inset-0 m-0 flex max-w-[11ch] flex-col justify-center text-[clamp(2.5rem,6.8vw,5.25rem)] font-semibold leading-[0.95] tracking-[-0.045em] will-change-transform motion-reduce:static motion-reduce:mt-12 motion-reduce:block"
             >
               One experience.
             </p>
