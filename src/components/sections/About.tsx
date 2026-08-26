@@ -2,43 +2,29 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { ABSORB_END, consumeWindow, remainingAt } from "@/lib/motion/converge";
+import { FIELD_COUNT, fieldPosition } from "@/lib/motion/overlap";
 import { STUDIO_LOCATION } from "@/lib/site/studio";
 
 /**
- * Chapter 3 — Our Philosophy. Most companies treat development, video, photography and
- * design as four separate services; we treat them as one experience. The section performs
- * that argument rather than asserting it: each craft is consumed into the one above it and
- * the counter falls 04 → 01, so "Four crafts. One studio." is watched rather than read.
+ * Chapter 3 — Our Philosophy. The hero already commits to three disciplines and one studio,
+ * so this section takes the part the hero leaves unsaid: *why* they are one. Three fields —
+ * the site, the film, the identity — drift together until they intersect, and the payoff
+ * sits where all three are true at once. The studio's position is made spatial rather than
+ * claimed.
  *
- * The scrub hands the sequence to the visitor — per the motion system, scrolling should
- * reveal a story rather than expose content. Held in place with CSS `sticky` rather than a
- * GSAP pin: Pillars pins a full-screen track immediately after this section, and a second
- * pin competing across that boundary on every refresh is a known source of jitter.
+ * Held in place with CSS `sticky` rather than a GSAP pin: Pillars pins a full-screen track
+ * immediately after, and a second pin competing across that boundary on every refresh is a
+ * known source of jitter.
+ *
+ * Arrival and the gather are two triggers on purpose. A held section's scrub does not begin
+ * until its top reaches the top of the viewport — a full screen after the content is already
+ * visible — so running the reveal off the scrub leaves the section blank the whole way in.
  */
-const CRAFTS = ["Web Development", "Videography", "Graphic Design"] as const;
-
-const pad = (value: number) => String(value).padStart(2, "0");
-
-/**
- * Where a line of text actually sits, in viewport px.
- *
- * An empty inline-block of zero height takes its own bottom edge as its baseline, so it
- * aligns to the baseline of the text it is dropped into. There is no DOM API for this and
- * deriving it from font-size means hard-coding a metric per typeface.
- *
- * Prepended, not appended: the answer wraps onto two lines and it is the first baseline
- * that has to match the row being replaced.
- */
-function baselineOf(element: HTMLElement): number {
-  const probe = document.createElement("span");
-  probe.setAttribute("aria-hidden", "true");
-  probe.style.cssText = "display:inline-block;width:0;height:0;overflow:hidden";
-  element.prepend(probe);
-  const baseline = probe.getBoundingClientRect().bottom;
-  probe.remove();
-  return baseline;
-}
+const FIELDS = [
+  { label: "Websites", tint: "rgba(169, 59, 157, 0.5)" },
+  { label: "Videos", tint: "rgba(104, 83, 212, 0.5)" },
+  { label: "Designs", tint: "rgba(8, 115, 127, 0.5)" },
+] as const;
 
 export function About() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -47,19 +33,17 @@ export function About() {
     const section = sectionRef.current;
     if (!section) return;
 
-    const query = <T extends HTMLElement>(selector: string) =>
-      section.querySelector<T>(selector);
+    const query = <T extends HTMLElement>(selector: string) => section.querySelector<T>(selector);
     const queryAll = <T extends HTMLElement>(selector: string) =>
       Array.from(section.querySelectorAll<T>(selector));
 
-    const masthead = queryAll("[data-about-lead]");
+    const lead = queryAll("[data-about-lead]");
     const rule = query("[data-about-rule]");
-    const rows = queryAll("[data-about-craft]");
-    const count = query("[data-about-count]");
-    const noun = query("[data-about-noun]");
-    const resolve = query("[data-about-resolve]");
-    const firstWord = query("[data-about-word]");
-    if (!rule || !count || !noun || !resolve || !firstWord || rows.length === 0) return;
+    const fields = queryAll("[data-about-field]");
+    const labels = queryAll("[data-about-label]");
+    const setup = query("[data-about-setup]");
+    const payoff = query("[data-about-payoff]");
+    if (!rule || !setup || !payoff || fields.length !== FIELD_COUNT) return;
 
     const mm = gsap.matchMedia();
 
@@ -72,57 +56,29 @@ export function About() {
       (context) => {
         const { held, still } = context.conditions as Record<string, boolean>;
 
-        // With motion removed the absorption has nothing to show, so the section states its
-        // conclusion outright and keeps every craft on the page.
+        const place = (progress: number) => {
+          fields.forEach((field, index) => {
+            const { x, y } = fieldPosition(index, progress);
+            // The -50 is the centring. It has to live here rather than in a Tailwind
+            // translate utility, because GSAP writes `transform` wholesale and would
+            // clobber a class-based translate the first time it placed a field.
+            gsap.set(field, { xPercent: -50 + x, yPercent: -50 + y });
+          });
+        };
+
+        // With motion removed the drift has nothing to show, so the fields are placed where
+        // they end up and the section states its conclusion outright.
         if (still) {
-          gsap.set([...masthead, ...rows, resolve], { clipPath: "none", y: 0, opacity: 1 });
+          gsap.set([...lead, setup, payoff], { clipPath: "none", y: 0, opacity: 1 });
           gsap.set(rule, { scaleX: 1 });
-          count.textContent = pad(1);
-          noun.textContent = "studio";
+          gsap.set(fields, { opacity: 1, scale: 1 });
+          gsap.set(labels, { opacity: 0 });
+          place(1);
           return;
         }
 
-        // Measured rather than assumed: the rows are clamp-sized, so their pitch changes
-        // with the viewport and a hard-coded step would leave a line short of the one it is
-        // being absorbed into. Read as a function so `invalidateOnRefresh` picks up the
-        // remeasure after a resize or a late font swap.
-        const rowPitch = () => (rows.length > 1 ? rows[1].offsetTop - rows[0].offsetTop : 0);
+        place(0);
 
-        /**
-         * The answer has to land on the line the absorption ended on. It is roughly twice
-         * the size of the craft it replaces, so their box tops are nowhere near each other
-         * and only the baselines can be matched. Both sides are measured with their
-         * transforms cleared, since a rect includes them and a refresh can land mid-scroll
-         * with the row part-way through being absorbed; the scrub re-renders straight after.
-         */
-        const alignResolve = () => {
-          gsap.set([resolve, rows[0]], { y: 0 });
-          resolve.style.top = "0px";
-          resolve.style.top = `${baselineOf(firstWord) - baselineOf(resolve)}px`;
-        };
-
-        alignResolve();
-
-        let shown = -1;
-        const tick = (progress: number) => {
-          const remaining = remainingAt(progress, rows.length);
-          if (remaining === shown) return;
-          shown = remaining;
-          count.textContent = pad(remaining);
-          noun.textContent = remaining === 1 ? "studio" : "crafts";
-          // The numeral drops into place as it changes, so the tick is felt, not just read.
-          gsap.fromTo(
-            count,
-            { yPercent: -9, opacity: 0.35 },
-            { yPercent: 0, opacity: 1, duration: 0.4, ease: "power3.out", overwrite: true },
-          );
-        };
-
-        // Arrival and absorption are two triggers on purpose. Held sections do not begin
-        // their scrub until the section's top reaches the top of the viewport, which is a
-        // full screen of scrolling after the content is first visible — running the reveal
-        // off that scrub left the section sitting blank the whole way in. The reveal plays
-        // on entry in its own time; only the absorption follows the scroll.
         gsap
           .timeline({
             defaults: { ease: "power3.out" },
@@ -133,70 +89,54 @@ export function About() {
             },
           })
           .fromTo(
-            masthead,
+            lead,
             { clipPath: "inset(0% 0% 100% 0%)", y: 16 },
             { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.75, stagger: 0.09 },
             0,
           )
           .fromTo(rule, { scaleX: 0 }, { scaleX: 1, duration: 0.95 }, 0.1)
+          // The fields bloom rather than slide in — they are light, not objects.
           .fromTo(
-            rows,
-            { clipPath: "inset(0% 0% 100% 0%)", y: 20 },
-            { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.65, stagger: 0.09 },
-            0.22,
+            fields,
+            { opacity: 0, scale: 0.82 },
+            { opacity: 1, scale: 1, duration: 1.1, ease: "power2.out", stagger: 0.12 },
+            0.15,
+          )
+          .fromTo(
+            [setup, ...labels],
+            { opacity: 0, y: 12 },
+            { opacity: 1, y: 0, duration: 0.7, stagger: 0.07 },
+            0.4,
           );
 
-        // Total duration of 1 maps this timeline directly onto the scrub's own progress, so
-        // the windows in converge.ts are the timeline's positions with no conversion.
-        const timeline = gsap.timeline({
-          defaults: { ease: "power3.out" },
+        const gather = gsap.timeline({
           scrollTrigger: {
             trigger: section,
             start: held ? "top top" : "top 62%",
             end: held ? "bottom bottom" : "bottom 65%",
-            scrub: 0.8,
+            scrub: 0.9,
             invalidateOnRefresh: true,
-            // Type reflows on resize and when the webfont swaps in, and both change where
-            // the first row's baseline is.
-            onRefreshInit: alignResolve,
-            onUpdate: (self) => tick(self.progress),
+            // Driven off the scrub's own progress rather than tweened per field: the
+            // geometry is one table in overlap.ts, and this keeps it the only description
+            // of where a field is.
+            onUpdate: (self) => place(self.progress),
           },
         });
 
-        // Each craft rises exactly one row and is clipped away into the line above. One row
-        // and no further: a line that travelled to a shared baseline would pass through the
-        // others and land as unreadable overlap.
-        rows.forEach((row, index) => {
-          const window = consumeWindow(index, rows.length);
-          if (!window) return;
-          timeline.to(
-            row,
-            {
-              y: () => -rowPitch(),
-              clipPath: "inset(0% 0% 100% 0%)",
-              duration: window.end - window.start,
-              ease: "power2.inOut",
-            },
-            window.start,
-          );
-        });
-
-        timeline
-          .to(
-            rows[0],
-            { y: -10, clipPath: "inset(0% 0% 100% 0%)", duration: 0.08, ease: "power2.in" },
-            ABSORB_END,
-          )
+        gather
+          // The labels name three things. They go before the payoff lands, because by then
+          // there are not three things any more.
+          .to(labels, { opacity: 0, duration: 0.3, stagger: 0.06 }, 0.18)
+          .to(setup, { opacity: 0.28, duration: 0.3 }, 0.3)
           .fromTo(
-            resolve,
-            { clipPath: "inset(100% 0% 0% 0%)", y: 12 },
-            { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.12, ease: "expo.out" },
-            ABSORB_END + 0.06,
+            payoff,
+            { clipPath: "inset(0% 0% 100% 0%)", y: 22 },
+            { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.34, ease: "expo.out" },
+            0.62,
           );
 
         return () => {
-          shown = -1;
-          resolve.style.top = "";
+          gather.scrollTrigger?.kill();
         };
       },
     );
@@ -210,8 +150,7 @@ export function About() {
       id="about"
       className="relative isolate bg-surface motion-safe:min-[900px]:h-[190vh]"
     >
-      <div className="flex flex-col justify-center gap-[8vh] px-6 py-[16vh] md:px-[6vw] motion-safe:min-[900px]:sticky motion-safe:min-[900px]:top-0 motion-safe:min-[900px]:h-screen motion-safe:min-[900px]:gap-[7vh] motion-safe:min-[900px]:py-0">
-        {/* Masthead. The rule runs the full measure, which is what sets the spread below it. */}
+      <div className="flex flex-col gap-[7vh] px-6 py-[16vh] md:px-[6vw] motion-safe:min-[900px]:sticky motion-safe:min-[900px]:top-0 motion-safe:min-[900px]:h-screen motion-safe:min-[900px]:justify-center motion-safe:min-[900px]:py-0">
         <div className="flex flex-col gap-4">
           <p
             data-about-lead
@@ -226,75 +165,72 @@ export function About() {
           />
         </div>
 
-        <div className="grid gap-12 min-[900px]:grid-cols-[minmax(0,4fr)_minmax(0,6fr)] min-[900px]:items-start min-[900px]:gap-[5vw]">
-          {/* The count is the headline. "Four crafts. One studio." is the journey it takes,
-              so stating it again in a heading would be saying the same thing twice. */}
-          <div className="flex flex-col gap-8">
-            <h2 className="m-0 flex flex-col gap-2" data-about-lead>
-              <span className="sr-only">Three crafts. One studio.</span>
+        {/* The stage. Fields sit behind the type in their own layer so the multiply blend
+            darkens the ground and never the words. */}
+        <div className="relative min-h-[58vh] min-[900px]:min-h-[52vh]">
+          {/* No z-index here on purpose. A positioned element with an explicit z-index
+              forms a stacking context, and a stacking context is an isolation boundary for
+              blending — the fields would multiply with each other but not with the surface
+              they sit on. Paint order comes from the content's z-10 instead. */}
+          <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
+            {FIELDS.map((field) => (
               <span
-                data-about-count
-                aria-hidden="true"
-                className="text-gradient block text-[clamp(4.5rem,13vw,10rem)] font-semibold leading-[0.8] tracking-[-0.05em] tabular-nums"
-              >
-                03
-              </span>
-              <span
-                data-about-noun
-                aria-hidden="true"
-                className="block font-mono text-[0.8125rem] uppercase tracking-[0.22em] text-ink-muted"
-              >
-                crafts
-              </span>
-            </h2>
+                key={field.label}
+                data-about-field
+                className="absolute left-1/2 top-1/2 block aspect-square w-[46%] min-w-[280px] mix-blend-multiply will-change-transform"
+                style={{
+                  // A radial falloff, not a circle. There is no edge to read, which is what
+                  // keeps three overlapping fields from reading as a Venn diagram.
+                  backgroundImage: `radial-gradient(circle at 50% 50%, ${field.tint} 0%, ${field.tint.replace("0.5", "0.22")} 42%, transparent 72%)`,
+                }}
+              />
+            ))}
+          </div>
 
-            <div className="flex flex-col gap-4" data-about-lead>
-              <p className="m-0 max-w-[32ch] text-[0.9375rem] leading-[1.75] text-ink-muted">
-                Technology creates functionality. Design creates emotion. The best brands
-                need both.
+          <div className="relative z-10 flex h-full flex-col justify-center gap-6">
+            <p
+              data-about-setup
+              className="m-0 max-w-[24ch] text-[clamp(1rem,2.1vw,1.3rem)] font-medium leading-[1.4] tracking-[-0.02em] text-ink-muted"
+            >
+              Most studios sell you a slice.
+            </p>
+
+            {/* Ink, not the gradient. The fields darken the ground beneath these words by an
+                amount that depends on how far the gather has run, and the accent ramp is
+                only guaranteed legible down to --color-panel. */}
+            <p
+              data-about-payoff
+              className="m-0 max-w-[13ch] text-[clamp(2.25rem,7vw,5.5rem)] font-semibold leading-[0.94] tracking-[-0.045em] text-ink will-change-transform"
+            >
+              We work in the overlap.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <p className="m-0 max-w-[38ch] text-[0.9375rem] leading-[1.75] text-ink-muted">
+                The site, the film and the identity are the same decision made three ways.
+                Split them across three vendors and they stop agreeing.
               </p>
-              <p className="m-0 font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-ink-muted">
+              <p
+                data-about-lead
+                className="m-0 font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-ink-muted"
+              >
                 A creative studio in {STUDIO_LOCATION}
               </p>
             </div>
           </div>
 
-          {/* The list as every agency prints it — until it stops being four things. */}
-          <div className="relative min-[900px]:pt-[0.6rem]">
-            <ul className="m-0 flex list-none flex-col gap-5 p-0 min-[900px]:gap-6">
-              {CRAFTS.map((craft, index) => (
-                <li
-                  key={craft}
-                  data-about-craft
-                  className="m-0 flex items-baseline gap-5 will-change-transform"
-                >
-                  <span className="font-mono text-[0.6875rem] tabular-nums tracking-[0.18em] text-ink-muted">
-                    {pad(index + 1)}
-                  </span>
-                  <span
-                    data-about-word
-                    className="text-[clamp(1.5rem,3.4vw,2.6rem)] font-semibold leading-[1.15] tracking-[-0.035em] text-ink"
-                  >
-                    {craft}
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            {/* Deliberately off the index column the rows are set to. The grid holds for the
-                four; the thing they become is what breaks it.
-
-                It lands on the line the absorption ended on, so the answer appears exactly
-                where the last craft was consumed. `top` is set at runtime from a measured
-                baseline rather than guessed here — see alignResolve. The measure is tight
-                enough to break it over two lines, which carries it down into the space the
-                other three vacated. */}
-            <p
-              data-about-resolve
-              className="text-gradient absolute left-0 right-0 top-0 m-0 max-w-[11ch] text-[clamp(2.5rem,6.8vw,5.25rem)] font-semibold leading-[0.95] tracking-[-0.045em] will-change-transform motion-reduce:static motion-reduce:mt-12"
-            >
-              One experience.
-            </p>
+          {/* Named at the outer edge of each field, as annotations rather than set labels
+              printed inside circles. */}
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-20 hidden min-[900px]:block">
+            <span data-about-label className="absolute left-[6%] top-[12%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">
+              Websites
+            </span>
+            <span data-about-label className="absolute bottom-[10%] left-[46%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">
+              Videos
+            </span>
+            <span data-about-label className="absolute right-[6%] top-[8%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">
+              Designs
+            </span>
           </div>
         </div>
       </div>
