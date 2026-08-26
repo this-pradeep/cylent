@@ -1,69 +1,120 @@
 import { describe, expect, it } from "vitest";
-import { CRAFT_STEP_PX, convergeOffsets } from "@/lib/motion/converge";
+import {
+  ABSORB_END,
+  ENTRY_END,
+  absorptionCount,
+  consumeWindow,
+  remainingAt,
+} from "@/lib/motion/converge";
 
-const STEP = 60;
+const CRAFTS = 4;
 
-describe("convergeOffsets", () => {
-  it("returns one offset per line", () => {
-    expect(convergeOffsets(4, STEP)).toHaveLength(4);
+describe("absorptionCount", () => {
+  it("absorbs every line but the one they all end up as", () => {
+    expect(absorptionCount(4)).toBe(3);
+    expect(absorptionCount(1)).toBe(0);
   });
 
-  it("sends every line to the same baseline", () => {
-    // A line sits at index * step; adding its offset must land them all together.
-    const offsets = convergeOffsets(4, STEP);
-    const landings = offsets.map((offset, index) => index * STEP + offset);
-    expect(new Set(landings.map((y) => y.toFixed(5))).size).toBe(1);
-  });
-
-  it("is symmetric about the centre, so the group does not drift", () => {
-    const offsets = convergeOffsets(4, STEP);
-    const sum = offsets.reduce((total, offset) => total + offset, 0);
-    expect(sum).toBeCloseTo(0, 5);
-    expect(offsets[0]).toBeCloseTo(-offsets[3], 5);
-    expect(offsets[1]).toBeCloseTo(-offsets[2], 5);
-  });
-
-  it("moves the top line down and the bottom line up", () => {
-    const offsets = convergeOffsets(4, STEP);
-    expect(offsets[0]).toBeGreaterThan(0);
-    expect(offsets[3]).toBeLessThan(0);
-  });
-
-  it("moves outer lines further than inner ones", () => {
-    const offsets = convergeOffsets(4, STEP);
-    expect(Math.abs(offsets[0])).toBeGreaterThan(Math.abs(offsets[1]));
-    expect(offsets).toEqual([...offsets].sort((a, b) => b - a));
-  });
-
-  it("leaves the middle line of an odd stack where it is", () => {
-    expect(convergeOffsets(5, STEP)[2]).toBe(0);
-  });
-
-  it("holds a single line still — there is nothing to converge on", () => {
-    expect(convergeOffsets(1, STEP)).toEqual([0]);
-  });
-
-  it("returns nothing for an empty or negative stack", () => {
-    expect(convergeOffsets(0, STEP)).toEqual([]);
-    expect(convergeOffsets(-3, STEP)).toEqual([]);
-  });
-
-  it("collapses to no movement when the lines have no spacing yet", () => {
-    // Guards the pre-measurement pass, where the list has not been laid out.
-    expect(convergeOffsets(4, 0)).toEqual([0, 0, 0, 0]);
-  });
-
-  it("scales linearly with the measured step", () => {
-    const single = convergeOffsets(4, STEP);
-    const double = convergeOffsets(4, STEP * 2);
-    single.forEach((offset, index) => {
-      expect(double[index]).toBeCloseTo(offset * 2, 5);
-    });
+  it("has nothing to absorb in an empty stack", () => {
+    expect(absorptionCount(0)).toBe(0);
+    expect(absorptionCount(-2)).toBe(0);
   });
 });
 
-describe("CRAFT_STEP_PX", () => {
-  it("is a positive fallback for the pre-measurement pass", () => {
-    expect(CRAFT_STEP_PX).toBeGreaterThan(0);
+describe("consumeWindow", () => {
+  it("never consumes the first line — it is what the others become", () => {
+    expect(consumeWindow(0, CRAFTS)).toBeNull();
+  });
+
+  it("consumes from the bottom up, so the list shortens from its end", () => {
+    const last = consumeWindow(3, CRAFTS)!;
+    const middle = consumeWindow(2, CRAFTS)!;
+    const first = consumeWindow(1, CRAFTS)!;
+    expect(last.start).toBeLessThan(middle.start);
+    expect(middle.start).toBeLessThan(first.start);
+  });
+
+  it("starts absorbing only once the lines have finished arriving", () => {
+    expect(consumeWindow(3, CRAFTS)!.start).toBeCloseTo(ENTRY_END, 5);
+  });
+
+  it("finishes the last absorption exactly as the resolve begins", () => {
+    expect(consumeWindow(1, CRAFTS)!.end).toBeCloseTo(ABSORB_END, 5);
+  });
+
+  it("gives every line an equal share of the absorption phase", () => {
+    const spans = [1, 2, 3].map((index) => {
+      const window = consumeWindow(index, CRAFTS)!;
+      return window.end - window.start;
+    });
+    expect(spans[0]).toBeCloseTo(spans[1], 5);
+    expect(spans[1]).toBeCloseTo(spans[2], 5);
+  });
+
+  it("hands off without gaps or overlap — one line at a time", () => {
+    expect(consumeWindow(3, CRAFTS)!.end).toBeCloseTo(consumeWindow(2, CRAFTS)!.start, 5);
+    expect(consumeWindow(2, CRAFTS)!.end).toBeCloseTo(consumeWindow(1, CRAFTS)!.start, 5);
+  });
+
+  it("has no window for a line that does not exist", () => {
+    expect(consumeWindow(4, CRAFTS)).toBeNull();
+    expect(consumeWindow(-1, CRAFTS)).toBeNull();
+  });
+
+  it("has nothing to consume in a single-line stack", () => {
+    expect(consumeWindow(0, 1)).toBeNull();
+  });
+});
+
+describe("remainingAt", () => {
+  it("shows the full count until the absorption starts", () => {
+    expect(remainingAt(0, CRAFTS)).toBe(CRAFTS);
+    expect(remainingAt(ENTRY_END, CRAFTS)).toBe(CRAFTS);
+  });
+
+  it("ticks down only once a line is fully consumed, not as it starts", () => {
+    const window = consumeWindow(3, CRAFTS)!;
+    const midway = (window.start + window.end) / 2;
+    expect(remainingAt(midway, CRAFTS)).toBe(CRAFTS);
+    expect(remainingAt(window.end + 1e-6, CRAFTS)).toBe(CRAFTS - 1);
+  });
+
+  it("counts down one per absorption, in order", () => {
+    expect(remainingAt(consumeWindow(3, CRAFTS)!.end + 1e-6, CRAFTS)).toBe(3);
+    expect(remainingAt(consumeWindow(2, CRAFTS)!.end + 1e-6, CRAFTS)).toBe(2);
+    expect(remainingAt(consumeWindow(1, CRAFTS)!.end - 1e-6, CRAFTS)).toBe(2);
+  });
+
+  it("lands on one and stays there — the studio, not a craft", () => {
+    expect(remainingAt(ABSORB_END, CRAFTS)).toBe(1);
+    expect(remainingAt(1, CRAFTS)).toBe(1);
+  });
+
+  it("never overshoots in either direction across the whole scrub", () => {
+    for (let p = 0; p <= 1; p += 0.01) {
+      const remaining = remainingAt(p, CRAFTS);
+      expect(remaining).toBeGreaterThanOrEqual(1);
+      expect(remaining).toBeLessThanOrEqual(CRAFTS);
+      expect(Number.isInteger(remaining)).toBe(true);
+    }
+  });
+
+  it("never counts back up as the scrub advances", () => {
+    let previous = CRAFTS;
+    for (let p = 0; p <= 1; p += 0.005) {
+      const remaining = remainingAt(p, CRAFTS);
+      expect(remaining).toBeLessThanOrEqual(previous);
+      previous = remaining;
+    }
+  });
+
+  it("clamps a scrub that runs past its own range", () => {
+    expect(remainingAt(-5, CRAFTS)).toBe(CRAFTS);
+    expect(remainingAt(5, CRAFTS)).toBe(1);
+  });
+
+  it("holds at one for a stack that has nothing to absorb", () => {
+    expect(remainingAt(0, 1)).toBe(1);
+    expect(remainingAt(1, 1)).toBe(1);
   });
 });
