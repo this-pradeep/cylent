@@ -12,9 +12,9 @@ import { STUDIO_LOCATION } from "@/lib/site/studio";
  * sits where all three are true at once. The studio's position is made spatial rather than
  * claimed.
  *
- * Held in place with CSS `sticky` rather than a GSAP pin: Pillars pins a full-screen track
- * immediately after, and a second pin competing across that boundary on every refresh is a
- * known source of jitter.
+ * Held in place with CSS `sticky` rather than a GSAP pin. Pinning is kept to Process, the
+ * one section that genuinely needs it; sticky costs nothing at refresh time and cannot
+ * compete with a neighbouring pin the way a second pin can.
  *
  * Arrival and the gather are two triggers on purpose. A held section's scrub does not begin
  * until its top reaches the top of the viewport — a full screen after the content is already

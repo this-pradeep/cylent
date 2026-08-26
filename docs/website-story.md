@@ -154,11 +154,14 @@ Together they create impact.
 
 ## Chapter 4 — The Three Pillars
 
-### Objective
-
-Show how our expertise comes together.
-
----
+> **Merged into Chapter 6.** The pillars were originally their own section: three panels
+> claiming Build, Capture and Move, with the work shown separately further down. That put the
+> same three disciplines on the page twice — once claimed, once evidenced — and the claim
+> always looked weaker than the evidence sitting below it.
+>
+> Each pillar now heads its own chapter of the work in Chapter 6 and is proven by the
+> projects underneath it. The pillar copy below is still the source of truth for the verbs
+> and claims; it lives in `src/lib/site/projects.ts` as `DISCIPLINES`.
 
 ### Pillar One
 
@@ -269,6 +272,19 @@ Avoid:
 Present work in a way that feels curated.
 
 Quality over quantity.
+
+### Structure
+
+One chapter per discipline, in the order the navbar lists them — Web, Video, Design. Each
+chapter opens on its pillar verb and claim from Chapter 4, then proves it:
+
+- **One lead project per discipline** takes a full frame, and carries all four beats
+  (challenge, process, solution, result) arriving as it is scrolled through.
+- **Everything else is supporting**, shown compactly with a single line.
+
+A discipline is claimed and evidenced in one place, never twice. The lead-and-supporting
+split is the portfolio philosophy made structural: a few exceptional projects are worth more
+than many average ones, so exactly one project per discipline gets the screen.
 
 ### User Thought
 

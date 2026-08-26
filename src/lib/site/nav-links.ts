@@ -1,10 +1,8 @@
-import { scrollToId, scrollToPillar } from "@/lib/motion/scroll-to";
+import { scrollToId } from "@/lib/motion/scroll-to";
 
 export type NavLink = {
   label: string;
   id: string;
-  /** Pillar panels live inside a pinned horizontal track and need the mapped scroll. */
-  pillar?: boolean;
 };
 
 /**
@@ -16,9 +14,9 @@ export type NavLink = {
  */
 export const NAV_LINKS: NavLink[] = [
   { label: "About", id: "about" },
-  { label: "Web", id: "web", pillar: true },
-  { label: "Videos", id: "video", pillar: true },
-  { label: "Design", id: "graphics", pillar: true },
+  { label: "Web", id: "web" },
+  { label: "Videos", id: "video" },
+  { label: "Design", id: "graphics" },
 ];
 
 /** Kept apart because the navbar renders it as a button, not as a nav item. */
@@ -28,9 +26,5 @@ export const CONTACT_LINK: NavLink = { label: "Contact", id: "contact" };
 export const FOOTER_LINKS: NavLink[] = [...NAV_LINKS, CONTACT_LINK];
 
 export function goTo(link: NavLink): void {
-  if (link.pillar) {
-    scrollToPillar(link.id);
-    return;
-  }
   scrollToId(link.id);
 }

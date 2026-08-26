@@ -4,7 +4,8 @@ import { useEffect, useRef } from "react";
 
 type VideoAssetProps = {
   src: string;
-  aspectRatio: "16:9" | "1:1" | "9:16";
+  /** "fill" covers the nearest positioned ancestor edge to edge, with no frame. */
+  aspectRatio: "16:9" | "1:1" | "9:16" | "fill";
   className?: string;
 };
 
@@ -12,10 +13,16 @@ const ASPECT_CLASS: Record<VideoAssetProps["aspectRatio"], string> = {
   "16:9": "aspect-video",
   "1:1": "aspect-square",
   "9:16": "aspect-[9/16]",
+  fill: "absolute inset-0",
 };
+
+/** A framed figure is a figure; a full-bleed frame is the ground, and a border round the
+    ground reads as a mistake. */
+const FRAME_CLASS = "rounded-sm border border-ink/10";
 
 export function VideoAsset({ src, aspectRatio, className }: VideoAssetProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const isFill = aspectRatio === "fill";
 
   useEffect(() => {
     const video = videoRef.current;
@@ -31,6 +38,8 @@ export function VideoAsset({ src, aspectRatio, className }: VideoAssetProps) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
+          // preload="none" means there is nothing buffered until the first play, so the
+          // load is deferred to the moment the clip is actually wanted.
           void video.play().catch(() => {});
         } else {
           video.pause();
@@ -47,7 +56,9 @@ export function VideoAsset({ src, aspectRatio, className }: VideoAssetProps) {
 
   return (
     <div
-      className={`relative overflow-hidden rounded-sm border border-ink/10 ${ASPECT_CLASS[aspectRatio]} ${className ?? ""}`}
+      className={`relative overflow-hidden ${ASPECT_CLASS[aspectRatio]} ${
+        isFill ? "bg-ink" : FRAME_CLASS
+      } ${className ?? ""}`}
     >
       <video
         ref={videoRef}
@@ -56,7 +67,9 @@ export function VideoAsset({ src, aspectRatio, className }: VideoAssetProps) {
         muted
         loop
         playsInline
-        preload="metadata"
+        // Nothing is fetched until the observer below says the clip is on screen. The one
+        // clip in the library is 15MB, which is more than the entire rest of the page.
+        preload="none"
       />
     </div>
   );
