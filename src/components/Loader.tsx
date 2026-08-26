@@ -8,15 +8,13 @@ import {
   greetingForHour,
   wordsRevealed,
 } from "@/lib/motion/loader-copy";
+import { STUDIO_LOCATION, STUDIO_TIME_ZONE } from "@/lib/site/studio";
 
 // Long enough for the triad to arrive one word at a time and be read. The loader
 // now sets the pace rather than waiting on a timer — the visitor is watching a
 // sequence that is actually happening, not sitting through an artificial delay.
 const MIN_DURATION_MS = 2600;
 const MAX_DURATION_MS = 4600;
-
-const STUDIO_LOCATION = "Indore, India";
-const STUDIO_TIME_ZONE = "Asia/Kolkata";
 
 export function Loader() {
   const containerRef = useRef<HTMLDivElement>(null);

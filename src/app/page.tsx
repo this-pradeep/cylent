@@ -1,6 +1,6 @@
 import { Hero } from "@/components/sections/Hero";
 // import { Problem } from "@/components/sections/Problem";
-import { Spine } from "@/components/sections/Spine";
+import { About } from "@/components/sections/About";
 import { Pillars } from "@/components/sections/Pillars";
 import { Process } from "@/components/sections/Process";
 import { Proof } from "@/components/sections/Proof";
@@ -12,7 +12,7 @@ export default function HomePage() {
     <main>
       <Hero />
       {/* <Problem /> */}
-      <Spine />
+      <About />
       <Pillars />
       <Process />
       <Proof />
