@@ -20,6 +20,26 @@ const CRAFTS = ["Web Development", "Videography", "Photography", "Graphic Design
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
+/**
+ * Where a line of text actually sits, in viewport px.
+ *
+ * An empty inline-block of zero height takes its own bottom edge as its baseline, so it
+ * aligns to the baseline of the text it is dropped into. There is no DOM API for this and
+ * deriving it from font-size means hard-coding a metric per typeface.
+ *
+ * Prepended, not appended: the answer wraps onto two lines and it is the first baseline
+ * that has to match the row being replaced.
+ */
+function baselineOf(element: HTMLElement): number {
+  const probe = document.createElement("span");
+  probe.setAttribute("aria-hidden", "true");
+  probe.style.cssText = "display:inline-block;width:0;height:0;overflow:hidden";
+  element.prepend(probe);
+  const baseline = probe.getBoundingClientRect().bottom;
+  probe.remove();
+  return baseline;
+}
+
 export function About() {
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -38,7 +58,8 @@ export function About() {
     const count = query("[data-about-count]");
     const noun = query("[data-about-noun]");
     const resolve = query("[data-about-resolve]");
-    if (!rule || !count || !noun || !resolve || rows.length === 0) return;
+    const firstWord = query("[data-about-word]");
+    if (!rule || !count || !noun || !resolve || !firstWord || rows.length === 0) return;
 
     const mm = gsap.matchMedia();
 
@@ -67,6 +88,21 @@ export function About() {
         // remeasure after a resize or a late font swap.
         const rowPitch = () => (rows.length > 1 ? rows[1].offsetTop - rows[0].offsetTop : 0);
 
+        /**
+         * The answer has to land on the line the absorption ended on. It is roughly twice
+         * the size of the craft it replaces, so their box tops are nowhere near each other
+         * and only the baselines can be matched. Both sides are measured with their
+         * transforms cleared, since a rect includes them and a refresh can land mid-scroll
+         * with the row part-way through being absorbed; the scrub re-renders straight after.
+         */
+        const alignResolve = () => {
+          gsap.set([resolve, rows[0]], { y: 0 });
+          resolve.style.top = "0px";
+          resolve.style.top = `${baselineOf(firstWord) - baselineOf(resolve)}px`;
+        };
+
+        alignResolve();
+
         let shown = -1;
         const tick = (progress: number) => {
           const remaining = remainingAt(progress, rows.length);
@@ -92,6 +128,9 @@ export function About() {
             end: held ? "bottom bottom" : "bottom 65%",
             scrub: 0.8,
             invalidateOnRefresh: true,
+            // Type reflows on resize and when the webfont swaps in, and both change where
+            // the first row's baseline is.
+            onRefreshInit: alignResolve,
             onUpdate: (self) => tick(self.progress),
           },
         });
@@ -144,6 +183,7 @@ export function About() {
 
         return () => {
           shown = -1;
+          resolve.style.top = "";
         };
       },
     );
@@ -218,7 +258,10 @@ export function About() {
                   <span className="font-mono text-[0.6875rem] tabular-nums tracking-[0.18em] text-ink-muted">
                     {pad(index + 1)}
                   </span>
-                  <span className="text-[clamp(1.5rem,3.4vw,2.6rem)] font-semibold leading-[1.15] tracking-[-0.035em] text-ink">
+                  <span
+                    data-about-word
+                    className="text-[clamp(1.5rem,3.4vw,2.6rem)] font-semibold leading-[1.15] tracking-[-0.035em] text-ink"
+                  >
                     {craft}
                   </span>
                 </li>
@@ -228,14 +271,14 @@ export function About() {
             {/* Deliberately off the index column the rows are set to. The grid holds for the
                 four; the thing they become is what breaks it.
 
-                It fills the block the four crafts vacated rather than sitting on the last
-                row's line — at this size its baseline could never have matched theirs, and
-                occupying the whole space is the point being made. The measure is tight
-                enough to break it over two lines, which is what gives it the weight to
-                answer the numeral across the spread. */}
+                It lands on the line the absorption ended on, so the answer appears exactly
+                where the last craft was consumed. `top` is set at runtime from a measured
+                baseline rather than guessed here — see alignResolve. The measure is tight
+                enough to break it over two lines, which carries it down into the space the
+                other three vacated. */}
             <p
               data-about-resolve
-              className="text-gradient absolute inset-0 m-0 flex max-w-[11ch] flex-col justify-center text-[clamp(2.5rem,6.8vw,5.25rem)] font-semibold leading-[0.95] tracking-[-0.045em] will-change-transform motion-reduce:static motion-reduce:mt-12 motion-reduce:block"
+              className="text-gradient absolute left-0 right-0 top-0 m-0 max-w-[11ch] text-[clamp(2.5rem,6.8vw,5.25rem)] font-semibold leading-[0.95] tracking-[-0.045em] will-change-transform motion-reduce:static motion-reduce:mt-12"
             >
               One experience.
             </p>
