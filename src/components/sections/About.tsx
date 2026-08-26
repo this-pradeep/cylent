@@ -16,7 +16,7 @@ import { STUDIO_LOCATION } from "@/lib/site/studio";
  * GSAP pin: Pillars pins a full-screen track immediately after this section, and a second
  * pin competing across that boundary on every refresh is a known source of jitter.
  */
-const CRAFTS = ["Web Development", "Videography", "Photography", "Graphic Design"] as const;
+const CRAFTS = ["Web Development", "Videography", "Graphic Design"] as const;
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
@@ -118,13 +118,41 @@ export function About() {
           );
         };
 
-        // Total duration of 1 maps the timeline directly onto the scrub's own progress, so
+        // Arrival and absorption are two triggers on purpose. Held sections do not begin
+        // their scrub until the section's top reaches the top of the viewport, which is a
+        // full screen of scrolling after the content is first visible — running the reveal
+        // off that scrub left the section sitting blank the whole way in. The reveal plays
+        // on entry in its own time; only the absorption follows the scroll.
+        gsap
+          .timeline({
+            defaults: { ease: "power3.out" },
+            scrollTrigger: {
+              trigger: section,
+              start: "top 82%",
+              toggleActions: "play none none reverse",
+            },
+          })
+          .fromTo(
+            masthead,
+            { clipPath: "inset(0% 0% 100% 0%)", y: 16 },
+            { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.75, stagger: 0.09 },
+            0,
+          )
+          .fromTo(rule, { scaleX: 0 }, { scaleX: 1, duration: 0.95 }, 0.1)
+          .fromTo(
+            rows,
+            { clipPath: "inset(0% 0% 100% 0%)", y: 20 },
+            { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.65, stagger: 0.09 },
+            0.22,
+          );
+
+        // Total duration of 1 maps this timeline directly onto the scrub's own progress, so
         // the windows in converge.ts are the timeline's positions with no conversion.
         const timeline = gsap.timeline({
           defaults: { ease: "power3.out" },
           scrollTrigger: {
             trigger: section,
-            start: held ? "top top" : "top 78%",
+            start: held ? "top top" : "top 62%",
             end: held ? "bottom bottom" : "bottom 65%",
             scrub: 0.8,
             invalidateOnRefresh: true,
@@ -134,21 +162,6 @@ export function About() {
             onUpdate: (self) => tick(self.progress),
           },
         });
-
-        timeline
-          .fromTo(
-            masthead,
-            { clipPath: "inset(0% 0% 100% 0%)", y: 16 },
-            { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.13, stagger: 0.03 },
-            0,
-          )
-          .fromTo(rule, { scaleX: 0 }, { scaleX: 1, duration: 0.2 }, 0.02)
-          .fromTo(
-            rows,
-            { clipPath: "inset(0% 0% 100% 0%)", y: 20 },
-            { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.12, stagger: 0.04 },
-            0.06,
-          );
 
         // Each craft rises exactly one row and is clipped away into the line above. One row
         // and no further: a line that travelled to a shared baseline would pass through the
@@ -218,13 +231,13 @@ export function About() {
               so stating it again in a heading would be saying the same thing twice. */}
           <div className="flex flex-col gap-8">
             <h2 className="m-0 flex flex-col gap-2" data-about-lead>
-              <span className="sr-only">Four crafts. One studio.</span>
+              <span className="sr-only">Three crafts. One studio.</span>
               <span
                 data-about-count
                 aria-hidden="true"
                 className="text-gradient block text-[clamp(4.5rem,13vw,10rem)] font-semibold leading-[0.8] tracking-[-0.05em] tabular-nums"
               >
-                04
+                03
               </span>
               <span
                 data-about-noun
