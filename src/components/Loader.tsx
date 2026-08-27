@@ -24,6 +24,7 @@ export function Loader() {
   const fillRef = useRef<HTMLSpanElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
   const progressRowRef = useRef<HTMLDivElement>(null);
+  const lensRef = useRef<HTMLDivElement>(null);
 
   const [visible, setVisible] = useState(true);
   const [greeting, setGreeting] = useState("Hello.");
@@ -86,12 +87,16 @@ export function Loader() {
         clipPath: `inset(0 ${100 - percent}% 0 0)`,
       });
 
+      // One custom property for the entire lens: scale, bloom, rim and specular all read
+      // --p in CSS. Four style writes a frame would do the same job four times over.
+      lensRef.current?.style.setProperty("--p", (percent / 100).toFixed(4));
+
       const count = wordsRevealed(percent);
       for (let i = 0; i < count; i++) revealWord(i, instant);
     };
 
     if (prefersReducedMotion) {
-      gsap.set([metaRef.current, greetingEl, progressRowRef.current], {
+      gsap.set([metaRef.current, greetingEl, progressRowRef.current, lensRef.current], {
         opacity: 1,
         yPercent: 0,
       });
@@ -113,12 +118,14 @@ export function Loader() {
     gsap.set(words, { yPercent: 115, opacity: 0 });
     gsap.set(progressRowRef.current, { opacity: 0 });
     gsap.set(fill, { clipPath: "inset(0 100% 0 0)" });
+    gsap.set(lensRef.current, { opacity: 0 });
 
     const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
     intro
       .to(metaRef.current, { opacity: 1, duration: 0.7 }, 0.1)
       .to(greetingEl, { yPercent: 0, duration: 1.05 }, 0.15)
-      .to(progressRowRef.current, { opacity: 1, duration: 0.6 }, 0.7);
+      .to(progressRowRef.current, { opacity: 1, duration: 0.6 }, 0.7)
+      .to(lensRef.current, { opacity: 1, duration: 0.9 }, 0.25);
 
     applyProgress(0);
 
@@ -157,6 +164,13 @@ export function Loader() {
           [metaRef.current, progressRowRef.current],
           { opacity: 0, duration: 0.45, ease: "power2.out" },
           "<0.1",
+        )
+        // The lens opens out and goes with the type rather than fading on its own — the
+        // loader hands over in one movement, it does not dissolve into the next screen.
+        .to(
+          lensRef.current,
+          { "--exit": 1.35, opacity: 0, duration: 0.7, ease: "power2.inOut" },
+          "<0.05",
         )
         .add(markLoaderReady, "<0.25")
         .to(
@@ -216,6 +230,15 @@ export function Loader() {
         >
           <span>Cylent Solutions</span>
           <span className="tabular-nums">{clock}</span>
+        </div>
+
+        {/* Centred, and behind the type in paint order — the composition is bottom-left
+            weighted and the lens is the thing being watched, not the thing being read. */}
+        <div ref={lensRef} className="loader-lens">
+          <span className="loader-lens-bloom" />
+          <span className="loader-lens-body" />
+          <span className="loader-lens-ring" />
+          <span className="loader-lens-spec" />
         </div>
 
         <span className="block overflow-hidden pb-[0.12em]">

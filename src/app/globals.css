@@ -154,6 +154,101 @@ body {
   }
 }
 
+/* Loader — the lens.
+   The same object as the cursor's: a nearly-empty glass body, a white rim, and the chroma
+   living on the *edge* as a conic ring rather than filling the disc. That is what separates
+   glass from a coloured circle, and it means the loading screen introduces the cursor before
+   the visitor ever meets it.
+
+   Everything is driven by one custom property, --p, written once per frame from the loader's
+   own progress. Nothing here animates `filter`: the bloom below is blurred once, statically,
+   and resolution is a cross-fade between it and the crisp lens, which stays on the
+   compositor. Animating the blur radius instead would re-rasterise the layer every frame for
+   an effect that reads the same. */
+.loader-lens {
+  --p: 0;
+  /* The exit opens the lens out. It is a variable rather than a GSAP `scale` because this
+     transform also carries the centring and the progress scale, and GSAP writes `transform`
+     wholesale — tweening the property directly would drop both the moment the exit began. */
+  --exit: 1;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(112px, 15vw, 190px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) scale(calc((0.84 + 0.16 * var(--p)) * var(--exit)));
+  will-change: transform;
+}
+
+.loader-lens span {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+}
+
+/* Out of focus at zero: a soft chromatic cloud that burns off as the lens resolves. */
+.loader-lens-bloom {
+  background: conic-gradient(
+    from 140deg,
+    #ff5ca8, #ffc76e, #8cffd6, #4ed6e8, #8b7bff, #ff8cf0, #ff5ca8
+  );
+  filter: blur(22px);
+  opacity: calc(0.62 - 0.42 * var(--p));
+  transform: scale(calc(1.06 - 0.1 * var(--p)));
+}
+
+/* The glass itself. Values carried over from .liquid-cursor-lens, lightened for paper —
+   the cursor floats over whatever it is on, this sits on a known cream ground. */
+.loader-lens-body {
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.9),
+    inset 0 -10px 20px rgba(255, 255, 255, 0.22),
+    0 14px 38px rgba(20, 18, 15, 0.13);
+}
+
+/* The chroma, as a rim. Same mask-composite ring the cursor uses, so the two are visibly
+   the same material rather than two things that happen to be colourful. */
+.loader-lens-ring {
+  padding: 2px;
+  background: conic-gradient(
+    from 140deg,
+    rgba(255, 92, 168, 0.9), rgba(255, 199, 110, 0.75), rgba(140, 255, 214, 0.7),
+    rgba(78, 214, 232, 0.9), rgba(139, 123, 255, 0.85), rgba(255, 140, 240, 0.75),
+    rgba(255, 92, 168, 0.9)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: calc(0.35 + 0.65 * var(--p));
+  transform: rotate(calc(var(--p) * 210deg));
+}
+
+/* The specular. Sharpens as the lens comes into focus, which is the tell that it has. */
+.loader-lens-spec {
+  inset: 7%;
+  background: radial-gradient(
+    circle at 34% 27%,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(255, 255, 255, 0.28) calc(22% + 26% * (1 - var(--p))),
+    transparent calc(52% + 24% * (1 - var(--p)))
+  );
+  opacity: calc(0.4 + 0.6 * var(--p));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader-lens-bloom {
+    filter: none;
+    opacity: 0.16;
+  }
+}
+
 /* Footer — the circular button.
    No transform transition on .cbtn itself: useMagneticHover writes x/y there every frame,
    and a transition on top of that smooths each write and makes the pull feel like it is
