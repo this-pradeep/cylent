@@ -18,30 +18,48 @@ const HIGHLIGHT = "remarkable.";
 const SENTENCE = WORDS.join(" ");
 
 /**
- * The closing wash. Where Chapter 3 has three fields converging inward, this one radiates:
- * a single halo blooming out past the words as the line completes. Converge, then radiate —
- * the two chromatic moments on the page argue opposite directions on purpose, so the last
- * one does not read as the first one repeated.
+ * The closing wash.
  *
- * A halo rather than a disc, and that is what makes it work at all. The words sit in the
- * clear centre while the colour blooms around them, so the line the section exists to
- * deliver is never asked to compete with the ground it sits on — and "remarkable." can keep
- * the accent gradient, which needs the paper under it to stay light.
+ * Subtractive primaries — cyan, magenta and amber — where Chapter 3 uses additive ones. RGB
+ * is how a screen makes colour and CMY is how ink does, so the page's two chromatic moments
+ * are the studio's two halves: the thing on the screen and the thing that gets printed.
+ * It also buys the one property that actually makes a wash beautiful, which is hue
+ * separation. The first pass here ran magenta, violet and cyan — three cool neighbours,
+ * stacked near the middle — and three neighbouring hues multiplied together do not make a
+ * gradient, they make lavender.
  *
- * Hues are the accent's own three stops rather than Chapter 3's RGB. Both sections get a
- * chromatic moment; neither gets the same palette.
+ * Each field owns a corner of the frame and the centre is left to their tails. That is
+ * deliberate and it is load-bearing. "remarkable." is set in the accent gradient, and that
+ * ramp is luminance-flat at about 0.139 by design, so its contrast is decided entirely by
+ * how light the paper under it stays. With the cores this far out the middle lands near 0.64
+ * and the ramp holds 3.66:1 against display type. The cliff is close:
+ *
+ *   tails of 0.13 each → 3.66:1   ✓
+ *   tails of 0.18 each → 3.17:1   ✓
+ *   tails of 0.22 each → 2.82:1   ✗  fails the 3:1 large-text minimum
+ *
+ * So pulling a core toward the centre, or raising the first stop, is not a taste change —
+ * it is the headline going illegible. If the wash needs to be denser, the honest move is to
+ * take "remarkable." off the gradient and set it in ink.
  */
-const HALOS = [
-  { rgb: "169, 59, 157", x: "38%", y: "44%", scale: 1 },
-  { rgb: "104, 83, 212", x: "58%", y: "56%", scale: 1.14 },
-  { rgb: "8, 115, 127", x: "50%", y: "38%", scale: 0.88 },
+const FIELDS = [
+  { name: "cyan", rgb: "31, 191, 212", x: -34, y: -26 },
+  { name: "amber", rgb: "242, 160, 60", x: 36, y: -24 },
+  { name: "magenta", rgb: "232, 71, 155", x: 2, y: 36 },
 ] as const;
 
-/** Clear core, colour at the rim, gone by the edge. */
-const HALO_STOPS = "transparent 0%, transparent 26%, rgba(RGB, 0.34) 46%, rgba(RGB, 0.16) 66%, transparent 88%";
+/** Five stops: at this size a three-stop radial bands, and banding reads as printed. */
+const FIELD_STOPS: readonly { at: number; alpha: number }[] = [
+  { at: 0, alpha: 0.55 },
+  { at: 26, alpha: 0.34 },
+  { at: 52, alpha: 0.18 },
+  { at: 74, alpha: 0.05 },
+  { at: 90, alpha: 0 },
+];
 
-function haloGradient(rgb: string): string {
-  return `radial-gradient(circle at 50% 50%, ${HALO_STOPS.replaceAll("RGB", rgb)})`;
+function fieldGradient(rgb: string): string {
+  const stops = FIELD_STOPS.map(({ at, alpha }) => `rgba(${rgb}, ${alpha}) ${at}%`).join(", ");
+  return `radial-gradient(circle at 50% 50%, ${stops})`;
 }
 
 export function Future() {
@@ -52,7 +70,7 @@ export function Future() {
     if (!section) return;
 
     const words = Array.from(section.querySelectorAll<HTMLElement>("[data-future-word]"));
-    const halos = Array.from(section.querySelectorAll<HTMLElement>("[data-future-halo]"));
+    const fields = Array.from(section.querySelectorAll<HTMLElement>("[data-future-field]"));
     if (words.length === 0) return;
 
     const mm = gsap.matchMedia();
@@ -66,14 +84,18 @@ export function Future() {
       (context) => {
         const { held, still } = context.conditions as Record<string, boolean>;
 
-        // Centring lives in GSAP's transform, not in a Tailwind translate. GSAP writes
-        // `transform` wholesale, so a class-based translate would be clobbered the first
-        // time a halo was scaled.
-        gsap.set(halos, { xPercent: -50, yPercent: -50 });
+        // Placement lives in GSAP's transform, not in Tailwind translate utilities. GSAP
+        // writes `transform` wholesale, so a class-based translate would be clobbered the
+        // first time a field was scaled. The -50 is the centring; the rest is the layout.
+        fields.forEach((field, index) => {
+          const spot = FIELDS[index];
+          if (!spot) return;
+          gsap.set(field, { xPercent: -50 + spot.x, yPercent: -50 + spot.y });
+        });
 
         if (still) {
           gsap.set(words, { yPercent: 0, opacity: 1 });
-          gsap.set(halos, { scale: 1, opacity: 1 });
+          gsap.set(fields, { scale: 1, opacity: 1 });
           return;
         }
 
@@ -103,12 +125,12 @@ export function Future() {
         );
 
         // The bloom trails the words rather than leading them — the sentence earns the
-        // colour, and each halo opens at its own rate so the wash never reads as one disc
-        // being scaled.
-        halos.forEach((halo, index) => {
+        // colour — and each field opens at its own rate so the wash never reads as one disc
+        // being scaled. Blooming outward, where Chapter 3 gathers inward.
+        fields.forEach((field, index) => {
           timeline.fromTo(
-            halo,
-            { scale: 0.24, opacity: 0 },
+            field,
+            { scale: 0.3, opacity: 0 },
             { scale: 1, opacity: 1, duration: 0.72 + index * 0.08, ease: "power2.out" },
             0.16 + index * 0.06,
           );
@@ -135,16 +157,12 @@ export function Future() {
         {/* No z-index: an explicit one would form a second stacking context and isolate the
             blend all over again. Paint order comes from the heading carrying z-10. */}
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
-          {HALOS.map((halo) => (
+          {FIELDS.map((field) => (
             <span
-              key={halo.rgb}
-              data-future-halo
-              className="absolute block aspect-square w-[104%] min-w-[680px] mix-blend-multiply will-change-transform"
-              style={{
-                left: halo.x,
-                top: halo.y,
-                backgroundImage: haloGradient(halo.rgb),
-              }}
+              key={field.name}
+              data-future-field
+              className="absolute left-1/2 top-1/2 block aspect-square w-[86%] min-w-[600px] mix-blend-multiply will-change-transform"
+              style={{ backgroundImage: fieldGradient(field.rgb) }}
             />
           ))}
         </div>
