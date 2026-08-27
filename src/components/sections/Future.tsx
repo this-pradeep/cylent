@@ -83,20 +83,29 @@ export function Future() {
       className="relative bg-surface motion-safe:min-[820px]:h-[170vh]"
     >
       <div className="flex min-h-[50vh] flex-col items-center justify-center px-6 py-[14vh] motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen motion-safe:min-[820px]:py-0">
-        <h2 className="m-0 max-w-[16ch] text-center">
+        {/* The display size lives here, not on a child. `ch` resolves against the element's
+            own font-size, so a measure set here while the size sat on the inner span was
+            being computed against the inherited 16px — a ~128px box that wrapped every word
+            onto its own line and left the masks clipping them sideways. */}
+        <h2 className="m-0 max-w-[18ch] text-center text-[clamp(2.5rem,10vw,9rem)] font-semibold leading-[0.98] tracking-[-0.05em] text-ink">
           <span className="sr-only">{SENTENCE}</span>
 
           <span
             aria-hidden="true"
-            className="flex flex-wrap justify-center gap-x-[0.26em] text-[clamp(2.5rem,10vw,9rem)] font-semibold leading-[0.98] tracking-[-0.05em] text-ink"
+            className="flex flex-wrap items-end justify-center gap-x-[0.26em]"
           >
             {WORDS.map((word) => (
-              // The mask is the outer span. Its padding buys room for descenders and the
-              // gradient's clipped glyph edges, and the matching negative margin keeps that
-              // room out of the line box so the words still sit on one baseline.
+              // The mask is the outer span, and it must only ever clip vertically. It holds
+              // its width against the flex line (`shrink-0`) and refuses to break the word
+              // inside it, because `overflow-hidden` clips both axes and a squeezed box
+              // takes the ends off the word rather than wrapping it.
+              //
+              // The padding buys room for descenders and the gradient's clipped glyph edges;
+              // the matching negative margin keeps that room out of the line box so the
+              // words still sit on one baseline.
               <span
                 key={word}
-                className="inline-block overflow-hidden pb-[0.14em] -mb-[0.14em] align-bottom"
+                className="inline-block shrink-0 overflow-hidden whitespace-nowrap pb-[0.14em] -mb-[0.14em]"
               >
                 <span
                   data-future-word
