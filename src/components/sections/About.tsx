@@ -20,11 +20,34 @@ import { STUDIO_LOCATION } from "@/lib/site/studio";
  * until its top reaches the top of the viewport — a full screen after the content is already
  * visible — so running the reveal off the scrub leaves the section blank the whole way in.
  */
+/**
+ * Additive primaries, which is the one colour model that argues the same thing this section
+ * does: red, green and blue are how every screen makes every other colour, so three fields
+ * combining is the claim rather than a decoration of it. Video takes red for the record
+ * light.
+ *
+ * Shades, not primaries — raspberry, jade and azure rather than #f00/#0f0/#00f, which would
+ * read as a test card. This is a deliberate departure from the one-accent rule in
+ * design-principles.md: the accent gradient still owns every hairline and every piece of
+ * accented type on the page, and these three are material for one section only.
+ *
+ * Carried as bare channels rather than finished colours so the core and halo stops can be
+ * written directly instead of patched out of each other with string replacement.
+ */
 const FIELDS = [
-  { label: "Websites", tint: "rgba(169, 59, 157, 0.5)" },
-  { label: "Videos", tint: "rgba(104, 83, 212, 0.5)" },
-  { label: "Designs", tint: "rgba(8, 115, 127, 0.5)" },
+  { label: "Websites", rgb: "74, 114, 245" },
+  { label: "Videos", rgb: "228, 80, 110" },
+  { label: "Designs", rgb: "45, 190, 126" },
 ] as const;
+
+/**
+ * Alphas are capped by what the payoff line needs to survive. Multiplying three fields at
+ * 0.35 each puts the intersection near rgb(129, 139, 161), which holds ink at about 5.3:1;
+ * at the 0.5 the earlier tints used, saturated primaries would take it far darker and the
+ * ink would start to fail on the one word the section exists to deliver.
+ */
+const FIELD_CORE_ALPHA = 0.42;
+const FIELD_HALO_ALPHA = 0.2;
 
 export function About() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -167,7 +190,7 @@ export function About() {
 
         {/* The stage. Fields sit behind the type in their own layer so the multiply blend
             darkens the ground and never the words. */}
-        <div className="relative min-h-[58vh] min-[900px]:min-h-[52vh]">
+        <div className="relative min-h-[72vh] min-[900px]:min-h-[64vh]">
           {/* No z-index here on purpose. A positioned element with an explicit z-index
               forms a stacking context, and a stacking context is an isolation boundary for
               blending — the fields would multiply with each other but not with the surface
@@ -177,11 +200,11 @@ export function About() {
               <span
                 key={field.label}
                 data-about-field
-                className="absolute left-1/2 top-1/2 block aspect-square w-[46%] min-w-[280px] mix-blend-multiply will-change-transform"
+                className="absolute left-1/2 top-1/2 block aspect-square w-[58%] min-w-[340px] mix-blend-multiply will-change-transform"
                 style={{
                   // A radial falloff, not a circle. There is no edge to read, which is what
                   // keeps three overlapping fields from reading as a Venn diagram.
-                  backgroundImage: `radial-gradient(circle at 50% 50%, ${field.tint} 0%, ${field.tint.replace("0.5", "0.22")} 42%, transparent 72%)`,
+                  backgroundImage: `radial-gradient(circle at 50% 50%, rgba(${field.rgb}, ${FIELD_CORE_ALPHA}) 0%, rgba(${field.rgb}, ${FIELD_HALO_ALPHA}) 42%, transparent 72%)`,
                 }}
               />
             ))}
@@ -190,9 +213,9 @@ export function About() {
           <div className="relative z-10 flex h-full flex-col justify-center gap-6">
             <p
               data-about-setup
-              className="m-0 max-w-[24ch] text-[clamp(1rem,2.1vw,1.3rem)] font-medium leading-[1.4] tracking-[-0.02em] text-ink-muted"
+              className="m-0 max-w-[26ch] text-[clamp(1.0625rem,2.4vw,1.5rem)] font-medium leading-[1.35] tracking-[-0.025em] text-ink-muted"
             >
-              Most studios sell you a slice.
+              What you need rarely fits one job description.
             </p>
 
             {/* Ink, not the gradient. The fields darken the ground beneath these words by an
@@ -200,15 +223,15 @@ export function About() {
                 only guaranteed legible down to --color-panel. */}
             <p
               data-about-payoff
-              className="m-0 max-w-[13ch] text-[clamp(2.25rem,7vw,5.5rem)] font-semibold leading-[0.94] tracking-[-0.045em] text-ink will-change-transform"
+              className="m-0 max-w-[12ch] text-[clamp(2.75rem,9vw,8rem)] font-semibold leading-[0.9] tracking-[-0.05em] text-ink will-change-transform"
             >
-              We work in the overlap.
+              The answer lives in the overlap.
             </p>
 
             <div className="flex flex-col gap-3">
               <p className="m-0 max-w-[38ch] text-[0.9375rem] leading-[1.75] text-ink-muted">
-                The site, the film and the identity are the same decision made three ways.
-                Split them across three vendors and they stop agreeing.
+                Hire three specialists and you get three answers — plus the job of making
+                them agree. Nobody quotes for that job. It lands on you.
               </p>
               <p
                 data-about-lead

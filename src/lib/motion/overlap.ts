@@ -8,7 +8,12 @@ import { clampProgress } from "@/lib/motion/scroll-progress";
  *
  * Positions are percentages of a field's own box — the unit GSAP's `xPercent`/`yPercent`
  * take — so the geometry holds at any viewport and can be reasoned about without a DOM.
- * A field is sized at 46% of the stage, so 100 here is 46% of the stage's width.
+ * A field is sized at 58% of the stage, so 100 here is 58% of the stage's width.
+ *
+ * That size is why the offsets look modest. The composition is self-similar — grow the
+ * fields and the same offsets fling them further across the stage in absolute terms — so
+ * making the section grander meant scaling these down, not up, to keep the arrangement on
+ * stage rather than half of it clipped against the edges.
  */
 
 export type FieldPosition = {
@@ -23,9 +28,9 @@ export const FIELD_COUNT = 3;
  * circles is a Venn diagram, and a Venn diagram is a consultancy slide.
  */
 export const FIELD_RESTS: readonly FieldPosition[] = [
-  { x: -62, y: -34 },
-  { x: 40, y: 46 },
-  { x: 78, y: -44 },
+  { x: -45, y: -25 },
+  { x: 29, y: 33 },
+  { x: 56, y: -32 },
 ];
 
 /**
@@ -36,9 +41,9 @@ export const FIELD_RESTS: readonly FieldPosition[] = [
  * is the entire argument, so each keeps a residual offset.
  */
 export const FIELD_FOCUS: readonly FieldPosition[] = [
-  { x: -18, y: -10 },
-  { x: 4, y: 16 },
-  { x: 22, y: -18 },
+  { x: -13, y: -7 },
+  { x: 3, y: 12 },
+  { x: 16, y: -13 },
 ];
 
 const ORIGIN: FieldPosition = { x: 0, y: 0 };
