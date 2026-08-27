@@ -3,6 +3,18 @@
 import { useEffect, useRef } from "react";
 import { liftStrength, liftTransform, stepToward } from "@/lib/motion/cursor-lift";
 
+/**
+ * Headroom for the lift, to be worn by whatever element clips this label.
+ *
+ * The section reveals animate `clip-path` to `inset(0 0 0 0)` and leave it there, and that
+ * clips to the border box — so a letter rising out of the line is simply cut off. Padding
+ * grows the clip box upward and the matching negative margin keeps that growth out of the
+ * layout, so nothing moves and the letters have somewhere to go.
+ *
+ * Comfortably clears LIFT_RISE_PX plus what the tilt adds at the corners.
+ */
+export const EYEBROW_LIFT_HEADROOM = "pt-[18px] -mt-[18px]";
+
 type SectionEyebrowProps = {
   /** What the section is called. */
   label: string;

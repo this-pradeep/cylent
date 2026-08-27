@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { FIELD_COUNT, fieldPosition } from "@/lib/motion/overlap";
 import { STUDIO_LOCATION } from "@/lib/site/studio";
-import { SectionEyebrow } from "@/components/SectionEyebrow";
+import { EYEBROW_LIFT_HEADROOM, SectionEyebrow } from "@/components/SectionEyebrow";
 
 /**
  * Chapter 3 — Our Philosophy. The hero already commits to three disciplines and one studio,
@@ -177,7 +177,7 @@ export function About() {
     >
       <div className="flex flex-col gap-[7vh] px-6 py-[16vh] md:px-[6vw] motion-safe:min-[900px]:sticky motion-safe:min-[900px]:top-0 motion-safe:min-[900px]:h-screen motion-safe:min-[900px]:justify-center motion-safe:min-[900px]:py-0">
         <div className="flex flex-col gap-4">
-          <span data-about-lead className="block">
+          <span data-about-lead className={`block ${EYEBROW_LIFT_HEADROOM}`}>
             <SectionEyebrow label="Who we are" />
           </span>
           <span

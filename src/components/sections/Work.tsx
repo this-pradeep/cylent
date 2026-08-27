@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ImageAsset } from "@/components/ImageAsset";
-import { SectionEyebrow } from "@/components/SectionEyebrow";
+import { EYEBROW_LIFT_HEADROOM, SectionEyebrow } from "@/components/SectionEyebrow";
 import { VideoAsset } from "@/components/VideoAsset";
 import { beatWindow } from "@/lib/motion/chapter-beats";
 import {
@@ -247,7 +247,7 @@ export function Work() {
             className="relative"
           >
             <header className="flex flex-col gap-4 px-6 py-[11vh] md:px-[6vw]">
-              <span data-chapter-masthead className="block">
+              <span data-chapter-masthead className={`block ${EYEBROW_LIFT_HEADROOM}`}>
                 <SectionEyebrow label={discipline.label} />
               </span>
               <h3
