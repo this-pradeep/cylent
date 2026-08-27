@@ -145,7 +145,7 @@ export const PROJECTS: readonly Project[] = [
     ),
     media: {
       kind: "image",
-      src: "/images/zen-data-shastra.png",
+      src: "/images/zen-data-shastra.webp",
       alt: "The Zen Data Shastra website shown on a desktop, laptop, tablet and phone",
       fit: "contain",
     },
