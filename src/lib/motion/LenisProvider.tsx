@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -14,6 +15,28 @@ export function getLenisInstance(): Lenis | null {
 }
 
 export function LenisProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  /**
+   * Re-measure everything when the route changes.
+   *
+   * Navigation here is client-side, and the layout does not unmount across it — the footer
+   * in particular survives every route change. Its ScrollTrigger therefore keeps the start
+   * position it measured on whatever page it was created on, and on the homepage that is
+   * thousands of pixels down a page a work route does not have. The trigger simply never
+   * fires, and the footer's heading stays at the opacity its reveal starts from.
+   *
+   * Deferred by a frame because the new route has to be laid out before there is anything
+   * correct to measure. Lenis is resized alongside, since it caches document height too.
+   */
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      activeLenis?.resize();
+      ScrollTrigger.refresh();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [pathname]);
+
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) {
