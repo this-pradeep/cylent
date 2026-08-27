@@ -18,49 +18,39 @@ const HIGHLIGHT = "remarkable.";
 const SENTENCE = WORDS.join(" ");
 
 /**
- * The closing wash.
+ * The closing wash: a beam cast down from above the frame.
  *
- * Subtractive primaries — cyan, magenta and amber — where Chapter 3 uses additive ones. RGB
- * is how a screen makes colour and CMY is how ink does, so the page's two chromatic moments
- * are the studio's two halves: the thing on the screen and the thing that gets printed.
- * It also buys the one property that actually makes a wash beautiful, which is hue
- * separation. The first pass here ran magenta, violet and cyan — three cool neighbours,
- * stacked near the middle — and three neighbouring hues multiplied together do not make a
- * gradient, they make lavender.
+ * Chapter 3 owns the spread-radial composition — three fields drifting together — so this
+ * one is deliberately not that shape at all. It is top-anchored and directional, with an
+ * obvious light source off the top edge, and the closing line stands in the light rather
+ * than in front of it.
  *
- * Each field owns a corner of the frame and the centre is left to their tails. That is
- * deliberate and it is load-bearing. "remarkable." is set in the accent gradient, and that
- * ramp is luminance-flat at about 0.139 by design, so its contrast is decided entirely by
- * how light the paper under it stays. With the cores this far out the middle lands near 0.64
- * and the ramp holds 3.66:1 against display type. The cliff is close:
+ * Built from ellipses centred *above* the frame rather than from a clipped cone. A polygon
+ * gives the beam hard sides, and hard sides read as a shape rather than as light; an ellipse
+ * whose centre sits off-screen spills downward and outward with no edge anywhere. Hue
+ * travels with distance from that source — amber at the mouth, through magenta, into cyan as
+ * it falls — so the beam has depth without needing three separate objects.
  *
- *   tails of 0.13 each → 3.66:1   ✓
- *   tails of 0.18 each → 3.17:1   ✓
- *   tails of 0.22 each → 2.82:1   ✗  fails the 3:1 large-text minimum
+ * Two layers: a defined core and a wider, fainter spill that lags behind it.
  *
- * So pulling a core toward the centre, or raising the first stop, is not a taste change —
- * it is the headline going illegible. If the wash needs to be denser, the honest move is to
- * take "remarkable." off the gradient and set it in ink.
+ * This geometry also buys back the contrast headroom the three-field version spent. The
+ * density is at the top of the frame while the headline sits at the middle, so the paper
+ * behind "remarkable." stays far lighter than it did — which matters, because that word is
+ * set in the accent gradient and the ramp is luminance-flat, so its legibility is decided
+ * entirely by how light the ground under it is.
  */
-const FIELDS = [
-  { name: "cyan", rgb: "31, 191, 212", x: -34, y: -26 },
-  { name: "amber", rgb: "242, 160, 60", x: 36, y: -24 },
-  { name: "magenta", rgb: "232, 71, 155", x: 2, y: 36 },
+const BEAMS = [
+  {
+    name: "core",
+    gradient:
+      "radial-gradient(ellipse 42% 92% at 50% -10%, rgba(242, 160, 60, 0.52) 0%, rgba(232, 71, 155, 0.36) 34%, rgba(31, 191, 212, 0.17) 62%, transparent 88%)",
+  },
+  {
+    name: "spill",
+    gradient:
+      "radial-gradient(ellipse 82% 104% at 50% -18%, rgba(232, 71, 155, 0.26) 0%, rgba(31, 191, 212, 0.15) 46%, transparent 82%)",
+  },
 ] as const;
-
-/** Five stops: at this size a three-stop radial bands, and banding reads as printed. */
-const FIELD_STOPS: readonly { at: number; alpha: number }[] = [
-  { at: 0, alpha: 0.55 },
-  { at: 26, alpha: 0.34 },
-  { at: 52, alpha: 0.18 },
-  { at: 74, alpha: 0.05 },
-  { at: 90, alpha: 0 },
-];
-
-function fieldGradient(rgb: string): string {
-  const stops = FIELD_STOPS.map(({ at, alpha }) => `rgba(${rgb}, ${alpha}) ${at}%`).join(", ");
-  return `radial-gradient(circle at 50% 50%, ${stops})`;
-}
 
 export function Future() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -70,7 +60,7 @@ export function Future() {
     if (!section) return;
 
     const words = Array.from(section.querySelectorAll<HTMLElement>("[data-future-word]"));
-    const fields = Array.from(section.querySelectorAll<HTMLElement>("[data-future-field]"));
+    const beams = Array.from(section.querySelectorAll<HTMLElement>("[data-future-beam]"));
     if (words.length === 0) return;
 
     const mm = gsap.matchMedia();
@@ -84,18 +74,9 @@ export function Future() {
       (context) => {
         const { held, still } = context.conditions as Record<string, boolean>;
 
-        // Placement lives in GSAP's transform, not in Tailwind translate utilities. GSAP
-        // writes `transform` wholesale, so a class-based translate would be clobbered the
-        // first time a field was scaled. The -50 is the centring; the rest is the layout.
-        fields.forEach((field, index) => {
-          const spot = FIELDS[index];
-          if (!spot) return;
-          gsap.set(field, { xPercent: -50 + spot.x, yPercent: -50 + spot.y });
-        });
-
         if (still) {
           gsap.set(words, { yPercent: 0, opacity: 1 });
-          gsap.set(fields, { scale: 1, opacity: 1 });
+          gsap.set(beams, { scaleY: 1, opacity: 1 });
           return;
         }
 
@@ -124,15 +105,21 @@ export function Future() {
           0,
         );
 
-        // The bloom trails the words rather than leading them — the sentence earns the
-        // colour — and each field opens at its own rate so the wash never reads as one disc
-        // being scaled. Blooming outward, where Chapter 3 gathers inward.
-        fields.forEach((field, index) => {
+        // The beam trails the words rather than leading them — the sentence earns the
+        // light. It extends from the top edge downward, so the origin is the mouth of the
+        // beam and not its middle; the spill lags the core so the light arrives with depth.
+        beams.forEach((beam, index) => {
           timeline.fromTo(
-            field,
-            { scale: 0.3, opacity: 0 },
-            { scale: 1, opacity: 1, duration: 0.72 + index * 0.08, ease: "power2.out" },
-            0.16 + index * 0.06,
+            beam,
+            { scaleY: 0.34, opacity: 0, transformOrigin: "50% 0%" },
+            {
+              scaleY: 1,
+              opacity: 1,
+              duration: 0.76 + index * 0.1,
+              ease: "power2.out",
+              transformOrigin: "50% 0%",
+            },
+            0.16 + index * 0.1,
           );
         });
 
@@ -157,12 +144,12 @@ export function Future() {
         {/* No z-index: an explicit one would form a second stacking context and isolate the
             blend all over again. Paint order comes from the heading carrying z-10. */}
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
-          {FIELDS.map((field) => (
+          {BEAMS.map((beam) => (
             <span
-              key={field.name}
-              data-future-field
-              className="absolute left-1/2 top-1/2 block aspect-square w-[86%] min-w-[600px] mix-blend-multiply will-change-transform"
-              style={{ backgroundImage: fieldGradient(field.rgb) }}
+              key={beam.name}
+              data-future-beam
+              className="absolute inset-0 block mix-blend-multiply will-change-transform"
+              style={{ backgroundImage: beam.gradient }}
             />
           ))}
         </div>
