@@ -18,53 +18,34 @@ const HIGHLIGHT = "remarkable.";
 const SENTENCE = WORDS.join(" ");
 
 /**
- * The closing wash: a beam cast down from a source above the frame.
+ * The closing wash: a beam cast down from above the frame.
  *
  * Chapter 3 owns the spread-radial composition, so this one is deliberately not that shape.
  * It is top-anchored and directional, and the closing line stands in the light rather than
  * in front of it.
  *
- * The cone is cut by a conic gradient used as a mask, not by a clip-path polygon. A polygon
- * gives the beam hard sides and hard sides read as a triangle rather than as light; a conic
- * mask spreads from the same apex but its edges fall off over a few degrees, so the beam has
- * a real shape and no visible boundary. (An earlier pass tried to solve the hard sides by
- * dropping the cone for off-screen ellipses — that removed the edges by removing the beam.)
+ * The cone is a clip-path polygon with defined sides. An earlier pass softened those sides
+ * with a wide conic mask and added a glow around the mouth; both were arguing with the
+ * shape, and together they turned the beam into haze. The edges are meant to be legible —
+ * this is a beam, not an atmosphere.
  *
- * In CSS conic terms 0deg points up, so the wedge is centred on 180deg: opaque across 40
- * degrees, feathered over 18 either side. Those numbers are the difference between a beam
- * and a haze — a narrow core inside a wide feather has no visible taper at all, it just
- * reads as a bright spine. At this spread the cone is about 20px across where it enters the
- * frame and roughly 700px at the foot of a tall viewport, which is the taper doing the work.
+ * The fall carries colour to the bottom edge rather than dissolving before it. Fading out
+ * early left the beam hanging in the middle of the section with clear paper beneath it,
+ * which reads as an unfinished gradient rather than as light reaching the floor.
  *
- * Hue travels down the fall rather than across it — amber at the mouth, magenta through the
- * middle, cyan as it disperses — so the beam reads as light cooling with distance.
+ * Hue travels down the fall — amber at the mouth, magenta through the middle, cyan as it
+ * disperses — so the light cools with distance.
  */
-const BEAM_APEX = "50% -6%";
+const BEAM_GRADIENT =
+  "linear-gradient(to bottom," +
+  " rgba(242, 160, 60, 0.5) 0%," +
+  " rgba(232, 71, 155, 0.32) 38%," +
+  " rgba(31, 191, 212, 0.16) 68%," +
+  " rgba(31, 191, 212, 0.07) 100%)";
 
-const BEAM_CONE =
-  `conic-gradient(from 0deg at ${BEAM_APEX},` +
-  " transparent 142deg, rgba(0,0,0,0.5) 156deg, #000 160deg," +
-  " #000 200deg, rgba(0,0,0,0.5) 204deg, transparent 218deg)";
-
-const BEAMS = [
-  {
-    name: "core",
-    /** Cut to the cone. This is the beam itself. */
-    cone: true,
-    gradient:
-      "linear-gradient(to bottom, rgba(242, 160, 60, 0.6) 0%, rgba(232, 71, 155, 0.4) 34%," +
-      " rgba(31, 191, 212, 0.2) 62%, transparent 92%)",
-  },
-  {
-    name: "mouth",
-    /** Uncut: the glow around the source, which seats the beam instead of letting it start
-        out of nowhere at the top edge. */
-    cone: false,
-    gradient:
-      "radial-gradient(ellipse 46% 40% at 50% -8%, rgba(242, 160, 60, 0.34) 0%," +
-      " rgba(232, 71, 155, 0.16) 46%, transparent 78%)",
-  },
-] as const;
+/** Narrow at the mouth, past the frame edges at the foot. */
+const BEAM_CLOSED = "polygon(44% 0%, 56% 0%, 78% 100%, 22% 100%)";
+const BEAM_OPEN = "polygon(30% 0%, 70% 0%, 108% 100%, -8% 100%)";
 
 export function Future() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -74,7 +55,7 @@ export function Future() {
     if (!section) return;
 
     const words = Array.from(section.querySelectorAll<HTMLElement>("[data-future-word]"));
-    const beams = Array.from(section.querySelectorAll<HTMLElement>("[data-future-beam]"));
+    const beam = section.querySelector<HTMLElement>("[data-future-beam]");
     if (words.length === 0) return;
 
     const mm = gsap.matchMedia();
@@ -90,7 +71,7 @@ export function Future() {
 
         if (still) {
           gsap.set(words, { yPercent: 0, opacity: 1 });
-          gsap.set(beams, { scaleX: 1, scaleY: 1, opacity: 1 });
+          if (beam) gsap.set(beam, { clipPath: BEAM_OPEN, opacity: 1 });
           return;
         }
 
@@ -120,23 +101,17 @@ export function Future() {
         );
 
         // The beam trails the words rather than leading them — the sentence earns the
-        // light. It widens and lengthens from the apex, so the origin is the mouth and not
-        // the middle, and the glow lags the beam so the source lights before the fall does.
-        beams.forEach((beam, index) => {
+        // light. The cone itself opens, rather than a fixed shape being scaled: both
+        // polygons carry the same four points in the same units, so the sides sweep outward
+        // from the mouth as it widens.
+        if (beam) {
           timeline.fromTo(
             beam,
-            { scaleX: 0.42, scaleY: 0.55, opacity: 0, transformOrigin: "50% 0%" },
-            {
-              scaleX: 1,
-              scaleY: 1,
-              opacity: 1,
-              duration: 0.78 + index * 0.1,
-              ease: "power2.out",
-              transformOrigin: "50% 0%",
-            },
-            0.16 + index * 0.1,
+            { clipPath: BEAM_CLOSED, opacity: 0 },
+            { clipPath: BEAM_OPEN, opacity: 1, duration: 0.82, ease: "power2.out" },
+            0.16,
           );
-        });
+        }
 
         return () => {
           timeline.scrollTrigger?.kill();
@@ -159,20 +134,11 @@ export function Future() {
         {/* No z-index: an explicit one would form a second stacking context and isolate the
             blend all over again. Paint order comes from the heading carrying z-10. */}
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
-          {BEAMS.map((beam) => (
-            <span
-              key={beam.name}
-              data-future-beam
-              className="absolute inset-0 block mix-blend-multiply will-change-transform"
-              style={{
-                backgroundImage: beam.gradient,
-                // Both spellings: Safari still wants the prefixed property for masks.
-                ...(beam.cone
-                  ? { maskImage: BEAM_CONE, WebkitMaskImage: BEAM_CONE }
-                  : {}),
-              }}
-            />
-          ))}
+          <span
+            data-future-beam
+            className="absolute inset-0 block mix-blend-multiply"
+            style={{ backgroundImage: BEAM_GRADIENT, clipPath: BEAM_OPEN }}
+          />
         </div>
 
         {/* The display size lives here, not on a child. `ch` resolves against the element's
