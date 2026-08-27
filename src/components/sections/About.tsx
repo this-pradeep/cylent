@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { FIELD_COUNT, fieldPosition } from "@/lib/motion/overlap";
 import { STUDIO_LOCATION } from "@/lib/site/studio";
+import { SectionEyebrow } from "@/components/SectionEyebrow";
 
 /**
  * Chapter 3 — Our Philosophy. The hero already commits to three disciplines and one studio,
@@ -171,16 +172,14 @@ export function About() {
     <section
       ref={sectionRef}
       id="about"
+      data-eyebrow-surface
       className="relative isolate bg-surface motion-safe:min-[900px]:h-[190vh]"
     >
       <div className="flex flex-col gap-[7vh] px-6 py-[16vh] md:px-[6vw] motion-safe:min-[900px]:sticky motion-safe:min-[900px]:top-0 motion-safe:min-[900px]:h-screen motion-safe:min-[900px]:justify-center motion-safe:min-[900px]:py-0">
         <div className="flex flex-col gap-4">
-          <p
-            data-about-lead
-            className="m-0 font-mono text-[0.65rem] uppercase tracking-[0.22em] text-ink-muted"
-          >
-            Section 02 — Who we are
-          </p>
+          <span data-about-lead className="block">
+            <SectionEyebrow index="02" label="Who we are" />
+          </span>
           <span
             data-about-rule
             aria-hidden="true"

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ImageAsset } from "@/components/ImageAsset";
+import { SectionEyebrow } from "@/components/SectionEyebrow";
 import { VideoAsset } from "@/components/VideoAsset";
 import { beatWindow } from "@/lib/motion/chapter-beats";
 import {
@@ -238,14 +239,17 @@ export function Work() {
         if (!lead) return null;
 
         return (
-          <article key={discipline.id} id={discipline.id} data-chapter className="relative">
+          <article
+            key={discipline.id}
+            id={discipline.id}
+            data-chapter
+            data-eyebrow-surface
+            className="relative"
+          >
             <header className="flex flex-col gap-4 px-6 py-[11vh] md:px-[6vw]">
-              <p
-                data-chapter-masthead
-                className="m-0 font-mono text-[0.65rem] uppercase tracking-[0.22em] text-ink-muted"
-              >
-                0{disciplineIndex + 1} — {discipline.label}
-              </p>
+              <span data-chapter-masthead className="block">
+                <SectionEyebrow index={`0${disciplineIndex + 1}`} label={discipline.label} />
+              </span>
               <h3
                 data-chapter-masthead
                 className="m-0 text-[clamp(2.25rem,6vw,4.75rem)] font-semibold leading-[0.94] tracking-[-0.045em] text-ink"
