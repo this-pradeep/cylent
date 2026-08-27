@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { markLoaderReady } from "@/lib/motion/loader-ready";
-import { LoaderOrb } from "@/components/three/LoaderOrb";
 import {
   LOADER_TRIAD,
   greetingForHour,
@@ -25,9 +24,6 @@ export function Loader() {
   const fillRef = useRef<HTMLSpanElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
   const progressRowRef = useRef<HTMLDivElement>(null);
-  const lensRef = useRef<HTMLDivElement>(null);
-  /** Written every frame, read by the orb's own loop. Never a prop — see LoaderOrb. */
-  const progressRef = useRef(0);
 
   const [visible, setVisible] = useState(true);
   const [greeting, setGreeting] = useState("Hello.");
@@ -90,17 +86,12 @@ export function Loader() {
         clipPath: `inset(0 ${100 - percent}% 0 0)`,
       });
 
-      progressRef.current = percent;
-      // The CSS lens is the no-WebGL fallback; it reads --p for scale, bloom, rim and
-      // specular, so one property carries the lot.
-      lensRef.current?.style.setProperty("--p", (percent / 100).toFixed(4));
-
       const count = wordsRevealed(percent);
       for (let i = 0; i < count; i++) revealWord(i, instant);
     };
 
     if (prefersReducedMotion) {
-      gsap.set([metaRef.current, greetingEl, progressRowRef.current, lensRef.current], {
+      gsap.set([metaRef.current, greetingEl, progressRowRef.current], {
         opacity: 1,
         yPercent: 0,
       });
@@ -122,14 +113,12 @@ export function Loader() {
     gsap.set(words, { yPercent: 115, opacity: 0 });
     gsap.set(progressRowRef.current, { opacity: 0 });
     gsap.set(fill, { clipPath: "inset(0 100% 0 0)" });
-    gsap.set(lensRef.current, { opacity: 0 });
 
     const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
     intro
       .to(metaRef.current, { opacity: 1, duration: 0.7 }, 0.1)
       .to(greetingEl, { yPercent: 0, duration: 1.05 }, 0.15)
-      .to(progressRowRef.current, { opacity: 1, duration: 0.6 }, 0.7)
-      .to(lensRef.current, { opacity: 1, duration: 0.9 }, 0.25);
+      .to(progressRowRef.current, { opacity: 1, duration: 0.6 }, 0.7);
 
     applyProgress(0);
 
@@ -168,13 +157,6 @@ export function Loader() {
           [metaRef.current, progressRowRef.current],
           { opacity: 0, duration: 0.45, ease: "power2.out" },
           "<0.1",
-        )
-        // The lens opens out and goes with the type rather than fading on its own — the
-        // loader hands over in one movement, it does not dissolve into the next screen.
-        .to(
-          lensRef.current,
-          { "--exit": 1.35, opacity: 0, duration: 0.7, ease: "power2.inOut" },
-          "<0.05",
         )
         .add(markLoaderReady, "<0.25")
         .to(
@@ -234,15 +216,6 @@ export function Loader() {
         >
           <span>Cylent Solutions</span>
           <span className="tabular-nums">{clock}</span>
-        </div>
-
-        {/* Centred, and behind the type in paint order — the composition is bottom-left
-            weighted and the orb is the thing being watched, not the thing being read. */}
-        <div
-          ref={lensRef}
-          className="loader-orb absolute left-1/2 top-1/2 aspect-square w-[clamp(210px,27vw,360px)]"
-        >
-          <LoaderOrb progressRef={progressRef} className="h-full w-full" />
         </div>
 
         <span className="block overflow-hidden pb-[0.12em]">
