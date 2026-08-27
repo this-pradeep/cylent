@@ -83,17 +83,30 @@ export default async function DisciplineWorkPage({ params }: PageProps) {
                   alt={project.media.alt}
                   aspectRatio="16:9"
                   priority={index === 0}
+                  fit={project.media.fit}
+                  className={project.media.fit === "contain" ? "bg-panel" : undefined}
                 />
               )}
             </div>
 
             <div className="flex flex-col gap-3 min-[900px]:w-[42%]">
               <p className="m-0 font-mono text-[0.5625rem] uppercase tracking-[0.2em] text-ink-muted">
-                {project.sector}
+                {project.client ? `${project.client} · ${project.sector}` : project.sector}
               </p>
               <p className="m-0 text-[clamp(1.25rem,2.6vw,1.75rem)] font-semibold leading-[1.25] tracking-[-0.03em] text-ink">
                 {projectLine(project)}
               </p>
+              {project.url ? (
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1 inline-flex w-fit items-center gap-2 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-ink-muted transition-colors hover:text-ink"
+                >
+                  Visit the site
+                  <Arrow className="h-3 w-3" />
+                </a>
+              ) : null}
             </div>
           </li>
         ))}

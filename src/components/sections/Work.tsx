@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ActionLink } from "@/components/ActionLink";
+import { Arrow } from "@/components/icons/Arrow";
 import { ImageAsset } from "@/components/ImageAsset";
 import { EYEBROW_LIFT_HEADROOM, SectionEyebrow } from "@/components/SectionEyebrow";
 import { VideoAsset } from "@/components/VideoAsset";
@@ -40,9 +41,22 @@ import {
  * across a section boundary can.
  */
 function LeadFrame({ project, priority }: { project: LeadProject; priority: boolean }) {
+  // A product shot is not a photograph and must not be treated as one. Cropping it to fill
+  // cuts the device, and the grade that makes white type legible over a photo would take a
+  // screenshot down to nothing. Contained shots sit whole on the ink ground, the type keeps
+  // clear of them, and no grade is needed — surface on ink is 17:1 without help.
+  const contained = project.media.kind === "image" && project.media.fit === "contain";
+
   return (
     <div className="relative flex h-svh min-h-[560px] flex-col justify-end overflow-hidden bg-ink motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen">
-      <div data-chapter-plate className="absolute inset-0 motion-safe:min-[820px]:-inset-y-[4%]">
+      <div
+        data-chapter-plate
+        className={
+          contained
+            ? "absolute inset-x-6 top-[8vh] bottom-[38vh] md:inset-x-[6vw] min-[820px]:bottom-[34vh]"
+            : "absolute inset-0 motion-safe:min-[820px]:-inset-y-[4%]"
+        }
+      >
         {project.media.kind === "video" ? (
           <VideoAsset src={project.media.src} aspectRatio="fill" />
         ) : (
@@ -51,6 +65,7 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
             alt={project.media.alt}
             aspectRatio="fill"
             priority={priority}
+            fit={project.media.fit}
           />
         )}
       </div>
@@ -66,11 +81,15 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
           failed — the gradient had faded to 0.35 while the text was still 15px.
 
           If the real photography comes in dark, the flat layer is the dial to drop. */}
-      <div aria-hidden="true" className="absolute inset-0 bg-ink/[0.78]" />
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-[62%] bg-[linear-gradient(to_top,rgba(20,18,15,0.68)_0%,rgba(20,18,15,0.42)_38%,transparent_100%)]"
-      />
+      {!contained && (
+        <>
+          <div aria-hidden="true" className="absolute inset-0 bg-ink/[0.78]" />
+          <div
+            aria-hidden="true"
+            className="absolute inset-x-0 bottom-0 h-[62%] bg-[linear-gradient(to_top,rgba(20,18,15,0.68)_0%,rgba(20,18,15,0.42)_38%,transparent_100%)]"
+          />
+        </>
+      )}
 
       <div className="relative flex flex-col gap-8 px-6 pb-[9vh] md:px-[6vw] min-[820px]:flex-row min-[820px]:items-end min-[820px]:justify-between min-[820px]:gap-[6vw]">
         <div className="flex flex-col gap-4">
@@ -78,7 +97,7 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
             data-chapter-lead
             className="m-0 font-mono text-[0.65rem] uppercase tracking-[0.22em] text-surface/70"
           >
-            {project.sector}
+            {project.client ? `${project.client} · ${project.sector}` : project.sector}
           </p>
           <h4
             data-chapter-lead
@@ -86,6 +105,22 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
           >
             {project.headline}
           </h4>
+
+          {project.url ? (
+            <a
+              data-chapter-lead
+              href={project.url}
+              target="_blank"
+              rel="noreferrer"
+              className="cbtn inline-flex w-fit items-center gap-2 font-mono text-[0.625rem] uppercase tracking-[0.18em] text-surface/70 transition-colors hover:text-surface"
+            >
+              Visit the site
+              <span className="relative grid h-3 w-3 place-items-center overflow-hidden">
+                <Arrow className="cbtn-arrow cbtn-arrow-one h-3 w-3" />
+                <Arrow className="cbtn-arrow cbtn-arrow-two absolute h-3 w-3" />
+              </span>
+            </a>
+          ) : null}
         </div>
 
         <dl className="m-0 flex max-w-[42ch] flex-col gap-4 min-[820px]:max-w-[34ch]">
@@ -121,7 +156,7 @@ function SupportingRow({ projects }: { projects: SupportingProject[] }) {
           )}
           <div className="flex flex-col gap-1.5">
             <p className="m-0 font-mono text-[0.5625rem] uppercase tracking-[0.2em] text-ink-muted">
-              {project.sector}
+              {project.client ? `${project.client} · ${project.sector}` : project.sector}
             </p>
             <p className="m-0 text-[1.0625rem] font-semibold leading-[1.3] tracking-[-0.02em] text-ink">
               {project.summary}

@@ -64,14 +64,29 @@ export type ProjectBeat = {
 };
 
 export type ProjectMedia =
-  | { kind: "image"; src: string; alt: string }
-  | { kind: "video"; src: string; alt?: undefined };
+  | {
+      kind: "image";
+      src: string;
+      alt: string;
+      /**
+       * "cover" for a photograph, which can be cropped to fill a frame. "contain" for a
+       * product shot, which cannot — cropping a device mockup cuts the device. It also
+       * decides how the lead frame is composed: a contained shot sits on the ink ground
+       * with the type beside it, where a photograph is graded and carries the type on top.
+       */
+      fit?: "cover" | "contain";
+    }
+  | { kind: "video"; src: string; alt?: undefined; fit?: undefined };
 
 type BaseProject = {
   slug: string;
   discipline: Discipline;
-  /** What kind of work it was. The visible identifier until real client names exist. */
+  /** What kind of work it was. */
   sector: string;
+  /** Who it was for. Present once there is a real client to name — never a placeholder. */
+  client?: string;
+  /** The live site, where there is one to link to. */
+  url?: string;
   media: ProjectMedia;
 };
 
@@ -110,22 +125,27 @@ const beats = (
 
 export const PROJECTS: readonly Project[] = [
   {
-    slug: "hospitality-group",
+    slug: "zen-data-shastra",
     discipline: "web",
     lead: true,
-    sector: "Hospitality",
-    headline: "Three properties,\none system.",
+    client: "Zen Data Shastra",
+    sector: "AI & analytics",
+    url: "https://zendatashastra.com/",
+    headline: "One proposition,\nevery screen.",
+    // ⚠ These four are mine and grounded only in what the finished site shows. The Result in
+    // particular is a fact, not an outcome — replace it with something the engagement
+    // actually produced.
     beats: beats(
-      "A boutique group whose three properties shared nothing but a parent name.",
-      "One identity settled first, then the builds — never the other way round.",
-      "A single design system carrying three distinct property characters.",
-      "One presence across every guest touchpoint.",
+      "A consultancy with real delivery behind it and nothing online that said so.",
+      "The proposition settled first — the objection the client's buyers actually voice — then the site built around it.",
+      "A responsive marketing site that opens on that objection instead of on a capability list.",
+      "Live at zendatashastra.com.",
     ),
-    // Unsplash License (unsplash.com/photo-1758193783649-13371d7fb8dd)
     media: {
       kind: "image",
-      src: "/images/proof-project-one-hotel.jpg",
-      alt: "Elegant boutique hotel lobby interior",
+      src: "/images/zen-data-shastra.png",
+      alt: "The Zen Data Shastra website shown on a desktop, laptop, tablet and phone",
+      fit: "contain",
     },
   },
   {

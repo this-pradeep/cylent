@@ -9,6 +9,12 @@ type ImageAssetProps = {
   priority?: boolean;
   /** Defaults suit a half-width figure; a full-bleed frame must say so or it is served an undersized file. */
   sizes?: string;
+  /**
+   * "cover" fills and crops, which is right for a photograph. "contain" fits the whole
+   * frame in, which is the only correct treatment for a product shot — cropping a device
+   * mockup cuts the device.
+   */
+  fit?: "cover" | "contain";
 };
 
 const ASPECT_CLASS: Record<ImageAssetProps["aspectRatio"], string> = {
@@ -29,6 +35,7 @@ export function ImageAsset({
   className,
   priority,
   sizes,
+  fit = "cover",
 }: ImageAssetProps) {
   const isFill = aspectRatio === "fill";
 
@@ -43,7 +50,7 @@ export function ImageAsset({
         alt={alt}
         fill
         sizes={sizes ?? (isFill ? "100vw" : "(min-width: 768px) 50vw, 100vw")}
-        className="object-cover"
+        className={fit === "contain" ? "object-contain" : "object-cover"}
         priority={priority}
       />
     </div>

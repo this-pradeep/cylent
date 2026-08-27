@@ -147,3 +147,31 @@ describe("projectLine", () => {
     });
   });
 });
+
+describe("real work", () => {
+  it("names a client wherever there is one to name", () => {
+    PROJECTS.forEach((project) => {
+      if (project.client === undefined) return;
+      expect(project.client.trim().length).toBeGreaterThan(0);
+      // The whole reason `name` was removed: a placeholder dressed as a client is worse
+      // than no client at all.
+      expect(project.client).not.toMatch(/^Project\b/i);
+    });
+  });
+
+  it("links only to real absolute destinations", () => {
+    PROJECTS.forEach((project) => {
+      if (project.url === undefined) return;
+      expect(project.url).toMatch(/^https:\/\//);
+    });
+  });
+
+  it("never crops a product shot", () => {
+    // A contained shot is contained everywhere it appears; cropping a device mockup to
+    // fill a frame cuts the device in half.
+    PROJECTS.forEach((project) => {
+      if (project.media.kind !== "image") return;
+      expect(["cover", "contain", undefined]).toContain(project.media.fit);
+    });
+  });
+});
