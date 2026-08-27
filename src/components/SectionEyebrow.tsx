@@ -4,15 +4,11 @@ import { useEffect, useRef } from "react";
 import { liftStrength, liftTransform, stepToward } from "@/lib/motion/cursor-lift";
 
 type SectionEyebrowProps = {
-  /** The section's number, shown at full ink. */
-  index: string;
-  /** What the section is called, shown muted beside it. */
+  /** What the section is called. */
   label: string;
   /** Extra classes for the wrapper — spacing belongs to the caller, not here. */
   className?: string;
 };
-
-const SEPARATOR = " — ";
 
 /**
  * The section label, shared by About and by every Work chapter. The two had drifted into
@@ -26,7 +22,7 @@ const SEPARATOR = " — ";
  * reduced motion, and in both cases the label simply sits there fully legible — the effect
  * is a reward for having a cursor, never a requirement for reading it.
  */
-export function SectionEyebrow({ index, label, className }: SectionEyebrowProps) {
+export function SectionEyebrow({ label, className }: SectionEyebrowProps) {
   const rootRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -116,9 +112,9 @@ export function SectionEyebrow({ index, label, className }: SectionEyebrowProps)
         letter.style.color = "";
       });
     };
-  }, [index, label]);
+  }, [label]);
 
-  const characters = `${index}${SEPARATOR}${label}`.split("");
+  const characters = label.split("");
 
   return (
     <span
@@ -127,16 +123,14 @@ export function SectionEyebrow({ index, label, className }: SectionEyebrowProps)
     >
       {/* Announced once, as a phrase. A row of individually transformed letters is not
           reliably read as one label. */}
-      <span className="sr-only">{`${index}${SEPARATOR}${label}`}</span>
+      <span className="sr-only">{label}</span>
 
       <span aria-hidden="true" className="flex">
         {characters.map((character, position) => (
           <span
             key={`${character}-${position}`}
             data-eyebrow-letter
-            className={`inline-block whitespace-pre will-change-transform ${
-              position < index.length ? "tabular-nums text-ink" : ""
-            }`}
+            className="inline-block whitespace-pre will-change-transform"
           >
             {character}
           </span>

@@ -248,7 +248,7 @@ export function Work() {
           >
             <header className="flex flex-col gap-4 px-6 py-[11vh] md:px-[6vw]">
               <span data-chapter-masthead className="block">
-                <SectionEyebrow index={`0${disciplineIndex + 1}`} label={discipline.label} />
+                <SectionEyebrow label={discipline.label} />
               </span>
               <h3
                 data-chapter-masthead
