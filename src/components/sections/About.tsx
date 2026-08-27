@@ -27,28 +27,42 @@ import { EYEBROW_LIFT_HEADROOM, SectionEyebrow } from "@/components/SectionEyebr
  * combining is the claim rather than a decoration of it. Video takes red for the record
  * light.
  *
- * Shades, not primaries — raspberry, jade and azure rather than #f00/#0f0/#00f, which would
- * read as a test card. This is a deliberate departure from the one-accent rule in
- * design-principles.md: the accent gradient still owns every hairline and every piece of
- * accented type on the page, and these three are material for one section only.
+ * Vivid rather than tinted. Multiplied over a warm paper ground these read as stained glass
+ * — saturated where a single field owns the space, deepening where two or three cross. The
+ * earlier muted shades were doing neither job: too weak to be a colour, too flat to be
+ * glass.
  *
- * Carried as bare channels rather than finished colours so the core and halo stops can be
- * written directly instead of patched out of each other with string replacement.
+ * This is a deliberate departure from the one-accent rule in design-principles.md. The
+ * accent gradient still owns every hairline and every piece of accented type on the page;
+ * these three are material for one section only.
  */
 const FIELDS = [
-  { label: "Websites", rgb: "74, 114, 245" },
-  { label: "Videos", rgb: "228, 80, 110" },
-  { label: "Designs", rgb: "45, 190, 126" },
+  { label: "Websites", rgb: "76, 111, 255" },
+  { label: "Videos", rgb: "255, 78, 122" },
+  { label: "Designs", rgb: "31, 217, 160" },
 ] as const;
 
 /**
- * Alphas are capped by what the payoff line needs to survive. Multiplying three fields at
- * 0.35 each puts the intersection near rgb(129, 139, 161), which holds ink at about 5.3:1;
- * at the 0.5 the earlier tints used, saturated primaries would take it far darker and the
- * ink would start to fail on the one word the section exists to deliver.
+ * Five stops rather than three. A radial gradient with few stops bands visibly once it is
+ * this large, and the banding is what makes a wash look printed instead of lit.
+ *
+ * The core alpha is capped by what the payoff line needs. Three fields multiplying at 0.30
+ * each put the intersection near rgb(145, 156, 185), which holds ink at about 6.8:1; the
+ * ceiling before ink starts to fail is a long way above that, but the cores are already as
+ * saturated as glass wants to be.
  */
-const FIELD_CORE_ALPHA = 0.42;
-const FIELD_HALO_ALPHA = 0.2;
+const FIELD_STOPS: readonly { at: number; alpha: number }[] = [
+  { at: 0, alpha: 0.62 },
+  { at: 26, alpha: 0.4 },
+  { at: 52, alpha: 0.18 },
+  { at: 74, alpha: 0.05 },
+  { at: 90, alpha: 0 },
+];
+
+function fieldGradient(rgb: string): string {
+  const stops = FIELD_STOPS.map(({ at, alpha }) => `rgba(${rgb}, ${alpha}) ${at}%`).join(", ");
+  return `radial-gradient(circle at 50% 50%, ${stops})`;
+}
 
 export function About() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -175,8 +189,30 @@ export function About() {
       data-eyebrow-surface
       className="relative isolate bg-surface motion-safe:min-[900px]:h-[190vh]"
     >
-      <div className="flex flex-col gap-[7vh] px-6 py-[16vh] md:px-[6vw] motion-safe:min-[900px]:sticky motion-safe:min-[900px]:top-0 motion-safe:min-[900px]:h-screen motion-safe:min-[900px]:justify-center motion-safe:min-[900px]:py-0">
-        <div className="flex flex-col gap-4">
+      {/* The wrapper paints its own ground, and that is load-bearing. `position: sticky`
+          creates a stacking context, which is an isolation boundary for blending — without
+          a background of its own here the fields would have nothing to multiply against and
+          would composite as flat washes instead of glass. */}
+      <div className="relative flex flex-col gap-[7vh] overflow-hidden bg-surface px-6 py-[16vh] md:px-[6vw] motion-safe:min-[900px]:sticky motion-safe:min-[900px]:top-0 motion-safe:min-[900px]:h-screen motion-safe:min-[900px]:justify-center motion-safe:min-[900px]:py-0">
+        {/* Full bleed, behind everything. No z-index: an explicit one would form a second
+            stacking context and isolate the blend all over again. Paint order comes from the
+            content carrying z-10. */}
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
+          {FIELDS.map((field) => (
+            <span
+              key={field.label}
+              data-about-field
+              className="absolute left-1/2 top-1/2 block aspect-square w-[78%] min-w-[520px] mix-blend-multiply will-change-transform"
+              style={{
+                // A falloff, not a circle. There is no edge to read, which is what keeps
+                // three overlapping fields from reading as a Venn diagram.
+                backgroundImage: fieldGradient(field.rgb),
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="relative z-10 flex flex-col gap-4">
           <span data-about-lead className={`block ${EYEBROW_LIFT_HEADROOM}`}>
             <SectionEyebrow label="Who we are" />
           </span>
@@ -187,73 +223,50 @@ export function About() {
           />
         </div>
 
-        {/* The stage. Fields sit behind the type in their own layer so the multiply blend
-            darkens the ground and never the words. */}
-        <div className="relative min-h-[72vh] min-[900px]:min-h-[64vh]">
-          {/* No z-index here on purpose. A positioned element with an explicit z-index
-              forms a stacking context, and a stacking context is an isolation boundary for
-              blending — the fields would multiply with each other but not with the surface
-              they sit on. Paint order comes from the content's z-10 instead. */}
-          <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
-            {FIELDS.map((field) => (
-              <span
-                key={field.label}
-                data-about-field
-                className="absolute left-1/2 top-1/2 block aspect-square w-[58%] min-w-[340px] mix-blend-multiply will-change-transform"
-                style={{
-                  // A radial falloff, not a circle. There is no edge to read, which is what
-                  // keeps three overlapping fields from reading as a Venn diagram.
-                  backgroundImage: `radial-gradient(circle at 50% 50%, rgba(${field.rgb}, ${FIELD_CORE_ALPHA}) 0%, rgba(${field.rgb}, ${FIELD_HALO_ALPHA}) 42%, transparent 72%)`,
-                }}
-              />
-            ))}
-          </div>
+        <div className="relative z-10 flex flex-col gap-6">
+          <p
+            data-about-setup
+            className="m-0 max-w-[26ch] text-[clamp(1.0625rem,2.4vw,1.5rem)] font-medium leading-[1.35] tracking-[-0.025em] text-ink-muted"
+          >
+            What you need rarely fits one job description.
+          </p>
 
-          <div className="relative z-10 flex h-full flex-col justify-center gap-6">
-            <p
-              data-about-setup
-              className="m-0 max-w-[26ch] text-[clamp(1.0625rem,2.4vw,1.5rem)] font-medium leading-[1.35] tracking-[-0.025em] text-ink-muted"
-            >
-              What you need rarely fits one job description.
+          {/* Ink, not the gradient. The fields darken the ground beneath these words by an
+              amount that depends on how far the gather has run, and the accent ramp is only
+              guaranteed legible down to --color-panel. */}
+          <p
+            data-about-payoff
+            className="m-0 max-w-[12ch] text-[clamp(2.75rem,9vw,8rem)] font-semibold leading-[0.9] tracking-[-0.05em] text-ink will-change-transform"
+          >
+            The answer lives in the overlap.
+          </p>
+
+          <div className="flex flex-col gap-3">
+            <p className="m-0 max-w-[38ch] text-[0.9375rem] leading-[1.75] text-ink-muted">
+              Hire three specialists and you get three answers — plus the job of making them
+              agree. Nobody quotes for that job. It lands on you.
             </p>
-
-            {/* Ink, not the gradient. The fields darken the ground beneath these words by an
-                amount that depends on how far the gather has run, and the accent ramp is
-                only guaranteed legible down to --color-panel. */}
             <p
-              data-about-payoff
-              className="m-0 max-w-[12ch] text-[clamp(2.75rem,9vw,8rem)] font-semibold leading-[0.9] tracking-[-0.05em] text-ink will-change-transform"
+              data-about-lead
+              className="m-0 font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-ink-muted"
             >
-              The answer lives in the overlap.
+              A creative studio in {STUDIO_LOCATION}
             </p>
-
-            <div className="flex flex-col gap-3">
-              <p className="m-0 max-w-[38ch] text-[0.9375rem] leading-[1.75] text-ink-muted">
-                Hire three specialists and you get three answers — plus the job of making
-                them agree. Nobody quotes for that job. It lands on you.
-              </p>
-              <p
-                data-about-lead
-                className="m-0 font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-ink-muted"
-              >
-                A creative studio in {STUDIO_LOCATION}
-              </p>
-            </div>
           </div>
+        </div>
 
-          {/* Named at the outer edge of each field, as annotations rather than set labels
-              printed inside circles. */}
-          <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-20 hidden min-[900px]:block">
-            <span data-about-label className="absolute left-[6%] top-[12%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">
-              Websites
-            </span>
-            <span data-about-label className="absolute bottom-[10%] left-[46%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">
-              Videos
-            </span>
-            <span data-about-label className="absolute right-[6%] top-[8%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">
-              Designs
-            </span>
-          </div>
+        {/* Named at the outer edge of each field, as annotations rather than set labels
+            printed inside circles. Kept clear of the copy column on the left. */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-20 hidden min-[900px]:block">
+          <span data-about-label className="absolute left-[6%] top-[9%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">
+            Websites
+          </span>
+          <span data-about-label className="absolute right-[8%] top-[24%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">
+            Videos
+          </span>
+          <span data-about-label className="absolute bottom-[16%] right-[10%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">
+            Designs
+          </span>
         </div>
       </div>
     </section>
