@@ -56,7 +56,7 @@ export default async function DisciplineWorkPage({ params }: PageProps) {
         <span className={`block ${EYEBROW_LIFT_HEADROOM}`}>
           <SectionEyebrow label={discipline.promise} />
         </span>
-        <h1 className="m-0 text-[clamp(2.5rem,8vw,6.5rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink">
+        <h1 className="m-0 -mb-[0.14em] pb-[0.14em] text-[clamp(3.25rem,13vw,12rem)] font-semibold leading-[0.84] tracking-[-0.055em] text-ink">
           {discipline.label}
         </h1>
         <p className="m-0 max-w-[38ch] text-[0.9375rem] leading-[1.75] text-ink-muted">

@@ -281,10 +281,18 @@ export function Work() {
               </span>
 
               {/* The heading and the way into the category share a line. */}
-              <div className="flex flex-col gap-7 min-[820px]:flex-row min-[820px]:items-center min-[820px]:justify-between min-[820px]:gap-[6vw]">
+              <div className="flex flex-col gap-7 min-[820px]:flex-row min-[820px]:items-end min-[820px]:justify-between min-[820px]:gap-[5vw]">
+                {/* One word, so it can carry real scale — roughly double what it was, and
+                    the whole reason a discipline heading is a single noun.
+
+                    The padding is not decoration. Leading below 1 pulls the line box in
+                    tighter than the glyphs, so the descender in "Design" hangs outside it —
+                    and the masthead reveal animates clip-path to inset(0 0 0 0), which clips
+                    to exactly that box. The matching negative margin keeps the room out of
+                    the layout, so the tight leading still reads as tight. */}
                 <h3
                   data-chapter-masthead
-                  className="m-0 text-[clamp(2.25rem,6vw,4.75rem)] font-semibold leading-[0.94] tracking-[-0.045em] text-ink"
+                  className="m-0 -mb-[0.14em] pb-[0.14em] text-[clamp(3.25rem,12vw,11rem)] font-semibold leading-[0.84] tracking-[-0.055em] text-ink"
                 >
                   {discipline.label}
                 </h3>
