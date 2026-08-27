@@ -18,7 +18,19 @@ import {
   ROTATE_INTERVAL_MS,
   SLIDE_DURATION_S,
 } from "@/lib/motion/rotator-timing";
-import { HeroModelScene } from "@/components/three/HeroModelScene";
+import dynamic from "next/dynamic";
+
+/**
+ * Lazy, and deliberately so. Three is the single largest dependency on the site, and
+ * importing it statically here put it in the homepage's first-load bundle — ahead of the
+ * loading screen that exists to cover exactly this kind of wait. The scene already carries
+ * its own loading and no-WebGL states, so arriving a beat later costs nothing it was not
+ * already handling.
+ */
+const HeroModelScene = dynamic(
+  () => import("@/components/three/HeroModelScene").then((m) => m.HeroModelScene),
+  { ssr: false },
+);
 import { onLoaderReady } from "@/lib/motion/loader-ready";
 
 const ROTATOR_ITEMS = [

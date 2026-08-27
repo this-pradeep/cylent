@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { markLoaderReady } from "@/lib/motion/loader-ready";
+import { LoaderOrb } from "@/components/three/LoaderOrb";
 import {
   LOADER_TRIAD,
   greetingForHour,
@@ -25,6 +26,8 @@ export function Loader() {
   const counterRef = useRef<HTMLSpanElement>(null);
   const progressRowRef = useRef<HTMLDivElement>(null);
   const lensRef = useRef<HTMLDivElement>(null);
+  /** Written every frame, read by the orb's own loop. Never a prop — see LoaderOrb. */
+  const progressRef = useRef(0);
 
   const [visible, setVisible] = useState(true);
   const [greeting, setGreeting] = useState("Hello.");
@@ -87,8 +90,9 @@ export function Loader() {
         clipPath: `inset(0 ${100 - percent}% 0 0)`,
       });
 
-      // One custom property for the entire lens: scale, bloom, rim and specular all read
-      // --p in CSS. Four style writes a frame would do the same job four times over.
+      progressRef.current = percent;
+      // The CSS lens is the no-WebGL fallback; it reads --p for scale, bloom, rim and
+      // specular, so one property carries the lot.
       lensRef.current?.style.setProperty("--p", (percent / 100).toFixed(4));
 
       const count = wordsRevealed(percent);
@@ -233,12 +237,12 @@ export function Loader() {
         </div>
 
         {/* Centred, and behind the type in paint order — the composition is bottom-left
-            weighted and the lens is the thing being watched, not the thing being read. */}
-        <div ref={lensRef} className="loader-lens">
-          <span className="loader-lens-bloom" />
-          <span className="loader-lens-body" />
-          <span className="loader-lens-ring" />
-          <span className="loader-lens-spec" />
+            weighted and the orb is the thing being watched, not the thing being read. */}
+        <div
+          ref={lensRef}
+          className="loader-orb absolute left-1/2 top-1/2 aspect-square w-[clamp(210px,27vw,360px)]"
+        >
+          <LoaderOrb progressRef={progressRef} className="h-full w-full" />
         </div>
 
         <span className="block overflow-hidden pb-[0.12em]">

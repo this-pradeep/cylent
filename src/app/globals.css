@@ -165,19 +165,22 @@ body {
    and resolution is a cross-fade between it and the crisp lens, which stays on the
    compositor. Animating the blur radius instead would re-rasterise the layer every frame for
    an effect that reads the same. */
+/* Placement and the exit belong to the host, which holds whichever mark is showing. The
+   exit is a variable rather than a GSAP `scale` because this transform also carries the
+   centring, and GSAP writes `transform` wholesale — tweening the property directly would
+   drop the centring the instant the exit began. */
+.loader-orb {
+  --exit: 1;
+  transform: translate(-50%, -50%) scale(var(--exit));
+  will-change: transform;
+}
+
+/* The no-WebGL fallback. Fills whatever the host sized for it; the host does the placing. */
 .loader-lens {
   --p: 0;
-  /* The exit opens the lens out. It is a variable rather than a GSAP `scale` because this
-     transform also carries the centring and the progress scale, and GSAP writes `transform`
-     wholesale — tweening the property directly would drop both the moment the exit began. */
-  --exit: 1;
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: clamp(112px, 15vw, 190px);
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%) scale(calc((0.84 + 0.16 * var(--p)) * var(--exit)));
-  will-change: transform;
+  inset: 0;
+  transform: scale(calc(0.84 + 0.16 * var(--p)));
 }
 
 .loader-lens span {
