@@ -89,7 +89,7 @@ export default async function DisciplineWorkPage({ params }: PageProps) {
 
             <div className="flex flex-col gap-3 min-[900px]:w-[42%]">
               <p className="m-0 font-mono text-[0.5625rem] uppercase tracking-[0.2em] text-ink-muted">
-                {project.name} · {project.sector}
+                {project.sector}
               </p>
               <p className="m-0 text-[clamp(1.25rem,2.6vw,1.75rem)] font-semibold leading-[1.25] tracking-[-0.03em] text-ink">
                 {projectLine(project)}

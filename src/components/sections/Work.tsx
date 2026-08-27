@@ -78,7 +78,7 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
             data-chapter-lead
             className="m-0 font-mono text-[0.65rem] uppercase tracking-[0.22em] text-surface/70"
           >
-            {project.name} · {project.sector}
+            {project.sector}
           </p>
           <h4
             data-chapter-lead
@@ -121,7 +121,7 @@ function SupportingRow({ projects }: { projects: SupportingProject[] }) {
           )}
           <div className="flex flex-col gap-1.5">
             <p className="m-0 font-mono text-[0.5625rem] uppercase tracking-[0.2em] text-ink-muted">
-              {project.name} · {project.sector}
+              {project.sector}
             </p>
             <p className="m-0 text-[1.0625rem] font-semibold leading-[1.3] tracking-[-0.02em] text-ink">
               {project.summary}

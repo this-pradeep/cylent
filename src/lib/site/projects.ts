@@ -6,10 +6,18 @@
  * gives one project the full frame and lets the rest support it. That is the brand's own
  * portfolio philosophy: a few exceptional projects are worth more than many average ones.
  *
- * ⚠ EVERY PROJECT BELOW IS A PLACEHOLDER. The names are "Project N", the photographs are
- * stock, and no result is measurable. The composition is built to carry real work and will
- * not flatter what is here. Replacing this array is the highest-value change available to
- * this section — nothing about the layout will fix it.
+ * ⚠ EVERY PROJECT BELOW IS A PLACEHOLDER. The photographs are stock and no result is
+ * measurable. The composition is built to carry real work and will not flatter what is here.
+ * Replacing this array is the highest-value change available to this section — nothing about
+ * the layout will fix it.
+ *
+ * There is no `name` and nothing is numbered. The placeholders had been "Project One",
+ * "Two" and "Four", which is a sequence with a hole in it and read as a mistake rather than
+ * as a stand-in. A real client name belongs here when there is one; a counter never did.
+ *
+ * The supporting shape is kept even though nothing is currently supporting. Each discipline
+ * is meant to grow past one project, and the lead-plus-rest split is what stops the section
+ * costing three full screens when it does.
  */
 
 export type Discipline = "web" | "video" | "graphics";
@@ -62,8 +70,8 @@ export type ProjectMedia =
 type BaseProject = {
   slug: string;
   discipline: Discipline;
+  /** What kind of work it was. The visible identifier until real client names exist. */
   sector: string;
-  name: string;
   media: ProjectMedia;
 };
 
@@ -83,6 +91,11 @@ export type SupportingProject = BaseProject & {
 
 export type Project = LeadProject | SupportingProject;
 
+/**
+ * Slugs describe the work rather than counting it — they are React keys and future route
+ * segments, and a key called "project-four" tells nobody anything.
+ */
+
 const beats = (
   challenge: string,
   process: string,
@@ -97,11 +110,10 @@ const beats = (
 
 export const PROJECTS: readonly Project[] = [
   {
-    slug: "project-one",
+    slug: "hospitality-group",
     discipline: "web",
     lead: true,
     sector: "Hospitality",
-    name: "Project One",
     headline: "Three properties,\none system.",
     beats: beats(
       "A boutique group whose three properties shared nothing but a parent name.",
@@ -117,24 +129,10 @@ export const PROJECTS: readonly Project[] = [
     },
   },
   {
-    slug: "project-three",
-    discipline: "web",
-    sector: "Internal tooling",
-    name: "Project Three",
-    summary: "A build system the team could actually ship against.",
-    // Photo by Bernd Dittrich, Unsplash License (unsplash.com/photo-1774901128215-3549cc686921)
-    media: {
-      kind: "image",
-      src: "/images/build-code-workspace.jpg",
-      alt: "Dark-themed code editor displaying a web project on a laptop screen",
-    },
-  },
-  {
-    slug: "project-two",
+    slug: "product-launch",
     discipline: "video",
     lead: true,
     sector: "Product launch",
-    name: "Project Two",
     headline: "One launch,\none story.",
     beats: beats(
       "Strong technology with no visual story to match it.",
@@ -147,11 +145,10 @@ export const PROJECTS: readonly Project[] = [
     media: { kind: "video", src: "/videos/move-city-night.mp4" },
   },
   {
-    slug: "project-four",
+    slug: "editorial-identity",
     discipline: "graphics",
     lead: true,
     sector: "Editorial",
-    name: "Project Four",
     headline: "A face,\nnot a logo.",
     beats: beats(
       "A studio recognised by its work but not by its name.",
@@ -164,19 +161,6 @@ export const PROJECTS: readonly Project[] = [
       kind: "image",
       src: "/images/capture-portrait.jpg",
       alt: "Black-and-white editorial studio portrait",
-    },
-  },
-  {
-    slug: "project-five",
-    discipline: "graphics",
-    sector: "Architecture",
-    name: "Project Five",
-    summary: "A visual language drawn from the buildings themselves.",
-    // Unsplash License (unsplash.com/photo-1758846946191-dfe1cd91779b)
-    media: {
-      kind: "image",
-      src: "/images/proof-project-two-architecture.jpg",
-      alt: "Modern glass building facade reflecting the sky",
     },
   },
 ];
