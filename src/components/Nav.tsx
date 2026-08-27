@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { getCondenseProgress } from "@/lib/motion/nav-scroll";
+import { Arrow } from "@/components/icons/Arrow";
 import { useMagneticHover } from "@/lib/motion/useMagneticHover";
 import { CONTACT_LINK, NAV_LINKS, goTo } from "@/lib/site/nav-links";
 
@@ -138,15 +139,25 @@ export function Nav() {
           </button>
         </nav>
 
-        {/* Its own block beside the bar, matching height and radius so the two read as
-            one system. Keeps the magnetic hover the previous Contact button had. */}
+        {/* Its own block beside the bar, matching height and radius so the two read as one
+            system — but filled, not outlined. It had been wearing the bar's own styling:
+            surface ground, hairline border, same shadow, which made the one action on the
+            page look like a second navigation bar. design-principles.md settles it — buttons
+            are ink. Ink against the bar's paper is the hierarchy the nav was missing.
+
+            Carries `cbtn` so the arrow hand-off already described in globals.css applies
+            here too, rather than a second copy of that rule under a new name. */}
         <button
           ref={contactRef}
           type="button"
           onClick={() => goTo(CONTACT_LINK)}
-          className="hidden shrink-0 items-center rounded-full border border-ink/10 bg-surface px-7 text-[0.95rem] font-semibold text-ink shadow-[0_8px_30px_rgba(20,18,15,0.10)] transition-colors hover:bg-ink/5 md:inline-flex"
+          className="cbtn group hidden shrink-0 items-center gap-2.5 rounded-full bg-ink pl-7 pr-6 text-[0.95rem] font-semibold text-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_8px_26px_rgba(20,18,15,0.24)] outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent md:inline-flex"
         >
           Contact
+          <span className="relative grid h-3.5 w-3.5 place-items-center overflow-hidden">
+            <Arrow className="cbtn-arrow cbtn-arrow-one h-3.5 w-3.5" />
+            <Arrow className="cbtn-arrow cbtn-arrow-two absolute h-3.5 w-3.5" />
+          </span>
         </button>
       </div>
 
@@ -178,7 +189,7 @@ export function Nav() {
                 setMobileOpen(false);
                 goTo(CONTACT_LINK);
               }}
-              className="mt-1 w-full rounded-full border border-ink/10 bg-surface px-5 py-3 text-sm font-semibold text-ink"
+              className="mt-1 flex w-full items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.14)]"
             >
               Contact
             </button>
