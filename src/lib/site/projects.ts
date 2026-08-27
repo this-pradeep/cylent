@@ -76,7 +76,9 @@ export type ProjectMedia =
        */
       fit?: "cover" | "contain";
     }
-  | { kind: "video"; src: string; alt?: undefined; fit?: undefined };
+  | { kind: "video"; src: string; alt?: undefined; fit?: undefined }
+  /** A third-party player. Always contained — it has its own controls and its own branding. */
+  | { kind: "embed"; src: string; title: string; alt?: undefined; fit?: undefined };
 
 type BaseProject = {
   slug: string;
@@ -160,9 +162,11 @@ export const PROJECTS: readonly Project[] = [
       "A single campaign running across web, video and print.",
       "A launch that read as one story, not three deliverables.",
     ),
-    // Video by Trev W. Adams, Pexels License (pexels.com/video/night-traffic-in-city-13567267).
-    // 15MB — must be re-encoded before production. It is the heaviest asset on the site.
-    media: { kind: "video", src: "/videos/move-city-night.mp4" },
+    media: {
+      kind: "embed",
+      src: "https://geo.dailymotion.com/player.html?video=xa0acvc",
+      title: "Product launch film",
+    },
   },
   {
     slug: "editorial-identity",
@@ -214,4 +218,18 @@ export function projectLine(project: Project): string {
     return project.beats.find((beat) => beat.label === "Result")?.value ?? "";
   }
   return project.summary;
+}
+
+/**
+ * Whether the media is shown whole rather than bled to the edges.
+ *
+ * A photograph can be cropped to fill a frame and graded so type sits over it. A product
+ * shot cannot be cropped without cutting the device, and a third-party player cannot be
+ * built on at all — it has its own controls and its own branding. Both are shown whole, on
+ * the ground, with the type kept clear of them.
+ *
+ * Lives here so every surface that renders a project agrees about it.
+ */
+export function isContained(media: ProjectMedia): boolean {
+  return media.kind === "embed" || (media.kind === "image" && media.fit === "contain");
 }

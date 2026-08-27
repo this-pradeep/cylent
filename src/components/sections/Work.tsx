@@ -4,14 +4,14 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ActionLink } from "@/components/ActionLink";
 import { Arrow } from "@/components/icons/Arrow";
-import { ImageAsset } from "@/components/ImageAsset";
+import { ProjectMediaView } from "@/components/ProjectMediaView";
 import { EYEBROW_LIFT_HEADROOM, SectionEyebrow } from "@/components/SectionEyebrow";
-import { VideoAsset } from "@/components/VideoAsset";
 import { beatWindow } from "@/lib/motion/chapter-beats";
 import {
   DISCIPLINES,
   type LeadProject,
   type SupportingProject,
+  isContained,
   leadProject,
   supportingProjects,
   workHref,
@@ -45,7 +45,7 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
   // cuts the device, and the grade that makes white type legible over a photo would take a
   // screenshot down to nothing. Contained shots sit whole on the ink ground, the type keeps
   // clear of them, and no grade is needed — surface on ink is 17:1 without help.
-  const contained = project.media.kind === "image" && project.media.fit === "contain";
+  const contained = isContained(project.media);
 
   return (
     <div className="relative flex h-svh min-h-[560px] flex-col justify-end overflow-hidden bg-ink motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen">
@@ -57,17 +57,7 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
             : "absolute inset-0 motion-safe:min-[820px]:-inset-y-[4%]"
         }
       >
-        {project.media.kind === "video" ? (
-          <VideoAsset src={project.media.src} aspectRatio="fill" />
-        ) : (
-          <ImageAsset
-            src={project.media.src}
-            alt={project.media.alt}
-            aspectRatio="fill"
-            priority={priority}
-            fit={project.media.fit}
-          />
-        )}
+        <ProjectMediaView media={project.media} aspectRatio="fill" priority={priority} />
       </div>
 
       {/* Two layers, both derived rather than eyeballed, because white type over a
@@ -149,11 +139,7 @@ function SupportingRow({ projects }: { projects: SupportingProject[] }) {
     <ul className="m-0 grid list-none gap-8 px-6 py-[9vh] md:px-[6vw] min-[720px]:grid-cols-2 min-[720px]:gap-[4vw]">
       {projects.map((project) => (
         <li key={project.slug} data-chapter-support className="m-0 flex flex-col gap-4">
-          {project.media.kind === "video" ? (
-            <VideoAsset src={project.media.src} aspectRatio="16:9" />
-          ) : (
-            <ImageAsset src={project.media.src} alt={project.media.alt} aspectRatio="16:9" />
-          )}
+          <ProjectMediaView media={project.media} aspectRatio="16:9" />
           <div className="flex flex-col gap-1.5">
             <p className="m-0 font-mono text-[0.5625rem] uppercase tracking-[0.2em] text-ink-muted">
               {project.client ? `${project.client} · ${project.sector}` : project.sector}

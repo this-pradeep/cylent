@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ImageAsset } from "@/components/ImageAsset";
-import { VideoAsset } from "@/components/VideoAsset";
+import { ProjectMediaView } from "@/components/ProjectMediaView";
 import { SectionEyebrow, EYEBROW_LIFT_HEADROOM } from "@/components/SectionEyebrow";
 import { Arrow } from "@/components/icons/Arrow";
 import {
@@ -75,18 +74,7 @@ export default async function DisciplineWorkPage({ params }: PageProps) {
             }`}
           >
             <div className="min-[900px]:w-[58%]">
-              {project.media.kind === "video" ? (
-                <VideoAsset src={project.media.src} aspectRatio="16:9" />
-              ) : (
-                <ImageAsset
-                  src={project.media.src}
-                  alt={project.media.alt}
-                  aspectRatio="16:9"
-                  priority={index === 0}
-                  fit={project.media.fit}
-                  className={project.media.fit === "contain" ? "bg-panel" : undefined}
-                />
-              )}
+              <ProjectMediaView media={project.media} aspectRatio="16:9" priority={index === 0} />
             </div>
 
             <div className="flex flex-col gap-3 min-[900px]:w-[42%]">
