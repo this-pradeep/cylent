@@ -54,7 +54,7 @@ export default async function DisciplineWorkPage({ params }: PageProps) {
     <main data-eyebrow-surface className="bg-surface">
       <header className="flex flex-col gap-6 px-6 pb-[9vh] pt-[22vh] md:px-[6vw]">
         <span className={`block ${EYEBROW_LIFT_HEADROOM}`}>
-          <SectionEyebrow label={discipline.verb} />
+          <SectionEyebrow label={discipline.promise} />
         </span>
         <h1 className="m-0 text-[clamp(2.5rem,8vw,6.5rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-ink">
           {discipline.label}

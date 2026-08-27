@@ -17,10 +17,22 @@ describe("disciplines", () => {
     expect(DISCIPLINES.map((discipline) => discipline.id)).toEqual(navIds);
   });
 
-  it("each carry a verb and a claim to head their chapter with", () => {
+  it("each carry a promise and a claim to head their chapter with", () => {
     DISCIPLINES.forEach((discipline) => {
-      expect(discipline.verb).not.toHaveLength(0);
+      expect(discipline.promise).not.toHaveLength(0);
       expect(discipline.claim).not.toHaveLength(0);
+    });
+  });
+
+  it("keeps the promises in one grammar, which is what makes them read as a set", () => {
+    DISCIPLINES.forEach((discipline) => {
+      expect(discipline.promise.startsWith("Built to ")).toBe(true);
+    });
+  });
+
+  it("never lets a promise just restate its own heading", () => {
+    DISCIPLINES.forEach((discipline) => {
+      expect(discipline.promise.toLowerCase()).not.toContain(discipline.label.toLowerCase());
     });
   });
 });

@@ -26,8 +26,19 @@ export type DisciplineMeta = {
   id: Discipline;
   /** What the navbar calls it, and what the chapter is headed with. */
   label: string;
-  /** The pillar verb — Build, Capture, Move — carried as the chapter's label. */
-  verb: string;
+  /**
+   * The eyebrow above the chapter's heading.
+   *
+   * It was the bare pillar verb — Build, Move, Capture — which stopped working once the
+   * heading became the discipline. "Capture" over "Design" is the pillar the story document
+   * pairs with photography sitting above the word for something else, and the pairing read
+   * as a mismatch rather than as a pair.
+   *
+   * All three now take one shape, because the shape is what makes them a set: read down the
+   * page they are three promises in the same grammar, and each one says something its
+   * heading does not already say.
+   */
+  promise: string;
   claim: string;
 };
 
@@ -36,19 +47,19 @@ export const DISCIPLINES: readonly DisciplineMeta[] = [
   {
     id: "web",
     label: "Web",
-    verb: "Build",
+    promise: "Built to perform",
     claim: "Fast, modern, high-performance digital experiences.",
   },
   {
     id: "video",
     label: "Video",
-    verb: "Move",
+    promise: "Built to move",
     claim: "Stories that connect emotionally.",
   },
   {
     id: "graphics",
     label: "Design",
-    verb: "Capture",
+    promise: "Built to be recognised",
     claim: "Visual identities that communicate personality and quality.",
   },
 ];

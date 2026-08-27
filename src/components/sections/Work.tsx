@@ -277,7 +277,7 @@ export function Work() {
           >
             <header className="flex flex-col gap-4 px-6 py-[11vh] md:px-[6vw]">
               <span data-chapter-masthead className={`block ${EYEBROW_LIFT_HEADROOM}`}>
-                <SectionEyebrow label={discipline.verb} />
+                <SectionEyebrow label={discipline.promise} />
               </span>
 
               {/* The heading and the way into the category share a line. */}

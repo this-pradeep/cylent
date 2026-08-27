@@ -160,8 +160,16 @@ Together they create impact.
 > always looked weaker than the evidence sitting below it.
 >
 > Each pillar now heads its own chapter of the work in Chapter 6 and is proven by the
-> projects underneath it. The pillar copy below is still the source of truth for the verbs
-> and claims; it lives in `src/lib/site/projects.ts` as `DISCIPLINES`.
+> projects underneath it. The pillar claims below are still the source of truth and live in
+> `src/lib/site/projects.ts` as `DISCIPLINES`.
+>
+> **The bare verbs are not what appears on screen.** Once the chapter heading became the
+> discipline — Web, Video, Design — the verb above it stopped pairing: "Capture" over
+> "Design" is the pillar this document ties to photography sitting above the word for
+> something else. The eyebrows are now three promises in one grammar — *Built to perform*,
+> *Built to move*, *Built to be recognised* — which read as a set down the page and each say
+> something their heading does not. Build, Capture and Move remain the internal names for
+> the three pillars; they are no longer display copy.
 
 ### Pillar One
 
