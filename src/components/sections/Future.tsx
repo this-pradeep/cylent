@@ -49,9 +49,14 @@ const BEAM_GRADIENT =
   " rgba(31, 191, 212, 0.16) 68%," +
   " rgba(31, 191, 212, 0.07) 100%)";
 
-/** Narrow at the mouth, past the frame edges at the foot. */
-const BEAM_CLOSED = "polygon(44% 0%, 56% 0%, 78% 100%, 22% 100%)";
-const BEAM_OPEN = "polygon(30% 0%, 70% 0%, 108% 100%, -8% 100%)";
+/**
+ * Sized to the word, not to the section. The spread is set so the cone measures roughly 58%
+ * of the frame where "remarkable." sits — about the width of the word itself at this type
+ * scale — rather than washing the whole width. It keeps widening past that point so it still
+ * reaches the floor, but the light belongs to the line, not to the room.
+ */
+const BEAM_CLOSED = "polygon(46% 0%, 54% 0%, 70% 100%, 30% 100%)";
+const BEAM_OPEN = "polygon(38% 0%, 62% 0%, 89% 100%, 11% 100%)";
 
 export function Future() {
   const sectionRef = useRef<HTMLElement>(null);
