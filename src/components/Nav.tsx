@@ -6,7 +6,20 @@ import { gsap } from "gsap";
 import { getCondenseProgress } from "@/lib/motion/nav-scroll";
 import { Arrow } from "@/components/icons/Arrow";
 import { useMagneticHover } from "@/lib/motion/useMagneticHover";
-import { CONTACT_LINK, NAV_LINKS, goTo } from "@/lib/site/nav-links";
+import { CONTACT_LINK, NAV_LINKS, goTo, hrefFor, isOnThisPage, type NavLink } from "@/lib/site/nav-links";
+
+/**
+ * Links, not buttons. The destination is a real href, so it scrolls in place when the
+ * section is here and navigates to the homepage anchor when it is not — and it can be
+ * opened in a new tab, read as a link, and followed without JavaScript.
+ */
+function useSectionLink() {
+  return (event: React.MouseEvent, link: NavLink) => {
+    if (!isOnThisPage(link)) return;
+    event.preventDefault();
+    goTo(link);
+  };
+}
 
 export function Nav() {
   const navRef = useRef<HTMLElement>(null);
@@ -14,6 +27,7 @@ export function Nav() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
   const contactRef = useRef<HTMLButtonElement>(null);
+  const followSection = useSectionLink();
 
   useMagneticHover(contactRef, reducedMotion);
 
@@ -115,13 +129,13 @@ export function Nav() {
           <ul className="hidden items-center gap-1 md:flex">
             {NAV_LINKS.map((link) => (
               <li key={link.id}>
-                <button
-                  type="button"
-                  onClick={() => goTo(link)}
-                  className="rounded-full px-3.5 py-1.5 text-[0.95rem] font-medium text-ink/68 transition-colors hover:bg-ink/5 hover:text-ink"
+                <Link
+                  href={hrefFor(link)}
+                  onClick={(event) => followSection(event, link)}
+                  className="block rounded-full px-3.5 py-1.5 text-[0.95rem] font-medium text-ink/68 transition-colors hover:bg-ink/5 hover:text-ink"
                 >
                   {link.label}
-                </button>
+                </Link>
               </li>
             ))}
           </ul>
@@ -170,16 +184,16 @@ export function Nav() {
         <ul className="flex flex-col gap-2 px-5 py-5">
           {NAV_LINKS.map((link) => (
             <li key={link.id}>
-              <button
-                type="button"
-                onClick={() => {
+              <Link
+                href={hrefFor(link)}
+                onClick={(event) => {
                   setMobileOpen(false);
-                  goTo(link);
+                  followSection(event, link);
                 }}
                 className="block w-full rounded-full px-4 py-2.5 text-left text-base font-medium text-ink/68 transition-colors hover:bg-ink/5 hover:text-ink"
               >
                 {link.label}
-              </button>
+              </Link>
             </li>
           ))}
           <li>

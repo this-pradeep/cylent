@@ -1,10 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CircularButton } from "@/components/CircularButton";
-import { FOOTER_LINKS, goTo, type NavLink } from "@/lib/site/nav-links";
+import { FOOTER_LINKS, goTo, hrefFor, isOnThisPage, type NavLink } from "@/lib/site/nav-links";
 import {
   CONTACT_CHANNELS,
   CONTACT_EMAIL,
@@ -145,11 +146,16 @@ export function Footer() {
         >
           <nav aria-label="Site index" className="flex flex-col">
             {FOOTER_LINKS.map((link, index) => (
-              <button
+              <Link
                 key={link.id}
-                type="button"
+                href={hrefFor(link)}
                 data-cursor
-                onClick={() => goTo(link)}
+                onClick={(event) => {
+                  // In place when the section is here, a real navigation when it is not.
+                  if (!isOnThisPage(link)) return;
+                  event.preventDefault();
+                  goTo(link);
+                }}
                 onPointerEnter={() => setActive(link)}
                 onPointerLeave={() =>
                   setActive((current) => (current === link ? null : current))
@@ -180,7 +186,7 @@ export function Footer() {
                 <em className="font-mono text-[0.6rem] not-italic tracking-[0.14em] text-ink-muted tabular-nums transition-[color,transform] duration-500 group-hover:translate-x-1 group-hover:text-accent">
                   {String(index + 1).padStart(2, "0")}
                 </em>
-              </button>
+              </Link>
             ))}
           </nav>
 
