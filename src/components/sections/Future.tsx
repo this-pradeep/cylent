@@ -35,7 +35,13 @@ const SENTENCE = WORDS.join(" ");
  *
  * Hue travels down the fall — amber at the mouth, magenta through the middle, cyan as it
  * disperses — so the light cools with distance.
+ *
+ * The beam never settles. It sways about its own mouth and breathes across a different
+ * period, so the two never line up and the motion has no loop you can catch. Scroll opens
+ * the cone; this is what keeps it alive once it is open.
  */
+/** Degrees either side of true vertical. Small enough to read as drift, not as a searchlight. */
+const BEAM_SWAY_DEG = 2.6;
 const BEAM_GRADIENT =
   "linear-gradient(to bottom," +
   " rgba(242, 160, 60, 0.5) 0%," +
@@ -113,7 +119,36 @@ export function Future() {
           );
         }
 
+        // Living motion, on transform rather than clip-path so it never contends with the
+        // reveal above for the same property. Sway and breathe run at coprime-ish periods so
+        // the pair never resynchronise into a visible loop.
+        const drift = gsap.timeline({ repeat: -1, yoyo: true, paused: true });
+        if (beam) {
+          gsap.set(beam, { transformOrigin: "50% 0%", rotation: -BEAM_SWAY_DEG });
+          drift
+            .to(beam, { rotation: BEAM_SWAY_DEG, duration: 9, ease: "sine.inOut" }, 0)
+            .to(beam, { scaleX: 1.07, duration: 6.5, ease: "sine.inOut" }, 0);
+        }
+
+        // Paused while the section is off screen. A continuously transforming layer under
+        // mix-blend-multiply re-composites every frame, and there is no reason to pay for
+        // that where nobody is looking.
+        //
+        // Declared through the config rather than by importing ScrollTrigger here: the
+        // plugin is registered once in LenisProvider, and naming the symbol in this file
+        // pulled a second copy into the page chunk and cost 17kB.
+        const presence = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: "top bottom",
+            end: "bottom top",
+            onToggle: (self) => (self.isActive ? drift.play() : drift.pause()),
+          },
+        });
+
         return () => {
+          drift.kill();
+          presence.scrollTrigger?.kill();
           timeline.scrollTrigger?.kill();
         };
       },
@@ -136,7 +171,7 @@ export function Future() {
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
           <span
             data-future-beam
-            className="absolute inset-0 block mix-blend-multiply"
+            className="absolute inset-0 block mix-blend-multiply will-change-transform"
             style={{ backgroundImage: BEAM_GRADIENT, clipPath: BEAM_OPEN }}
           />
         </div>
