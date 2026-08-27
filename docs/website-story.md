@@ -220,39 +220,11 @@ Focus:
 
 ## Chapter 5 — The Process
 
-### Objective
+Cut. The section is removed and the chapter is not being written back.
 
-Build trust.
-
-Show how projects are executed.
-
-Suggested flow:
-
-Discover
-
-↓
-
-Plan
-
-↓
-
-Create
-
-↓
-
-Refine
-
-↓
-
-Launch
-
-The process should feel collaborative.
-
-Not transactional.
-
-### User Thought
-
-"They have a clear system."
+Numbering is left alone rather than closed up, because the chapter numbers are identifiers —
+they are cited from section components and from Chapter 4's merge note, and renumbering to
+remove a gap would break every one of those references to tidy a cosmetic one.
 
 ---
 
@@ -294,22 +266,12 @@ than many average ones, so exactly one project per discipline gets the screen.
 
 ## Chapter 7 — Attention To Detail
 
-### Objective
+Cut, along with Chapter 5.
 
-Demonstrate craftsmanship.
-
-Show:
-
-- Performance achievements
-- Design quality
-- Visual refinement
-- Technical execution
-
-Communicate that details matter.
-
-### User Thought
-
-"They genuinely care about quality."
+Both carried the **Confidence** beat in the emotional journey above — "they know how to
+execute" and "they genuinely care about quality." Nothing carries it now. Chapter 6 proves
+capability and Chapter 8 asks for the meeting, so the page moves from what we make straight
+to the ask. Worth knowing before that beat is either replaced or deliberately abandoned.
 
 ---
 
