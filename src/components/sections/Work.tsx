@@ -12,7 +12,6 @@ import {
   type LeadProject,
   type SupportingProject,
   leadProject,
-  projectsFor,
   supportingProjects,
   workHref,
 } from "@/lib/site/projects";
@@ -191,7 +190,14 @@ export function Work() {
 
           const built = [reveal(masthead, "top 84%"), reveal(lead, "top 78%")];
           if (support.length > 0) built.push(reveal(support, "top 82%"));
-          if (more.length > 0) built.push(reveal(more, "top 88%"));
+          if (more.length > 0) {
+            built.push(
+              gsap.timeline({
+                defaults: { ease: "power3.out" },
+                scrollTrigger: { trigger: more[0], start: "top 88%", toggleActions: "play none none reverse" },
+              }).fromTo(more, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.7 }, 0),
+            );
+          }
 
           // A total duration of 1 maps this timeline straight onto the scrub, so the windows
           // in chapter-beats.ts are the timeline's own positions with no conversion.
@@ -255,12 +261,28 @@ export function Work() {
               <span data-chapter-masthead className={`block ${EYEBROW_LIFT_HEADROOM}`}>
                 <SectionEyebrow label={discipline.verb} />
               </span>
-              <h3
-                data-chapter-masthead
-                className="m-0 text-[clamp(2.25rem,6vw,4.75rem)] font-semibold leading-[0.94] tracking-[-0.045em] text-ink"
-              >
-                {discipline.label}
-              </h3>
+
+              {/* The heading and the way into the category share a line. */}
+              <div className="flex flex-col gap-7 min-[820px]:flex-row min-[820px]:items-center min-[820px]:justify-between min-[820px]:gap-[6vw]">
+                <h3
+                  data-chapter-masthead
+                  className="m-0 text-[clamp(2.25rem,6vw,4.75rem)] font-semibold leading-[0.94] tracking-[-0.045em] text-ink"
+                >
+                  {discipline.label}
+                </h3>
+
+                {/* Deliberately outside the clip-path reveal the rest of the masthead uses.
+                    The pill is magnetic and carries a hairline below its own box, and
+                    `inset(0 0 0 0)` would crop both. */}
+                <div data-chapter-more className="shrink-0">
+                  <ActionLink
+                    label="View all projects"
+                    ariaLabel={`View all ${discipline.label} projects`}
+                    href={workHref(discipline.id)}
+                  />
+                </div>
+              </div>
+
               <p
                 data-chapter-masthead
                 className="m-0 max-w-[34ch] text-[0.9375rem] leading-[1.75] text-ink-muted"
@@ -276,21 +298,6 @@ export function Work() {
             </div>
 
             <SupportingRow projects={supportingProjects(discipline.id)} />
-
-            {/* Closes the chapter. The homepage shows one project at full frame and the
-                rest in a line; everything else in the category lives on its own page. */}
-            <div
-              data-chapter-more
-              className="flex flex-col items-start gap-4 px-6 pb-[13vh] md:px-[6vw]"
-            >
-              <ActionLink
-                label={`View all ${discipline.label} projects`}
-                href={workHref(discipline.id)}
-              />
-              <p className="m-0 font-mono text-[0.5625rem] uppercase tracking-[0.2em] text-ink-muted">
-                {projectsFor(discipline.id).length} in this category
-              </p>
-            </div>
           </article>
         );
       })}

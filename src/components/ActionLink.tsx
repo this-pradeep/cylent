@@ -8,6 +8,12 @@ import { useMagneticHover } from "@/lib/motion/useMagneticHover";
 type ActionLinkProps = {
   label: string;
   href: string;
+  /**
+   * Accessible name, when the visible label is too terse to stand alone. Several of these
+   * can sit on one page reading the same three words, and a link list of identical names
+   * tells a screen-reader user nothing.
+   */
+  ariaLabel?: string;
   className?: string;
 };
 
@@ -23,7 +29,7 @@ type ActionLinkProps = {
  * accent never has to carry a large fill; the accent appears here as the hairline that
  * draws beneath on hover, which is a use the same document sanctions.
  */
-export function ActionLink({ label, href, className = "" }: ActionLinkProps) {
+export function ActionLink({ label, href, ariaLabel, className = "" }: ActionLinkProps) {
   const ref = useRef<HTMLAnchorElement>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
 
@@ -37,6 +43,7 @@ export function ActionLink({ label, href, className = "" }: ActionLinkProps) {
     <Link
       ref={ref}
       href={href}
+      aria-label={ariaLabel}
       className={`cbtn group relative inline-flex items-center gap-3.5 rounded-full bg-ink py-3.5 pl-6 pr-5 text-surface outline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${className}`}
     >
       <span className="font-mono text-[0.6875rem] uppercase tracking-[0.18em]">{label}</span>
