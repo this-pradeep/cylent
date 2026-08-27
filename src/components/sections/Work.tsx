@@ -31,9 +31,10 @@ import {
  * Three dark full-bleed frames running back to back would collapse into one long dark
  * stretch and lose the rhythm the design principles ask for.
  *
- * The frames hold with CSS `sticky` rather than a GSAP pin. Process pins immediately after
- * this section, and a second pin competing across that boundary on every refresh is a known
- * source of jitter — the same reason the draft stack this page used to carry avoided one.
+ * The frames hold with CSS `sticky` rather than a GSAP pin. Nothing on the page pins any
+ * more, and sticky is what made that possible: it holds a frame without taking the element
+ * out of flow, costs nothing at refresh time, and cannot fight a neighbour the way two pins
+ * across a section boundary can.
  */
 function LeadFrame({ project, priority }: { project: LeadProject; priority: boolean }) {
   return (

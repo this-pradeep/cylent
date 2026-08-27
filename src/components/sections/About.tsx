@@ -12,9 +12,9 @@ import { STUDIO_LOCATION } from "@/lib/site/studio";
  * sits where all three are true at once. The studio's position is made spatial rather than
  * claimed.
  *
- * Held in place with CSS `sticky` rather than a GSAP pin. Pinning is kept to Process, the
- * one section that genuinely needs it; sticky costs nothing at refresh time and cannot
- * compete with a neighbouring pin the way a second pin can.
+ * Held in place with CSS `sticky` rather than a GSAP pin. No section on the page pins now —
+ * sticky holds a section just as well without taking it out of flow, and costs nothing when
+ * ScrollTrigger refreshes.
  *
  * Arrival and the gather are two triggers on purpose. A held section's scrub does not begin
  * until its top reaches the top of the viewport — a full screen after the content is already
