@@ -248,13 +248,13 @@ export function Work() {
           >
             <header className="flex flex-col gap-4 px-6 py-[11vh] md:px-[6vw]">
               <span data-chapter-masthead className={`block ${EYEBROW_LIFT_HEADROOM}`}>
-                <SectionEyebrow label={discipline.label} />
+                <SectionEyebrow label={discipline.verb} />
               </span>
               <h3
                 data-chapter-masthead
                 className="m-0 text-[clamp(2.25rem,6vw,4.75rem)] font-semibold leading-[0.94] tracking-[-0.045em] text-ink"
               >
-                {discipline.verb}
+                {discipline.label}
               </h3>
               <p
                 data-chapter-masthead

@@ -16,9 +16,9 @@ export type Discipline = "web" | "video" | "graphics";
 
 export type DisciplineMeta = {
   id: Discipline;
-  /** What the navbar and the chapter masthead call it. */
+  /** What the navbar calls it, and what the chapter is headed with. */
   label: string;
-  /** The one-word imperative the chapter opens on. */
+  /** The pillar verb — Build, Capture, Move — carried as the chapter's label. */
   verb: string;
   claim: string;
 };
@@ -28,19 +28,19 @@ export const DISCIPLINES: readonly DisciplineMeta[] = [
   {
     id: "web",
     label: "Web",
-    verb: "Build.",
+    verb: "Build",
     claim: "Fast, modern, high-performance digital experiences.",
   },
   {
     id: "video",
     label: "Video",
-    verb: "Move.",
+    verb: "Move",
     claim: "Stories that connect emotionally.",
   },
   {
     id: "graphics",
     label: "Design",
-    verb: "Capture.",
+    verb: "Capture",
     claim: "Visual identities that communicate personality and quality.",
   },
 ];
