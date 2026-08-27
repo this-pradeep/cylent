@@ -4,8 +4,10 @@ import {
   PROJECTS,
   REQUIRED_BEATS,
   leadProject,
+  projectLine,
   projectsFor,
   supportingProjects,
+  workHref,
 } from "@/lib/site/projects";
 import { NAV_LINKS } from "@/lib/site/nav-links";
 
@@ -109,6 +111,39 @@ describe("project content", () => {
       if (project.media.kind === "image") {
         expect(project.media.alt.length).toBeGreaterThan(10);
       }
+    });
+  });
+});
+
+describe("workHref", () => {
+  it("gives every discipline its own index route", () => {
+    const routes = DISCIPLINES.map(({ id }) => workHref(id));
+    expect(routes).toEqual(["/work/web", "/work/video", "/work/graphics"]);
+    expect(new Set(routes).size).toBe(DISCIPLINES.length);
+  });
+});
+
+describe("projectLine", () => {
+  it("gives every project a sentence, whichever shape it is", () => {
+    PROJECTS.forEach((project) => {
+      expect(projectLine(project).length).toBeGreaterThan(10);
+    });
+  });
+
+  it("lists a lead by its result, not by the problem it started from", () => {
+    DISCIPLINES.forEach(({ id }) => {
+      const lead = leadProject(id);
+      if (!lead) return;
+      const result = lead.beats.find((beat) => beat.label === "Result");
+      expect(projectLine(lead)).toBe(result?.value);
+    });
+  });
+
+  it("lists a supporting project by its summary", () => {
+    DISCIPLINES.forEach(({ id }) => {
+      supportingProjects(id).forEach((project) => {
+        expect(projectLine(project)).toBe(project.summary);
+      });
     });
   });
 });

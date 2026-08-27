@@ -194,3 +194,20 @@ export function supportingProjects(discipline: Discipline): SupportingProject[] 
     (project): project is SupportingProject => project.lead !== true,
   );
 }
+
+/** Every discipline has its own index page listing the whole category. */
+export function workHref(discipline: Discipline): string {
+  return `/work/${discipline}`;
+}
+
+/**
+ * The single line a project is listed with. Leads carry four beats and supporting projects
+ * carry one summary, so the index needs one way to ask either of them for a sentence — and
+ * a lead's Result is the beat that belongs in a list.
+ */
+export function projectLine(project: Project): string {
+  if (project.lead === true) {
+    return project.beats.find((beat) => beat.label === "Result")?.value ?? "";
+  }
+  return project.summary;
+}

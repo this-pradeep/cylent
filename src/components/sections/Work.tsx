@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { ActionLink } from "@/components/ActionLink";
 import { ImageAsset } from "@/components/ImageAsset";
 import { EYEBROW_LIFT_HEADROOM, SectionEyebrow } from "@/components/SectionEyebrow";
 import { VideoAsset } from "@/components/VideoAsset";
@@ -11,7 +12,9 @@ import {
   type LeadProject,
   type SupportingProject,
   leadProject,
+  projectsFor,
   supportingProjects,
+  workHref,
 } from "@/lib/site/projects";
 
 /**
@@ -158,13 +161,14 @@ export function Work() {
           lead: Array.from(chapter.querySelectorAll<HTMLElement>("[data-chapter-lead]")),
           beats: Array.from(chapter.querySelectorAll<HTMLElement>("[data-chapter-beat]")),
           support: Array.from(chapter.querySelectorAll<HTMLElement>("[data-chapter-support]")),
+          more: Array.from(chapter.querySelectorAll<HTMLElement>("[data-chapter-more]")),
         }));
 
         // With motion removed every beat is simply present. None of this is decorative — the
         // four beats are required content.
         if (still) {
-          parts.forEach(({ masthead, lead, beats, support }) => {
-            gsap.set([...masthead, ...lead, ...beats, ...support], {
+          parts.forEach(({ masthead, lead, beats, support, more }) => {
+            gsap.set([...masthead, ...lead, ...beats, ...support, ...more], {
               opacity: 1,
               y: 0,
               clipPath: "none",
@@ -173,7 +177,7 @@ export function Work() {
           return;
         }
 
-        const timelines = parts.flatMap(({ chapter, masthead, lead, beats, support }) => {
+        const timelines = parts.flatMap(({ chapter, masthead, lead, beats, support, more }) => {
           const reveal = (targets: HTMLElement[], start: string) =>
             gsap.timeline({
               defaults: { ease: "power3.out" },
@@ -187,6 +191,7 @@ export function Work() {
 
           const built = [reveal(masthead, "top 84%"), reveal(lead, "top 78%")];
           if (support.length > 0) built.push(reveal(support, "top 82%"));
+          if (more.length > 0) built.push(reveal(more, "top 88%"));
 
           // A total duration of 1 maps this timeline straight onto the scrub, so the windows
           // in chapter-beats.ts are the timeline's own positions with no conversion.
@@ -271,6 +276,21 @@ export function Work() {
             </div>
 
             <SupportingRow projects={supportingProjects(discipline.id)} />
+
+            {/* Closes the chapter. The homepage shows one project at full frame and the
+                rest in a line; everything else in the category lives on its own page. */}
+            <div
+              data-chapter-more
+              className="flex flex-col items-start gap-4 px-6 pb-[13vh] md:px-[6vw]"
+            >
+              <ActionLink
+                label={`View all ${discipline.label} projects`}
+                href={workHref(discipline.id)}
+              />
+              <p className="m-0 font-mono text-[0.5625rem] uppercase tracking-[0.2em] text-ink-muted">
+                {projectsFor(discipline.id).length} in this category
+              </p>
+            </div>
           </article>
         );
       })}
