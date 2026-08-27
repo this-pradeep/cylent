@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ActionLink } from "@/components/ActionLink";
 import { Arrow } from "@/components/icons/Arrow";
+import { BackgroundEmbed } from "@/components/BackgroundEmbed";
 import { ProjectMediaView } from "@/components/ProjectMediaView";
 import { EYEBROW_LIFT_HEADROOM, SectionEyebrow } from "@/components/SectionEyebrow";
 import { beatWindow } from "@/lib/motion/chapter-beats";
@@ -46,40 +47,28 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
   // screenshot down to nothing. Contained shots sit whole on the ink ground, the type keeps
   // clear of them, and no grade is needed — surface on ink is 17:1 without help.
   const contained = isContained(project.media);
-  // A player is the one piece of media that cannot be cropped — the frame would take its
-  // controls with it — so it earns the room instead, on a shallower type reserve than a
-  // product shot needs. At 74vh tall the 16:9 box is about four fifths of the width of a
-  // 16:9 display, which is as large as it can be while the headline still has a band to sit
-  // in.
-  const isEmbed = project.media.kind === "embed";
+  // A player used as a background carries its own grade and its own sound control, so the
+  // frame hands the whole layer over rather than composing around it.
+  const backdrop = project.media.kind === "embed" ? project.media : null;
 
   return (
     <div className="relative flex h-svh min-h-[560px] flex-col justify-end overflow-hidden bg-ink motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen">
-      <div
-        data-chapter-plate
-        className={
-          !contained
-            ? "absolute inset-0 motion-safe:min-[820px]:-inset-y-[4%]"
-            : isEmbed
-              ? "absolute inset-x-4 top-[5vh] bottom-[30vh] md:inset-x-[4vw] min-[820px]:bottom-[21vh]"
-              : "absolute inset-x-6 top-[8vh] bottom-[38vh] md:inset-x-[6vw] min-[820px]:bottom-[34vh]"
-        }
-      >
-        <ProjectMediaView media={project.media} aspectRatio="fill" priority={priority} />
-      </div>
+      {backdrop ? (
+        <BackgroundEmbed src={backdrop.src} title={backdrop.title} />
+      ) : (
+        <div
+          data-chapter-plate
+          className={
+            contained
+              ? "absolute inset-x-6 top-[8vh] bottom-[38vh] md:inset-x-[6vw] min-[820px]:bottom-[34vh]"
+              : "absolute inset-0 motion-safe:min-[820px]:-inset-y-[4%]"
+          }
+        >
+          <ProjectMediaView media={project.media} aspectRatio="fill" priority={priority} />
+        </div>
+      )}
 
-      {/* Two layers, both derived rather than eyeballed, because white type over a
-          photograph nobody has chosen yet has to hold against the worst case: a blown white
-          highlight sitting exactly under a word.
-
-          The flat grade carries the headline. Composite luminance is roughly 1 - alpha, and
-          3:1 for display type needs it at or under 0.286, so nothing below 0.72 works at
-          all; 0.78 lands it at 3.6:1. The gradient then carries the lower edge to about
-          7.9:1 at the bottom and 5:1 at the first beat, which is where a 0.72-only version
-          failed — the gradient had faded to 0.35 while the text was still 15px.
-
-          If the real photography comes in dark, the flat layer is the dial to drop. */}
-      {!contained && (
+      {!contained && !backdrop && (
         <>
           <div aria-hidden="true" className="absolute inset-0 bg-ink/[0.78]" />
           <div

@@ -224,12 +224,14 @@ export function projectLine(project: Project): string {
  * Whether the media is shown whole rather than bled to the edges.
  *
  * A photograph can be cropped to fill a frame and graded so type sits over it. A product
- * shot cannot be cropped without cutting the device, and a third-party player cannot be
- * built on at all — it has its own controls and its own branding. Both are shown whole, on
- * the ground, with the type kept clear of them.
+ * shot cannot be cropped without cutting the device, so it is shown whole on the ground with
+ * the type kept clear of it.
+ *
+ * A player is not contained. Stripped of its own interface it behaves like footage, and
+ * footage covers — see BackgroundEmbed.
  *
  * Lives here so every surface that renders a project agrees about it.
  */
 export function isContained(media: ProjectMedia): boolean {
-  return media.kind === "embed" || (media.kind === "image" && media.fit === "contain");
+  return media.kind === "image" && media.fit === "contain";
 }
