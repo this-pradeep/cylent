@@ -17,6 +17,33 @@ const HIGHLIGHT = "remarkable.";
 
 const SENTENCE = WORDS.join(" ");
 
+/**
+ * The closing wash. Where Chapter 3 has three fields converging inward, this one radiates:
+ * a single halo blooming out past the words as the line completes. Converge, then radiate —
+ * the two chromatic moments on the page argue opposite directions on purpose, so the last
+ * one does not read as the first one repeated.
+ *
+ * A halo rather than a disc, and that is what makes it work at all. The words sit in the
+ * clear centre while the colour blooms around them, so the line the section exists to
+ * deliver is never asked to compete with the ground it sits on — and "remarkable." can keep
+ * the accent gradient, which needs the paper under it to stay light.
+ *
+ * Hues are the accent's own three stops rather than Chapter 3's RGB. Both sections get a
+ * chromatic moment; neither gets the same palette.
+ */
+const HALOS = [
+  { rgb: "169, 59, 157", x: "38%", y: "44%", scale: 1 },
+  { rgb: "104, 83, 212", x: "58%", y: "56%", scale: 1.14 },
+  { rgb: "8, 115, 127", x: "50%", y: "38%", scale: 0.88 },
+] as const;
+
+/** Clear core, colour at the rim, gone by the edge. */
+const HALO_STOPS = "transparent 0%, transparent 26%, rgba(RGB, 0.34) 46%, rgba(RGB, 0.16) 66%, transparent 88%";
+
+function haloGradient(rgb: string): string {
+  return `radial-gradient(circle at 50% 50%, ${HALO_STOPS.replaceAll("RGB", rgb)})`;
+}
+
 export function Future() {
   const sectionRef = useRef<HTMLElement>(null);
 
@@ -25,6 +52,7 @@ export function Future() {
     if (!section) return;
 
     const words = Array.from(section.querySelectorAll<HTMLElement>("[data-future-word]"));
+    const halos = Array.from(section.querySelectorAll<HTMLElement>("[data-future-halo]"));
     if (words.length === 0) return;
 
     const mm = gsap.matchMedia();
@@ -38,8 +66,14 @@ export function Future() {
       (context) => {
         const { held, still } = context.conditions as Record<string, boolean>;
 
+        // Centring lives in GSAP's transform, not in a Tailwind translate. GSAP writes
+        // `transform` wholesale, so a class-based translate would be clobbered the first
+        // time a halo was scaled.
+        gsap.set(halos, { xPercent: -50, yPercent: -50 });
+
         if (still) {
           gsap.set(words, { yPercent: 0, opacity: 1 });
+          gsap.set(halos, { scale: 1, opacity: 1 });
           return;
         }
 
@@ -68,6 +102,18 @@ export function Future() {
           0,
         );
 
+        // The bloom trails the words rather than leading them — the sentence earns the
+        // colour, and each halo opens at its own rate so the wash never reads as one disc
+        // being scaled.
+        halos.forEach((halo, index) => {
+          timeline.fromTo(
+            halo,
+            { scale: 0.24, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.72 + index * 0.08, ease: "power2.out" },
+            0.16 + index * 0.06,
+          );
+        });
+
         return () => {
           timeline.scrollTrigger?.kill();
         };
@@ -82,12 +128,32 @@ export function Future() {
       ref={sectionRef}
       className="relative bg-surface motion-safe:min-[820px]:h-[170vh]"
     >
-      <div className="flex min-h-[50vh] flex-col items-center justify-center px-6 py-[14vh] motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen motion-safe:min-[820px]:py-0">
+      {/* The wrapper paints its own ground because `position: sticky` forms a stacking
+          context, and a stacking context isolates blending — without a background here the
+          halos would have nothing to multiply against and would flatten into plain washes. */}
+      <div className="relative flex min-h-[50vh] flex-col items-center justify-center overflow-hidden bg-surface px-6 py-[14vh] motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen motion-safe:min-[820px]:py-0">
+        {/* No z-index: an explicit one would form a second stacking context and isolate the
+            blend all over again. Paint order comes from the heading carrying z-10. */}
+        <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
+          {HALOS.map((halo) => (
+            <span
+              key={halo.rgb}
+              data-future-halo
+              className="absolute block aspect-square w-[104%] min-w-[680px] mix-blend-multiply will-change-transform"
+              style={{
+                left: halo.x,
+                top: halo.y,
+                backgroundImage: haloGradient(halo.rgb),
+              }}
+            />
+          ))}
+        </div>
+
         {/* The display size lives here, not on a child. `ch` resolves against the element's
             own font-size, so a measure set here while the size sat on the inner span was
             being computed against the inherited 16px — a ~128px box that wrapped every word
             onto its own line and left the masks clipping them sideways. */}
-        <h2 className="m-0 max-w-[18ch] text-center text-[clamp(2.5rem,10vw,9rem)] font-semibold leading-[0.98] tracking-[-0.05em] text-ink">
+        <h2 className="relative z-10 m-0 max-w-[18ch] text-center text-[clamp(2.5rem,10vw,9rem)] font-semibold leading-[0.98] tracking-[-0.05em] text-ink">
           <span className="sr-only">{SENTENCE}</span>
 
           <span

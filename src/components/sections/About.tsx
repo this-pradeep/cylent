@@ -145,6 +145,15 @@ export function About() {
             { opacity: 0, y: 12 },
             { opacity: 1, y: 0, duration: 0.7, stagger: 0.07 },
             0.4,
+          )
+          // The headline belongs to the arrival, not to the scrub. Revealing it two thirds
+          // of the way through the gather left the section reading as an unfinished page
+          // for most of the time it was on screen.
+          .fromTo(
+            payoff,
+            { clipPath: "inset(0% 0% 100% 0%)", y: 24 },
+            { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.95, ease: "expo.out" },
+            0.5,
           );
 
         const gather = gsap.timeline({
@@ -161,17 +170,9 @@ export function About() {
           },
         });
 
-        gather
-          // The labels name three things. They go before the payoff lands, because by then
-          // there are not three things any more.
-          .to(labels, { opacity: 0, duration: 0.3, stagger: 0.06 }, 0.18)
-          .to(setup, { opacity: 0.28, duration: 0.3 }, 0.3)
-          .fromTo(
-            payoff,
-            { clipPath: "inset(0% 0% 100% 0%)", y: 22 },
-            { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.34, ease: "expo.out" },
-            0.62,
-          );
+        // The labels name three things. They go as the fields close, because by the time the
+        // fields have gathered there are not three things any more.
+        gather.to(labels, { opacity: 0, duration: 0.34, stagger: 0.06 }, 0.3);
 
         return () => {
           gather.scrollTrigger?.kill();
@@ -226,7 +227,7 @@ export function About() {
         <div className="relative z-10 flex flex-col gap-6">
           <p
             data-about-setup
-            className="m-0 max-w-[26ch] text-[clamp(1.0625rem,2.4vw,1.5rem)] font-medium leading-[1.35] tracking-[-0.025em] text-ink-muted"
+            className="m-0 max-w-[26ch] text-[clamp(1.0625rem,2.4vw,1.5rem)] font-medium leading-[1.35] tracking-[-0.025em] text-ink"
           >
             What you need rarely fits one job description.
           </p>
@@ -242,13 +243,13 @@ export function About() {
           </p>
 
           <div className="flex flex-col gap-3">
-            <p className="m-0 max-w-[38ch] text-[0.9375rem] leading-[1.75] text-ink-muted">
+            <p className="m-0 max-w-[40ch] text-[1rem] font-medium leading-[1.7] text-ink">
               Hire three specialists and you get three answers — plus the job of making them
               agree. Nobody quotes for that job. It lands on you.
             </p>
             <p
               data-about-lead
-              className="m-0 font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-ink-muted"
+              className="m-0 font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-ink"
             >
               A creative studio in {STUDIO_LOCATION}
             </p>
@@ -258,13 +259,13 @@ export function About() {
         {/* Named at the outer edge of each field, as annotations rather than set labels
             printed inside circles. Kept clear of the copy column on the left. */}
         <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-20 hidden min-[900px]:block">
-          <span data-about-label className="absolute left-[6%] top-[9%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">
+          <span data-about-label className="absolute left-[6%] top-[9%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink">
             Websites
           </span>
-          <span data-about-label className="absolute right-[8%] top-[24%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">
+          <span data-about-label className="absolute right-[8%] top-[24%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink">
             Videos
           </span>
-          <span data-about-label className="absolute bottom-[16%] right-[10%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink-muted">
+          <span data-about-label className="absolute bottom-[16%] right-[10%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink">
             Designs
           </span>
         </div>

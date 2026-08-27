@@ -131,7 +131,7 @@ export function SectionEyebrow({ label, className }: SectionEyebrowProps) {
   return (
     <span
       ref={rootRef}
-      className={`flex font-mono text-[0.8125rem] font-medium uppercase tracking-[0.16em] text-ink-muted ${className ?? ""}`}
+      className={`flex font-mono text-[0.8125rem] font-medium uppercase tracking-[0.16em] text-ink ${className ?? ""}`}
     >
       {/* Announced once, as a phrase. A row of individually transformed letters is not
           reliably read as one label. */}
