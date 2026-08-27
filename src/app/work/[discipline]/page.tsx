@@ -59,7 +59,7 @@ export default async function DisciplineWorkPage({ params }: PageProps) {
         <h1 className="m-0 -mb-[0.14em] pb-[0.14em] text-[clamp(3.25rem,13vw,12rem)] font-semibold leading-[0.84] tracking-[-0.055em] text-ink">
           {discipline.label}
         </h1>
-        <p className="m-0 max-w-[38ch] text-[0.9375rem] leading-[1.75] text-ink-muted">
+        <p className="m-0 max-w-[28ch] text-[clamp(1.0625rem,2.4vw,1.5rem)] font-medium leading-[1.35] tracking-[-0.025em] text-ink">
           {discipline.claim}
         </p>
         <span aria-hidden="true" className="mt-2 block h-px w-full bg-[image:var(--gradient-accent)]" />

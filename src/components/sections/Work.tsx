@@ -309,9 +309,12 @@ export function Work() {
                 </div>
               </div>
 
+              {/* The chapter's tagline, set like the lead-in line in Chapter 3. Both are a
+                  short statement standing under a display heading, and they were carrying
+                  two different treatments for the same job. */}
               <p
                 data-chapter-masthead
-                className="m-0 max-w-[34ch] text-[0.9375rem] leading-[1.75] text-ink-muted"
+                className="m-0 max-w-[28ch] text-[clamp(1.0625rem,2.4vw,1.5rem)] font-medium leading-[1.35] tracking-[-0.025em] text-ink"
               >
                 {discipline.claim}
               </p>
