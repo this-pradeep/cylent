@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { FIELD_COUNT, fieldPosition } from "@/lib/motion/overlap";
+import { FIELD_COUNT, FIELD_FALLOFF_PERCENT, fieldPosition } from "@/lib/motion/overlap";
 import { STUDIO_LOCATION } from "@/lib/site/studio";
 import { EYEBROW_LIFT_HEADROOM, SectionEyebrow } from "@/components/SectionEyebrow";
 
@@ -56,7 +56,7 @@ const FIELD_STOPS: readonly { at: number; alpha: number }[] = [
   { at: 26, alpha: 0.4 },
   { at: 52, alpha: 0.18 },
   { at: 74, alpha: 0.05 },
-  { at: 90, alpha: 0 },
+  { at: FIELD_FALLOFF_PERCENT, alpha: 0 },
 ];
 
 function fieldGradient(rgb: string): string {

@@ -3,6 +3,7 @@ import {
   FIELD_COUNT,
   FIELD_FOCUS,
   FIELD_RESTS,
+  FIELD_VISIBLE_RADIUS,
   fieldPosition,
   fieldSpread,
 } from "@/lib/motion/overlap";
@@ -71,9 +72,14 @@ describe("fieldSpread", () => {
   });
 
   it("keeps them close enough at the end to actually intersect", () => {
-    // The radial falloff reaches transparent at 72% of the field's half-width, so the
-    // visible pool is 72 across in these units. Any two centres further apart than that
-    // leave separate pools and no intersection to sit in.
-    expect(fieldSpread(1)).toBeLessThan(72);
+    // Derived rather than written down: two pools meet while their centres are closer than
+    // the sum of their radii, and hard-coding that number is how it survived a change to
+    // the falloff that had already made it wrong.
+    expect(fieldSpread(1)).toBeLessThan(2 * FIELD_VISIBLE_RADIUS);
+  });
+
+  it("stops short of stacking them, so the overlap stays light", () => {
+    // Well inside the point where all three pile onto one another and multiply to mud.
+    expect(fieldSpread(1)).toBeGreaterThan(FIELD_VISIBLE_RADIUS * 0.5);
   });
 });
