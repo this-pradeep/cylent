@@ -21,7 +21,8 @@ const ASPECT_CLASS: Record<ImageAssetProps["aspectRatio"], string> = {
   "16:9": "aspect-video",
   "1:1": "aspect-square",
   "9:16": "aspect-[9/16]",
-  fill: "absolute inset-0",
+  /** Fill takes its size from the ancestor it is pinned to, so it has no aspect of its own. */
+  fill: "",
 };
 
 /** A framed figure is a figure; a full-bleed frame is the ground, and a border round the
@@ -41,7 +42,9 @@ export function ImageAsset({
 
   return (
     <div
-      className={`relative overflow-hidden ${ASPECT_CLASS[aspectRatio]} ${
+      className={`overflow-hidden ${
+        isFill ? "absolute inset-0" : `relative ${ASPECT_CLASS[aspectRatio]}`
+      } ${
         isFill ? "" : FRAME_CLASS
       } ${className ?? ""}`}
     >
