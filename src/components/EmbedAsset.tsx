@@ -19,7 +19,7 @@ type EmbedAssetProps = {
 export function EmbedAsset({ src, title, className }: EmbedAssetProps) {
   return (
     <div className={`flex h-full w-full items-center justify-center ${className ?? ""}`}>
-      <div className="relative aspect-video h-full w-auto max-w-full overflow-hidden rounded-sm bg-ink">
+      <div className="relative aspect-video h-full w-auto max-w-full overflow-hidden rounded-lg bg-ink shadow-[0_30px_80px_-30px_rgba(0,0,0,0.75)] ring-1 ring-surface/12">
         <iframe
           src={src}
           title={title}

@@ -46,15 +46,23 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
   // screenshot down to nothing. Contained shots sit whole on the ink ground, the type keeps
   // clear of them, and no grade is needed — surface on ink is 17:1 without help.
   const contained = isContained(project.media);
+  // A player is the one piece of media that cannot be cropped — the frame would take its
+  // controls with it — so it earns the room instead, on a shallower type reserve than a
+  // product shot needs. At 74vh tall the 16:9 box is about four fifths of the width of a
+  // 16:9 display, which is as large as it can be while the headline still has a band to sit
+  // in.
+  const isEmbed = project.media.kind === "embed";
 
   return (
     <div className="relative flex h-svh min-h-[560px] flex-col justify-end overflow-hidden bg-ink motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen">
       <div
         data-chapter-plate
         className={
-          contained
-            ? "absolute inset-x-6 top-[8vh] bottom-[38vh] md:inset-x-[6vw] min-[820px]:bottom-[34vh]"
-            : "absolute inset-0 motion-safe:min-[820px]:-inset-y-[4%]"
+          !contained
+            ? "absolute inset-0 motion-safe:min-[820px]:-inset-y-[4%]"
+            : isEmbed
+              ? "absolute inset-x-4 top-[5vh] bottom-[30vh] md:inset-x-[4vw] min-[820px]:bottom-[21vh]"
+              : "absolute inset-x-6 top-[8vh] bottom-[38vh] md:inset-x-[6vw] min-[820px]:bottom-[34vh]"
         }
       >
         <ProjectMediaView media={project.media} aspectRatio="fill" priority={priority} />
