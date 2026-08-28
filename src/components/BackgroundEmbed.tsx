@@ -1,7 +1,3 @@
-"use client";
-
-import { useState } from "react";
-
 type BackgroundEmbedProps = {
   /** The player URL, already carrying its `video` parameter. */
   src: string;
@@ -11,14 +7,18 @@ type BackgroundEmbedProps = {
 /**
  * Player parameters that turn an embed into a background.
  *
- * Autoplay is only granted to muted video, which is why `mute` starts true rather than as a
- * stylistic choice. The rest strips the player back to picture: no controls, no logo, no
- * start-screen furniture, no queue, no sharing.
+ * `mute` is not a setting. Autoplay is only granted to muted video in the first place, and a
+ * background that can make noise is not a background — a visitor who scrolls into a section
+ * and gets sound has been interrupted by something they did not ask to play. It is fixed
+ * here rather than defaulted so there is nowhere for it to be turned off.
+ *
+ * The rest strips the player back to picture: no controls, no logo, no start-screen
+ * furniture, no queue, no sharing.
  */
-function playerUrl(src: string, muted: boolean): string {
+function playerUrl(src: string): string {
   const join = src.includes("?") ? "&" : "?";
   return `${src}${join}${new URLSearchParams({
-    mute: String(muted),
+    mute: "true",
     autoplay: "true",
     loop: "true",
     controls: "false",
@@ -30,28 +30,9 @@ function playerUrl(src: string, muted: boolean): string {
   })}`;
 }
 
-function SoundIcon({ muted }: { muted: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5">
-      <path
-        d="M4 9.5h3.2L12 5.5v13L7.2 14.5H4z"
-        fill="currentColor"
-        stroke="currentColor"
-        strokeWidth={1.2}
-        strokeLinejoin="round"
-      />
-      {muted ? (
-        <path d="M16 9.5l4.5 5M20.5 9.5l-4.5 5" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" fill="none" />
-      ) : (
-        <path d="M15.8 9a4.2 4.2 0 010 6M18.4 6.6a7.6 7.6 0 010 10.8" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" fill="none" />
-      )}
-    </svg>
-  );
-}
-
 /**
  * A hosted player used as a section background: covering the frame, stripped of its own
- * interface, and inert to the pointer. The only thing anyone can click is the sound.
+ * interface, silent, and inert to the pointer. There is nothing here to click.
  *
  * The iframe carries `pointer-events: none`, which is what makes this a background rather
  * than an embed that happens to be large — without it a stray click lands in someone else's
@@ -61,20 +42,17 @@ function SoundIcon({ muted }: { muted: boolean }) {
  * `min-h-full`, so whichever dimension is short gets overflowed rather than letterboxed. An
  * iframe cannot be `object-fit`-ed; it has to be measured into place.
  *
- * ⚠ Unmuting reloads the player, so the clip restarts. Holding position would mean loading
- * Dailymotion's SDK to issue a mute command — a third-party script on first paint, for a
- * looping background reel where restarting is barely visible. Swapping the parameter is the
- * cheaper trade.
+ * There was a sound toggle here. It is gone, and with it the client component this had to be
+ * — the whole thing renders on the server now. Unmuting also reloaded the player and
+ * restarted the clip, because holding position would have meant loading Dailymotion's SDK on
+ * first paint to issue a mute command; none of that has to be reasoned about any more.
  */
 export function BackgroundEmbed({ src, title }: BackgroundEmbedProps) {
-  const [muted, setMuted] = useState(true);
-
   return (
     <>
       <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
         <iframe
-          key={muted ? "muted" : "audible"}
-          src={playerUrl(src, muted)}
+          src={playerUrl(src)}
           title={title}
           allow="autoplay; web-share"
           referrerPolicy="strict-origin-when-cross-origin"
@@ -90,16 +68,6 @@ export function BackgroundEmbed({ src, title }: BackgroundEmbedProps) {
         aria-hidden="true"
         className="absolute inset-x-0 bottom-0 h-[62%] bg-[linear-gradient(to_top,rgba(20,18,15,0.68)_0%,rgba(20,18,15,0.42)_38%,transparent_100%)]"
       />
-
-      <button
-        type="button"
-        onClick={() => setMuted((value) => !value)}
-        aria-pressed={!muted}
-        className="absolute right-6 top-[13vh] z-10 inline-flex items-center gap-2 rounded-full border border-surface/25 bg-ink/50 px-4 py-2 font-mono text-[0.5625rem] uppercase tracking-[0.2em] text-surface backdrop-blur-sm transition-colors hover:bg-ink/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-surface md:right-[6vw]"
-      >
-        <SoundIcon muted={muted} />
-        {muted ? "Sound off" : "Sound on"}
-      </button>
     </>
   );
 }
