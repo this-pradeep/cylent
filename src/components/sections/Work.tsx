@@ -51,8 +51,11 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
   // frame hands the whole layer over rather than composing around it.
   const backdrop = project.media.kind === "embed" ? project.media : null;
 
+  // `min-h-svh` on the phone rather than `h-svh`: a contained shot and four beats do not fit
+  // one screen at that width, and forcing them to made the type sit on the picture. The
+  // frame grows instead; the desktop hold is unchanged.
   return (
-    <div className="relative flex h-svh min-h-[560px] flex-col justify-end overflow-hidden bg-ink motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen">
+    <div className="relative flex min-h-svh flex-col justify-end overflow-hidden bg-ink min-[820px]:h-svh motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen">
       {backdrop ? (
         <BackgroundEmbed src={backdrop.src} title={backdrop.title} />
       ) : (
@@ -60,7 +63,10 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
           data-chapter-plate
           className={
             contained
-              ? "absolute inset-x-6 top-[8vh] bottom-[38vh] md:inset-x-[6vw] min-[820px]:bottom-[34vh]"
+              // In flow on the phone, so the shot has a box of its own and the copy starts
+              // where the picture stops. Absolute again from 820px, where it is a plate the
+              // type is composed over and the parallax drift has something to move.
+              ? "relative mx-6 mb-10 mt-[13vh] aspect-[4/3] md:mx-[6vw] min-[820px]:absolute min-[820px]:inset-x-[6vw] min-[820px]:top-[8vh] min-[820px]:bottom-[34vh] min-[820px]:m-0 min-[820px]:aspect-auto"
               : "absolute inset-0 motion-safe:min-[820px]:-inset-y-[4%]"
           }
         >
@@ -275,49 +281,58 @@ export function Work() {
             data-eyebrow-surface
             className="relative"
           >
-            <header className="flex flex-col gap-4 px-6 py-[11vh] md:px-[6vw]">
-              <span data-chapter-masthead className={`block ${EYEBROW_LIFT_HEADROOM}`}>
+            {/* A grid rather than nested flex rows, so mobile and desktop can disagree
+                about the order without duplicating the markup. Source order is the mobile
+                order — eyebrow, heading, claim, then the way in — and the explicit
+                row/column placement below rebuilds the desktop arrangement, where the
+                heading and the button share a line. A nested row could not do that: the
+                button would have been trapped inside it, above the claim, on every phone. */}
+            <header className="grid grid-cols-1 gap-4 px-6 py-[11vh] md:px-[6vw] min-[820px]:grid-cols-[1fr_auto] min-[820px]:items-end min-[820px]:gap-x-[5vw]">
+              <span
+                data-chapter-masthead
+                className={`block ${EYEBROW_LIFT_HEADROOM} min-[820px]:col-span-2 min-[820px]:row-start-1`}
+              >
                 <SectionEyebrow label={discipline.promise} />
               </span>
 
-              {/* The heading and the way into the category share a line. */}
-              <div className="flex flex-col gap-7 min-[820px]:flex-row min-[820px]:items-end min-[820px]:justify-between min-[820px]:gap-[5vw]">
-                {/* One word, so it can carry real scale — roughly double what it was, and
-                    the whole reason a discipline heading is a single noun.
+              {/* One word, so it can carry real scale — roughly double what it was, and
+                  the whole reason a discipline heading is a single noun.
 
-                    The padding is not decoration. Leading below 1 pulls the line box in
-                    tighter than the glyphs, so the descender in "Design" hangs outside it —
-                    and the masthead reveal animates clip-path to inset(0 0 0 0), which clips
-                    to exactly that box. The matching negative margin keeps the room out of
-                    the layout, so the tight leading still reads as tight. */}
-                <h3
-                  data-chapter-masthead
-                  className="m-0 -mb-[0.14em] pb-[0.14em] text-[clamp(3.25rem,12vw,11rem)] font-semibold leading-[0.84] tracking-[-0.055em] text-ink"
-                >
-                  {discipline.label}
-                </h3>
-
-                {/* Deliberately outside the clip-path reveal the rest of the masthead uses.
-                    The pill is magnetic and carries a hairline below its own box, and
-                    `inset(0 0 0 0)` would crop both. */}
-                <div data-chapter-more className="shrink-0">
-                  <ActionLink
-                    label="View all projects"
-                    ariaLabel={`View all ${discipline.label} projects`}
-                    href={workHref(discipline.id)}
-                  />
-                </div>
-              </div>
+                  The padding is not decoration. Leading below 1 pulls the line box in
+                  tighter than the glyphs, so the descender in "Design" hangs outside it —
+                  and the masthead reveal animates clip-path to inset(0 0 0 0), which clips
+                  to exactly that box. The matching negative margin keeps the room out of
+                  the layout, so the tight leading still reads as tight. */}
+              <h3
+                data-chapter-masthead
+                className="m-0 -mb-[0.14em] pb-[0.14em] text-[clamp(3.25rem,12vw,11rem)] font-semibold leading-[0.84] tracking-[-0.055em] text-ink min-[820px]:col-start-1 min-[820px]:row-start-2"
+              >
+                {discipline.label}
+              </h3>
 
               {/* The chapter's tagline, set like the lead-in line in Chapter 3. Both are a
                   short statement standing under a display heading, and they were carrying
                   two different treatments for the same job. */}
               <p
                 data-chapter-masthead
-                className="m-0 max-w-[28ch] text-[clamp(1.0625rem,2.4vw,1.5rem)] font-medium leading-[1.35] tracking-[-0.025em] text-ink"
+                className="m-0 max-w-[28ch] text-[clamp(1.0625rem,2.4vw,1.5rem)] font-medium leading-[1.35] tracking-[-0.025em] text-ink min-[820px]:col-span-2 min-[820px]:row-start-3"
               >
                 {discipline.claim}
               </p>
+
+              {/* Deliberately outside the clip-path reveal the rest of the masthead uses.
+                  The pill is magnetic and carries a hairline below its own box, and
+                  `inset(0 0 0 0)` would crop both. */}
+              <div
+                data-chapter-more
+                className="mt-3 shrink-0 min-[820px]:col-start-2 min-[820px]:row-start-2 min-[820px]:mt-0 min-[820px]:justify-self-end"
+              >
+                <ActionLink
+                  label="View all projects"
+                  ariaLabel={`View all ${discipline.label} projects`}
+                  href={workHref(discipline.id)}
+                />
+              </div>
             </header>
 
             {/* The hold is the lead frame's own scroll room. 170vh rather than the 230vh a

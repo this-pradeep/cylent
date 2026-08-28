@@ -170,7 +170,10 @@ export function Future() {
       {/* The wrapper paints its own ground because `position: sticky` forms a stacking
           context, and a stacking context isolates blending — without a background here the
           halos would have nothing to multiply against and would flatten into plain washes. */}
-      <div className="relative flex min-h-[50vh] flex-col items-center justify-center overflow-hidden bg-surface px-6 py-[14vh] motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen motion-safe:min-[820px]:py-0">
+      {/* A full screen on the phone too. At `min-h-[50vh]` the closing statement shared a
+          scroll with whatever came next, which is the one thing a closing statement must not
+          do — it is the last thing said, so it gets the room to be said in. */}
+      <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-surface px-6 py-[14vh] motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen motion-safe:min-[820px]:py-0">
         {/* No z-index: an explicit one would form a second stacking context and isolate the
             blend all over again. Paint order comes from the heading carrying z-10. */}
         <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
@@ -185,7 +188,10 @@ export function Future() {
             own font-size, so a measure set here while the size sat on the inner span was
             being computed against the inherited 16px — a ~128px box that wrapped every word
             onto its own line and left the masks clipping them sideways. */}
-        <h2 className="relative z-10 m-0 max-w-[18ch] text-center text-[clamp(2.5rem,10vw,9rem)] font-semibold leading-[0.98] tracking-[-0.05em] text-ink">
+        {/* 14vw on the phone rather than 10: at 393px that is the difference between a
+            headline and a paragraph in bold. The cap is unchanged, so nothing moves above
+            the breakpoint where 10vw was already large. */}
+        <h2 className="relative z-10 m-0 max-w-[18ch] text-center text-[clamp(3rem,14vw,9rem)] font-semibold leading-[0.98] tracking-[-0.05em] text-ink min-[820px]:text-[clamp(2.5rem,10vw,9rem)]">
           <span className="sr-only">{SENTENCE}</span>
 
           <span

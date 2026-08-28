@@ -13,7 +13,6 @@ import {
 } from "@/lib/site/contact";
 import {
   MailIcon,
-  PhoneIcon,
   WhatsAppIcon,
 } from "@/components/icons/ContactIcons";
 
@@ -23,8 +22,20 @@ import {
  * fraction: as a fraction its narrower content floated in the middle of the track and left
  * dead space against the page edge.
  */
-const ROW =
+/**
+ * One grid for the whole footer body rather than two stacked rows.
+ *
+ * Two rows could not reorder across the boundary between them: the button lives in row one
+ * and the index in row two, so on a phone the button was always above the index no matter
+ * what `order` was set within either row. As a single grid, the mobile order is `order-*` on
+ * four children and the desktop arrangement is explicit row/column placement — the same
+ * two-by-two it always was.
+ */
+const FOOTER_GRID =
   "grid gap-[clamp(28px,4vw,64px)] min-[860px]:grid-cols-[1fr_23rem] min-[860px]:items-start";
+
+/** The second desktop row sits away from the first; on mobile the grid gap already does it. */
+const SECOND_ROW = "min-[860px]:row-start-2 min-[860px]:pt-[clamp(30px,4.5vw,56px)]";
 
 /** Shared by the two stacked copies of each index label, so their metrics match exactly. */
 const INDEX_LABEL =
@@ -33,7 +44,6 @@ const INDEX_LABEL =
 const CHANNEL_ICONS = {
   mail: MailIcon,
   whatsapp: WhatsAppIcon,
-  phone: PhoneIcon,
 };
 
 /**
@@ -103,11 +113,9 @@ export function Footer() {
           Contact
         </p>
 
-        {/* Row one and row two run on identical grid tracks, so the statement lines up with
-          the index and the circular button lines up with the contact block. */}
-        <div className={ROW}>
+        <div className={`${FOOTER_GRID} pb-[clamp(22px,3vw,34px)]`}>
           <div
-            className="fx-stage relative min-h-[clamp(110px,17vw,200px)]"
+            className="fx-stage relative order-1 min-h-[clamp(110px,17vw,200px)] min-[860px]:col-start-1 min-[860px]:row-start-1"
             data-swapped={blurb ? "true" : "false"}
           >
             <div className="overflow-hidden">
@@ -115,15 +123,19 @@ export function Footer() {
                 On one element GSAP's inline opacity would beat the swap's CSS rule and the
                 old heading would never leave — which is exactly what it did. */}
               <div ref={pitchRef}>
-                <p className="fx-pitch m-0 max-w-[15ch] text-[clamp(2rem,7.4vw,5.6rem)] font-semibold leading-[0.98] tracking-[-0.045em] text-ink">
+                <p className="fx-pitch m-0 max-w-[15ch] text-[clamp(2.5rem,11.5vw,5.6rem)] font-semibold leading-[0.98] tracking-[-0.045em] text-ink min-[860px]:text-[clamp(2rem,7.4vw,5.6rem)]">
                   Let&apos;s build something{" "}
-                  <span className="text-ink-muted">worth remembering.</span>
+                  {/* The tail carries the accent at rest, the same as Chapter 8's closing
+                      word. It used to be muted ink, which meant the only gradient in this
+                      section was on the swapped copy underneath — invisible until someone
+                      hovered a row, so the statement read as grey by default. */}
+                  <span className="text-gradient">worth remembering.</span>
                 </p>
               </div>
             </div>
             <p
               aria-hidden="true"
-              className="fx-alt pointer-events-none absolute inset-0 m-0 max-w-[15ch] text-[clamp(2rem,7.4vw,5.6rem)] font-semibold leading-[0.98] tracking-[-0.045em] text-ink"
+              className="fx-alt pointer-events-none absolute inset-0 m-0 max-w-[15ch] text-[clamp(2.5rem,11.5vw,5.6rem)] font-semibold leading-[0.98] tracking-[-0.045em] text-ink min-[860px]:text-[clamp(2rem,7.4vw,5.6rem)]"
             >
               {blurb ? (
                 <>
@@ -134,17 +146,19 @@ export function Footer() {
             </p>
           </div>
 
-          <CircularButton
-            label="Start a conversation"
-            href={mailtoHref(CONTACT_EMAIL, "New project")}
-            size={150}
-          />
-        </div>
+          {/* Third on a phone, so the index is read before the button is offered. */}
+          <div className="order-3 min-[860px]:col-start-2 min-[860px]:row-start-1">
+            <CircularButton
+              label="Start a conversation"
+              href={mailtoHref(CONTACT_EMAIL, "New project")}
+              size={150}
+            />
+          </div>
 
-        <div
-          className={`${ROW} pb-[clamp(22px,3vw,34px)] pt-[clamp(30px,4.5vw,56px)]`}
-        >
-          <nav aria-label="Site index" className="flex flex-col">
+          <nav
+            aria-label="Site index"
+            className={`order-2 flex flex-col min-[860px]:col-start-1 ${SECOND_ROW}`}
+          >
             {FOOTER_LINKS.map((link, index) => (
               <Link
                 key={link.id}
@@ -190,7 +204,9 @@ export function Footer() {
             ))}
           </nav>
 
-          <div className="flex flex-col gap-[clamp(24px,3vw,32px)]">
+          <div
+            className={`order-4 flex flex-col gap-[clamp(24px,3vw,32px)] min-[860px]:col-start-2 ${SECOND_ROW}`}
+          >
             <p className="m-0 max-w-[32ch] text-[0.9rem] leading-[1.68] text-ink-muted">
               Tell us what it is for and who has to feel something. We will tell
               you whether we are the right studio for it.

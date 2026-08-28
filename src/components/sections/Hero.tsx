@@ -228,14 +228,22 @@ export function Hero() {
       {/* Background creative. The entrance timeline picks this up automatically via
           [data-hero-creative]. The line-traced PrismScene remains in the repo,
           unmounted, if we want to return to it. */}
-      <HeroModelScene index={index} className="inset-0" />
+      {/* Full bleed from 768px up, as it always was. On a phone it is pinned to the upper
+          half instead: the composition there is the object over the statement, not the
+          statement standing in front of the object, and a full-bleed scene behind
+          viewport-wide type is just noise under it. */}
+      <HeroModelScene index={index} className="inset-x-0 top-0 h-[52svh] md:inset-0 md:h-auto" />
 
       <div className="relative z-10 mb-[6vh] px-6 md:mb-[7vh] md:px-[6vw]">
         <div className="md:flex md:items-end md:justify-between md:gap-[6vw]">
           <div className="md:w-[56%]">
+            {/* 13vw on the phone against 6vw above it. The rotating word is the one thing
+                on this screen that has to be read from across a room, and at 393px the old
+                clamp bottomed out at its 2.25rem floor — a headline the size of a
+                subheading. */}
             <h1
               aria-label={HEADLINE_LABEL}
-              className="text-[clamp(2.25rem,6vw,6rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-ink"
+              className="text-[clamp(2.75rem,13vw,6rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-ink md:text-[clamp(2.25rem,6vw,6rem)]"
             >
               <span aria-hidden="true">
                 {/* Line breaks are authored, not wrapped: each masked line needs its own
@@ -254,7 +262,7 @@ export function Hero() {
                       ref={pillRef}
                       onMouseEnter={() => setPausedBoth(true)}
                       onMouseLeave={() => setPausedBoth(false)}
-                      className="chromatic-ring inline-flex items-center gap-[0.3em] overflow-hidden rounded-full bg-ink/5 px-[0.6em] py-[0.26em] align-baseline shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6),inset_0_1px_1px_rgba(255,255,255,0.8),0_8px_24px_rgba(20,18,15,0.1)]"
+                      className="chromatic-ring inline-flex max-w-full items-center gap-[0.3em] overflow-hidden rounded-full bg-ink/5 px-[0.6em] py-[0.26em] align-baseline shadow-[inset_0_0_0_1px_rgba(255,255,255,0.6),inset_0_1px_1px_rgba(255,255,255,0.8),0_8px_24px_rgba(20,18,15,0.1)]"
                     >
                       <span
                         ref={contentRef}
@@ -270,7 +278,11 @@ export function Hero() {
                   data-hero-line
                   className="mb-[-0.14em] block  pb-[0.14em]"
                 >
-                  <span className="block whitespace-nowrap">
+                  {/* Allowed to wrap on a phone. `nowrap` holds the line together where
+                      there is room for it, but at 13vw there is not — the line ran off the
+                      screen and the section's own `overflow-hidden` quietly ate the end of
+                      it, so nothing reported a problem and the word was simply gone. */}
+                  <span className="block md:whitespace-nowrap">
                     Worth Remembering.
                   </span>
                 </span>
