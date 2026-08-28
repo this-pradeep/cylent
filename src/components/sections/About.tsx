@@ -2,9 +2,16 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { FIELD_COUNT, FIELD_FALLOFF_PERCENT, fieldPosition } from "@/lib/motion/overlap";
+import {
+  FIELD_COUNT,
+  FIELD_FALLOFF_PERCENT,
+  fieldPosition,
+} from "@/lib/motion/overlap";
 import { STUDIO_LOCATION } from "@/lib/site/studio";
-import { EYEBROW_LIFT_HEADROOM, SectionEyebrow } from "@/components/SectionEyebrow";
+import {
+  EYEBROW_LIFT_HEADROOM,
+  SectionEyebrow,
+} from "@/components/SectionEyebrow";
 
 /**
  * Chapter 3 — Our Philosophy. The hero already commits to three disciplines and one studio,
@@ -60,7 +67,9 @@ const FIELD_STOPS: readonly { at: number; alpha: number }[] = [
 ];
 
 function fieldGradient(rgb: string): string {
-  const stops = FIELD_STOPS.map(({ at, alpha }) => `rgba(${rgb}, ${alpha}) ${at}%`).join(", ");
+  const stops = FIELD_STOPS.map(
+    ({ at, alpha }) => `rgba(${rgb}, ${alpha}) ${at}%`,
+  ).join(", ");
   return `radial-gradient(circle at 50% 50%, ${stops})`;
 }
 
@@ -71,7 +80,8 @@ export function About() {
     const section = sectionRef.current;
     if (!section) return;
 
-    const query = <T extends HTMLElement>(selector: string) => section.querySelector<T>(selector);
+    const query = <T extends HTMLElement>(selector: string) =>
+      section.querySelector<T>(selector);
     const queryAll = <T extends HTMLElement>(selector: string) =>
       Array.from(section.querySelectorAll<T>(selector));
 
@@ -79,16 +89,17 @@ export function About() {
     const rule = query("[data-about-rule]");
     const fields = queryAll("[data-about-field]");
     const labels = queryAll("[data-about-label]");
-    const setup = query("[data-about-setup]");
+    const stanza = queryAll("[data-about-stanza]");
     const payoff = query("[data-about-payoff]");
-    if (!rule || !setup || !payoff || fields.length !== FIELD_COUNT) return;
+    if (!rule || !payoff || stanza.length === 0 || fields.length !== FIELD_COUNT) return;
 
     const mm = gsap.matchMedia();
 
     mm.add(
       {
         held: "(min-width: 900px) and (prefers-reduced-motion: no-preference)",
-        flowing: "(max-width: 899px) and (prefers-reduced-motion: no-preference)",
+        flowing:
+          "(max-width: 899px) and (prefers-reduced-motion: no-preference)",
         still: "(prefers-reduced-motion: reduce)",
       },
       (context) => {
@@ -107,7 +118,11 @@ export function About() {
         // With motion removed the drift has nothing to show, so the fields are placed where
         // they end up and the section states its conclusion outright.
         if (still) {
-          gsap.set([...lead, setup, payoff], { clipPath: "none", y: 0, opacity: 1 });
+          gsap.set([...lead, ...stanza, payoff], {
+            clipPath: "none",
+            y: 0,
+            opacity: 1,
+          });
           gsap.set(rule, { scaleX: 1 });
           gsap.set(fields, { opacity: 1, scale: 1 });
           gsap.set(labels, { opacity: 0 });
@@ -129,7 +144,12 @@ export function About() {
           .fromTo(
             lead,
             { clipPath: "inset(0% 0% 100% 0%)", y: 16 },
-            { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.75, stagger: 0.09 },
+            {
+              clipPath: "inset(0% 0% 0% 0%)",
+              y: 0,
+              duration: 0.75,
+              stagger: 0.09,
+            },
             0,
           )
           .fromTo(rule, { scaleX: 0 }, { scaleX: 1, duration: 0.95 }, 0.1)
@@ -137,11 +157,17 @@ export function About() {
           .fromTo(
             fields,
             { opacity: 0, scale: 0.82 },
-            { opacity: 1, scale: 1, duration: 1.1, ease: "power2.out", stagger: 0.12 },
+            {
+              opacity: 1,
+              scale: 1,
+              duration: 1.1,
+              ease: "power2.out",
+              stagger: 0.12,
+            },
             0.15,
           )
           .fromTo(
-            [setup, ...labels],
+            labels,
             { opacity: 0, y: 12 },
             { opacity: 1, y: 0, duration: 0.7, stagger: 0.07 },
             0.4,
@@ -152,8 +178,22 @@ export function About() {
           .fromTo(
             payoff,
             { clipPath: "inset(0% 0% 100% 0%)", y: 24 },
-            { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.95, ease: "expo.out" },
+            {
+              clipPath: "inset(0% 0% 0% 0%)",
+              y: 0,
+              duration: 0.95,
+              ease: "expo.out",
+            },
             0.5,
+          )
+          // The stanza follows the headline rather than preceding it, because it is the
+          // headline's own elaboration — three lines that each start where the last one
+          // left off, and a turn at the end. Staggered so it arrives in reading order.
+          .fromTo(
+            stanza,
+            { clipPath: "inset(0% 0% 100% 0%)", y: 14 },
+            { clipPath: "inset(0% 0% 0% 0%)", y: 0, duration: 0.7, stagger: 0.11 },
+            1.05,
           );
 
         const gather = gsap.timeline({
@@ -224,48 +264,90 @@ export function About() {
           />
         </div>
 
-        <div className="relative z-10 flex flex-col gap-6">
-          <p
-            data-about-setup
-            className="m-0 max-w-[26ch] text-[clamp(1.0625rem,2.4vw,1.5rem)] font-medium leading-[1.35] tracking-[-0.025em] text-ink"
-          >
-            What you need rarely fits one job description.
-          </p>
-
+        <div className="relative z-10 flex flex-col gap-7">
           {/* Ink, not the gradient. The fields darken the ground beneath these words by an
               amount that depends on how far the gather has run, and the accent ramp is only
               guaranteed legible down to --color-panel. */}
           <p
             data-about-payoff
-            className="m-0 max-w-[12ch] text-[clamp(2.75rem,9vw,8rem)] font-semibold leading-[0.9] tracking-[-0.05em] text-ink will-change-transform"
+            className="m-0 max-w-[13ch] text-[clamp(2.75rem,9vw,8rem)] font-semibold leading-[0.9] tracking-[-0.05em] text-ink will-change-transform"
           >
-            The answer lives in the overlap.
+            Great work doesn&rsquo;t happen in silos.
           </p>
 
-          <div className="flex flex-col gap-3">
-            <p className="m-0 max-w-[40ch] text-[1rem] font-medium leading-[1.7] text-ink">
-              Hire three specialists and you get three answers — plus the job of making them
-              agree. Nobody quotes for that job. It lands on you.
+          {/* Four lines, set as one stanza. The three &ldquo;between&rdquo; lines are a
+              cadence — each is a fragment of the sentence above it, so they are set at one
+              size in one weight and separated only by their own line breaks. The turn at the
+              end takes full ink, because it is the only one of the four that is a claim. */}
+          <div className="flex max-w-[52ch] flex-col gap-1.5">
+            <p
+              data-about-stanza
+              className="m-0 text-[clamp(1.0625rem,2.2vw,1.375rem)] font-medium leading-[1.35] tracking-[-0.02em] text-ink/70"
+            >
+              It happens in the space between ideas and execution.
             </p>
+            <p
+              data-about-stanza
+              className="m-0 text-[clamp(1.0625rem,2.2vw,1.375rem)] font-medium leading-[1.35] tracking-[-0.02em] text-ink/70"
+            >
+              Between technology and design.
+            </p>
+            <p
+              data-about-stanza
+              className="m-0 text-[clamp(1.0625rem,2.2vw,1.375rem)] font-medium leading-[1.35] tracking-[-0.02em] text-ink/70"
+            >
+              Between strategy and storytelling.
+            </p>
+            <p
+              data-about-stanza
+              className="m-0 mt-2 text-[clamp(1.0625rem,2.2vw,1.375rem)] font-semibold leading-[1.35] tracking-[-0.025em] text-ink"
+            >
+              That&rsquo;s where we work.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <p className="m-0 max-w-[44ch] text-[1rem] font-medium leading-[1.7] text-ink">
+              We bring different disciplines together to create digital experiences, brands,
+              and stories that feel as good as they work.
+            </p>
+            {/* The place is read from `studio.ts` rather than typed here. It is stamped
+                beside the loader's clock as well, and two copies of somewhere we might move
+                is two chances to be wrong about it. */}
             <p
               data-about-lead
               className="m-0 font-mono text-[0.6875rem] uppercase tracking-[0.16em] text-ink"
             >
-              A creative studio in {STUDIO_LOCATION}
+              Cylent &mdash; a creative technology studio from {STUDIO_LOCATION}
             </p>
           </div>
         </div>
 
         {/* Named at the outer edge of each field, as annotations rather than set labels
             printed inside circles. Kept clear of the copy column on the left. */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-20 hidden min-[900px]:block">
-          <span data-about-label className="absolute left-[6%] top-[9%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-20 hidden min-[900px]:block"
+        >
+          <span
+            data-about-label
+            // Right of the copy column, not above it. At left-[6%] this sat in the same
+            // place as the eyebrow — which only became a collision once the copy grew tall
+            // enough to push the eyebrow up the centred column.
+            className="absolute left-[52%] top-[11%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink"
+          >
             Websites
           </span>
-          <span data-about-label className="absolute right-[8%] top-[24%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink">
+          <span
+            data-about-label
+            className="absolute right-[8%] top-[24%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink"
+          >
             Videos
           </span>
-          <span data-about-label className="absolute bottom-[16%] right-[10%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink">
+          <span
+            data-about-label
+            className="absolute bottom-[16%] right-[10%] font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink"
+          >
             Designs
           </span>
         </div>
