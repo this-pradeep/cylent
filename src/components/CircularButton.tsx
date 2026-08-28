@@ -6,9 +6,16 @@ import { useMagneticHover } from "@/lib/motion/useMagneticHover";
 import { ringCircumference, ringLabel, ringPath } from "@/lib/motion/spin-ring";
 
 type CircularButtonProps = {
-  /** Set around the ring. Also the accessible name. */
+  /** Set around the ring. Also the accessible name unless `ariaLabel` overrides it. */
   label: string;
+  /**
+   * Accessible name, for when the ring carries something that is not a sentence — a bare
+   * domain reads fine spinning round a circle and badly as a link name.
+   */
+  ariaLabel?: string;
   href: string;
+  /** Opens in a new tab, with the rel a new tab requires. */
+  external?: boolean;
   /** Outer diameter in px. */
   size?: number;
   /** How many times the label repeats around the ring. */
@@ -28,7 +35,9 @@ type CircularButtonProps = {
  */
 export function CircularButton({
   label,
+  ariaLabel,
   href,
+  external = false,
   size = 152,
   repeats = 2,
   className = "",
@@ -53,7 +62,9 @@ export function CircularButton({
     <a
       ref={ref}
       href={href}
-      aria-label={label}
+      aria-label={ariaLabel ?? label}
+      target={external ? "_blank" : undefined}
+      rel={external ? "noreferrer" : undefined}
       className={`cbtn relative grid shrink-0 place-items-center rounded-full bg-ink ${className}`}
       style={{ width: size, height: size }}
     >
