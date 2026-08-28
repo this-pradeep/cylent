@@ -8,11 +8,6 @@ export function toE164(input: string): string {
   return digits ? `+${digits}` : "";
 }
 
-export function telHref(phone: string): string {
-  const e164 = toE164(phone);
-  return e164 ? `tel:${e164}` : "";
-}
-
 /**
  * wa.me takes digits with no leading plus — passing "+91…" silently fails to resolve the
  * number, which is the whole reason this is a function and not a template literal.
@@ -39,8 +34,8 @@ export const SITE_URL = `https://${SITE_DOMAIN}`;
 
 export const CONTACT_EMAIL = "contact@cylent.in";
 
-/** The studio line. Every phone-based channel below derives from it. */
-export const CONTACT_PHONE = "+91 7470407696";
+/** The studio line. WhatsApp is what it is for — the number is not offered to dial. */
+export const CONTACT_PHONE = "+91 96303 90748";
 
 export type ContactChannel = {
   /** Accessible name for the button. */
@@ -48,8 +43,8 @@ export type ContactChannel = {
   /** The actionable thing itself, shown on the button. */
   value: string;
   href: string;
-  icon: "mail" | "whatsapp" | "phone";
-  /** Phone-based channels should open in a new tab; mail and tel should not. */
+  icon: "mail" | "whatsapp";
+  /** WhatsApp opens a third-party surface and should leave the page; mail should not. */
   external?: boolean;
 };
 
@@ -73,12 +68,6 @@ const ALL_CHANNELS: ContactChannel[] = [
     href: whatsappHref(CONTACT_PHONE, "Hi Cylent — we have a project in mind."),
     icon: "whatsapp",
     external: true,
-  },
-  {
-    label: "Call us",
-    value: CONTACT_PHONE,
-    href: telHref(CONTACT_PHONE),
-    icon: "phone",
   },
 ];
 

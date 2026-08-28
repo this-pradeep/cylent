@@ -44,11 +44,3 @@ export function WhatsAppIcon({ className }: IconProps) {
     </Glyph>
   );
 }
-
-export function PhoneIcon({ className }: IconProps) {
-  return (
-    <Glyph className={className}>
-      <path d="M6.2 3.8h2.6l1.4 3.4-2 1.3a10 10 0 0 0 5.1 5.1l1.3-2 3.4 1.4v2.6a2 2 0 0 1-2.2 2A15.6 15.6 0 0 1 4.2 6a2 2 0 0 1 2-2.2z" />
-    </Glyph>
-  );
-}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mailtoHref, telHref, toE164, whatsappHref } from "@/lib/site/contact";
+import { mailtoHref, toE164, whatsappHref } from "@/lib/site/contact";
 
 describe("toE164", () => {
   it("strips the spacing humans write phone numbers with", () => {
@@ -17,16 +17,6 @@ describe("toE164", () => {
     expect(toE164("")).toBe("");
     expect(toE164("   ")).toBe("");
     expect(toE164("+")).toBe("");
-  });
-});
-
-describe("telHref", () => {
-  it("dials the normalised number", () => {
-    expect(telHref("+91 98765 43210")).toBe("tel:+919876543210");
-  });
-
-  it("is empty when there is no number to dial, so no dead link is rendered", () => {
-    expect(telHref("")).toBe("");
   });
 });
 
