@@ -17,12 +17,32 @@
 }
 
 :root {
-  /* The accent, as a gradient. Three stops from our own chromatic gradient — magenta, violet
-     and cyan — each darkened in OKLCH against --color-panel, the darkest light ground. Every
-     point along the ramp clears WCAG AA in both sRGB and OKLab interpolation (worst case
-     4.57:1), so it can legally carry text. Used raw, those stops bottom out at 1.00:1.
-     Buttons never use this. It is for display type and hairlines. */
-  --gradient-accent: linear-gradient(100deg, #a93b9d 0%, #6853d4 52%, #08737f 100%);
+  /* The accent, as a gradient. Still one gradient — the rule against a second one holds —
+     but five stops rather than three, and every one of them inside the magenta → violet →
+     blue → cyan arc of our own chromatic family. Three stops read as a tint laid across a
+     word; five read as light passing through it, which is the difference between this and
+     the About fields it has to sit near.
+
+     The arc is not an aesthetic preference, it is the constraint. Each stop is darkened
+     against --color-panel, the darkest light ground, until it clears 4.65:1 alone — and mint
+     and gold do not survive that. Taken down far enough to be legible they become olive and
+     khaki, and a ramp that drifts through them parks the headline in mud. Purples and blues
+     darken into jewel tones; greens and yellows darken into dirt. Only the arc is usable.
+
+     Sampled every 0.5% along all four segments: the worst point anywhere is 4.65:1, above
+     AA, so it can legally carry text. Used raw these bottom out around 1.4:1.
+
+     If this ever changes, re-derive every stop the same way and re-sample the whole ramp —
+     interpolation can dip below both ends of a segment, so checking the endpoints is not a
+     check. Buttons never use this. It is for display type and hairlines. */
+  --gradient-accent: linear-gradient(
+    100deg,
+    #ae3f73 0%,
+    #93508a 24%,
+    #665abb 50%,
+    #405dd6 74%,
+    #29717b 100%
+  );
 }
 
 html {
@@ -44,9 +64,41 @@ html {
 @supports ((background-clip: text) or (-webkit-background-clip: text)) {
   .text-gradient {
     background-image: var(--gradient-accent);
+    /* Wider than the text, so at any moment a word shows a slice of the ramp rather than the
+       whole of it compressed into a few letters. It is also what gives the drift below
+       somewhere to travel: a background the size of its box has nothing to move through. */
+    background-size: 260% 100%;
+    background-position: 0% 50%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    animation: accent-drift 19s linear infinite alternate;
+  }
+}
+
+/*
+ * The colour moves through the letters rather than sitting in them.
+ *
+ * Nothing else on this site holds still — the beam sways, the fields gather, the cursor
+ * refracts — and a static ramp next to any of them reads as the one flat thing in the room.
+ * `background-image` cannot be transitioned, but `background-position` can, which is the
+ * whole reason the ramp is oversized above.
+ *
+ * Slow and alternating on purpose: at 19 seconds a reader never catches it moving, they only
+ * notice the word is not the colour it was.
+ */
+@keyframes accent-drift {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-gradient {
+    animation: none;
   }
 }
 
@@ -303,3 +355,4 @@ body {
     linear-gradient(#000 0 0);
   mask-composite: exclude;
 }
+
