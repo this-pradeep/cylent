@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { getCondenseProgress } from "@/lib/motion/nav-scroll";
 import { Arrow } from "@/components/icons/Arrow";
+import { Logo } from "@/components/Logo";
 import { useMagneticHover } from "@/lib/motion/useMagneticHover";
 import { CONTACT_LINK, NAV_LINKS, goTo, hrefFor, isOnThisPage, type NavLink } from "@/lib/site/nav-links";
 
@@ -115,15 +116,23 @@ export function Nav() {
           ref={navRef}
           className="relative flex flex-1 items-center justify-between gap-6 rounded-full border border-ink/10 bg-surface px-7 shadow-[0_8px_30px_rgba(20,18,15,0.10)]"
           style={{
-            paddingTop: "calc(0.82rem - var(--nav-condense, 0) * 0.25rem)",
-            paddingBottom: "calc(0.82rem - var(--nav-condense, 0) * 0.25rem)",
+            paddingTop: "calc(0.65rem - var(--nav-condense, 0) * 0.25rem)",
+            paddingBottom: "calc(0.65rem - var(--nav-condense, 0) * 0.25rem)",
           }}
         >
-          <Link
-            href="/"
-            className="text-[1.12rem] font-bold tracking-tight text-ink"
-          >
-            Cylent
+          {/* The mark itself, not a typeset approximation of it. Held at a fixed height
+              while the bar condenses on scroll — a wordmark that resized with its container
+              would be the one thing on the page changing size as you read.
+
+              The height is paid for out of the pill's own padding, not out of the bar. The
+              bar carried 0.82rem above and below a 32px line box; at 0.65rem the mark gets
+              2.5rem and the pill lands within a few pixels of the height it always had.
+
+              2.5rem is a settled number, not a stop on the way somewhere. Read it against
+              the x-height, not the box — this mark is lowercase, so 2.5rem of box is about
+              1.34rem of visible word, which is why it looks smaller than it measures. */}
+          <Link href="/" aria-label="Cylent Solutions, home" className="shrink-0">
+            <Logo alt="" priority className="h-[2.5rem]" />
           </Link>
 
           <ul className="hidden items-center gap-1 md:flex">
