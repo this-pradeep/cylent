@@ -98,7 +98,7 @@ export function WorkList({ projects }: { projects: Project[] }) {
                 }`}
               >
                 <div className="flex flex-col gap-1">
-                  <h3 className="m-0 w-fit text-[1.0625rem] font-semibold leading-[1.3] tracking-[-0.02em] text-ink">
+                  <h2 className="m-0 w-fit text-[1.0625rem] font-semibold leading-[1.3] tracking-[-0.02em] text-ink">
                     {project.client ?? project.sector}
                     {/* The accent as a rule under the words, which is a use the brand
                         guidelines sanction — and the only ornament left on the card. */}
@@ -106,7 +106,7 @@ export function WorkList({ projects }: { projects: Project[] }) {
                       aria-hidden="true"
                       className="mt-1.5 block h-px w-full bg-[image:var(--gradient-accent)]"
                     />
-                  </h3>
+                  </h2>
                   {project.client ? (
                     <p className="m-0 text-[0.9375rem] leading-[1.4] text-ink/50">{project.sector}</p>
                   ) : null}
