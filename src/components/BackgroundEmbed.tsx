@@ -54,6 +54,18 @@ export function BackgroundEmbed({ src, title }: BackgroundEmbedProps) {
         <iframe
           src={playerUrl(src)}
           title={title}
+          /**
+           * Lazy, for the same reason EmbedAsset is, which this component should have been
+           * from the start. It sits in a section below the fold and it was fetching on first
+           * paint — a Lighthouse run put 980 KiB of Dailymotion on the homepage's initial
+           * load, plus 439 KiB of Google IMA and 35 KiB of Doubleclick that the player pulls
+           * in behind it. Three of its fonts landed on the critical path at 5.6s, 5.6s and
+           * 6.8s, which is what set the 6,849 ms critical path and a 13.3 s Speed Index.
+           *
+           * A muted background loop nobody has scrolled to has no business doing any of that
+           * before the hero has finished painting.
+           */
+          loading="lazy"
           allow="autoplay; web-share"
           referrerPolicy="strict-origin-when-cross-origin"
           tabIndex={-1}
