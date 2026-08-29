@@ -9,6 +9,7 @@ import { FOOTER_LINKS, goTo, hrefFor, isOnThisPage, type NavLink } from "@/lib/s
 import {
   CONTACT_CHANNELS,
   CONTACT_EMAIL,
+  SOCIAL_LINKS,
   mailtoHref,
 } from "@/lib/site/contact";
 import {
@@ -57,13 +58,6 @@ const BLURBS: Record<string, { lead: string; tail: string }> = {
   graphics: { lead: "Identities that communicate", tail: "quality." },
   contact: { lead: "Tell us what it is", tail: "actually for." },
 };
-
-// TODO: real profile URLs before launch — these are placeholders.
-const SOCIALS = [
-  { label: "Instagram", href: "#" },
-  { label: "LinkedIn", href: "#" },
-  { label: "Behance", href: "#" },
-];
 
 export function Footer() {
   const pitchRef = useRef<HTMLDivElement>(null);
@@ -263,21 +257,26 @@ export function Footer() {
           © {new Date().getFullYear()} Cylent Solutions Pvt Ltd
         </span>
         <span>Set in Manrope · Built with Next.js</span>
-        <span className="flex gap-2">
-          {SOCIALS.map((social, index) => (
-            <span key={social.label} className="flex gap-2">
+        {/* The separators are the list's own, drawn as a border on every item after the
+            first, so the dots cannot outnumber or outlive the links they sit between. */}
+        <ul className="m-0 flex list-none flex-wrap items-center gap-x-4 p-0">
+          {SOCIAL_LINKS.map((social) => (
+            <li
+              key={social.label}
+              className="before:mr-4 before:text-ink/30 before:content-['·'] first:before:hidden"
+            >
               <a
                 href={social.href}
-                className="transition-colors hover:text-ink"
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cursor
+                className="transition-colors duration-300 hover:text-ink"
               >
                 {social.label}
               </a>
-              {index < SOCIALS.length - 1 ? (
-                <span aria-hidden="true">·</span>
-              ) : null}
-            </span>
+            </li>
           ))}
-        </span>
+        </ul>
       </div>
     </footer>
   );

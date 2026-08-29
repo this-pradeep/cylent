@@ -32,6 +32,7 @@ export function mailtoHref(email: string, subject = ""): string {
 export const SITE_DOMAIN = "cylent.in";
 export const SITE_URL = `https://${SITE_DOMAIN}`;
 
+
 export const CONTACT_EMAIL = "contact@cylent.in";
 
 /** The studio line. WhatsApp is what it is for — the number is not offered to dial. */
@@ -74,3 +75,22 @@ const ALL_CHANNELS: ContactChannel[] = [
 export const CONTACT_CHANNELS: ContactChannel[] = ALL_CHANNELS.filter(
   (channel) => channel.href !== "",
 );
+
+export type SocialLink = {
+  /** Shown as the link text. The platform's own name, spelled the way it spells it. */
+  label: string;
+  href: string;
+};
+
+/**
+ * Where the work already lives. These sit in the baseline strip rather than beside the
+ * contact buttons on purpose: the buttons are for starting a conversation, and these are
+ * for going and looking first. Order runs from the most active profile to the least.
+ *
+ * Dribbble rather than Behance — that is where the design work is actually posted.
+ */
+export const SOCIAL_LINKS: SocialLink[] = [
+  { label: "Instagram", href: "https://www.instagram.com/cylent.studio" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/cylent" },
+  { label: "Dribbble", href: "https://dribbble.com/cylent-solutions" },
+];
