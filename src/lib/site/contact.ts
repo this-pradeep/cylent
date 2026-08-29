@@ -32,6 +32,13 @@ export function mailtoHref(email: string, subject = ""): string {
 export const SITE_DOMAIN = "cylent.in";
 export const SITE_URL = `https://${SITE_DOMAIN}`;
 
+/**
+ * The one-line description, shared by the page metadata and the Organization schema.
+ *
+ * Both have to say the same thing — a description in the markup that disagrees with the one
+ * in the structured data is the sort of mismatch a search engine reads as untrustworthy.
+ */
+export const SITE_DESCRIPTION = "We create digital experiences.";
 
 export const CONTACT_EMAIL = "contact@cylent.in";
 

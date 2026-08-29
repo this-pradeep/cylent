@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { WorkHero } from "@/components/WorkHero";
 import { WorkList } from "@/components/WorkList";
 import { Arrow } from "@/components/icons/Arrow";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbSchema, graph } from "@/lib/site/schema";
+import { pageMetadata } from "@/lib/site/seo";
 import {
   DISCIPLINES,
   type Discipline,
@@ -29,10 +32,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const discipline = findDiscipline(id);
   if (!discipline) return {};
 
-  return {
-    title: `${discipline.label} — Cylent Solutions`,
+  return pageMetadata({
+    title: discipline.label,
     description: discipline.claim,
-  };
+    path: `/work/${discipline.id}`,
+  });
 }
 
 /**
@@ -51,6 +55,17 @@ export default async function DisciplineWorkPage({ params }: PageProps) {
 
   return (
     <main data-eyebrow-surface className="bg-surface">
+      {/* The trail a search result can show above this page. Two levels, because the
+          disciplines sit directly under the homepage — there is no /work index to name. */}
+      <JsonLd
+        schema={graph([
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: discipline.label },
+          ]),
+        ])}
+      />
+
       <WorkHero discipline={discipline} />
 
       <WorkList projects={projects} />
