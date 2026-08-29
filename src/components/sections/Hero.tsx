@@ -223,7 +223,7 @@ export function Hero() {
   return (
     <section
       ref={containerRef}
-      className="relative isolate flex min-h-svh flex-col justify-end overflow-hidden bg-surface pb-[4vh] md:pb-[5.5vh]"
+      className="relative isolate flex flex-col overflow-hidden bg-surface pb-[8vh] md:min-h-svh md:justify-end md:pb-[5.5vh]"
     >
       {/* Background creative. The entrance timeline picks this up automatically via
           [data-hero-creative]. The line-traced PrismScene remains in the repo,
@@ -232,11 +232,23 @@ export function Hero() {
           half instead: the composition there is the object over the statement, not the
           statement standing in front of the object, and a full-bleed scene behind
           viewport-wide type is just noise under it. */}
-      <HeroModelScene index={index} className="inset-x-0 top-0 h-[52svh] md:inset-0 md:h-auto" />
+      <HeroModelScene index={index} className="inset-x-0 top-0 h-[58svh] md:inset-0 md:h-auto" />
 
-      <div className="relative z-10 mb-[6vh] px-6 md:mb-[7vh] md:px-[6vw]">
+      <div className="relative z-10 px-6 md:mb-[7vh] md:px-[6vw]">
         <div className="md:flex md:items-end md:justify-between md:gap-[6vw]">
-          <div className="md:w-[56%]">
+          {/* On a phone this block is the first screen, and the whole reason the section
+              above it no longer claims one: exactly one viewport tall with the statement
+              sitting at its foot, so what a visitor gets on arrival is the model's band and
+              the line it exists to introduce — and nothing else competing for that screen.
+
+              The supporting paragraph and the ethos rail follow it, which puts them just
+              past the fold rather than crowded into the same view. They are not hidden and
+              nothing is lost; they are simply the second thing rather than the fourth thing
+              on the first thing's screen.
+
+              From md up this collapses to what it always was — a 56% column in a row — and
+              the section takes the viewport height back. */}
+          <div className="flex min-h-svh flex-col justify-end pb-[7vh] md:block md:min-h-0 md:w-[56%] md:pb-0">
             {/* 13vw on the phone against 6vw above it. The rotating word is the one thing
                 on this screen that has to be read from across a room, and at 393px the old
                 clamp bottomed out at its 2.25rem floor — a headline the size of a
@@ -299,7 +311,7 @@ export function Hero() {
 
           <p
             data-hero-support
-            className="mt-5 text-[clamp(0.9375rem,1.35vw,1.1875rem)] leading-[1.55] tracking-[-0.01em] text-ink md:mt-0 md:w-[26%] md:max-w-[30ch] md:text-right"
+            className="mt-[6vh] text-[clamp(0.9375rem,1.35vw,1.1875rem)] leading-[1.55] tracking-[-0.01em] text-ink md:mt-0 md:w-[26%] md:max-w-[30ch] md:text-right"
           >
             Cylent is a small studio building websites, video, and visual
             identity for brands who care how they&rsquo;re experienced.
@@ -319,7 +331,7 @@ export function Hero() {
 
       <div
         data-hero-rail
-        className="relative z-10 flex items-center justify-between px-6 text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-ink-muted md:px-[6vw]"
+        className="relative z-10 mt-[5vh] flex items-center justify-between px-6 text-[0.6875rem] font-medium uppercase tracking-[0.22em] text-ink-muted md:mt-0 md:px-[6vw]"
       >
         <div className="flex items-center gap-[0.9em]">
           {ETHOS.map((word, i) => (
