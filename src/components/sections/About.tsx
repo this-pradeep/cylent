@@ -268,12 +268,18 @@ export function About() {
           {/* Ink, not the gradient. The fields darken the ground beneath these words by an
               amount that depends on how far the gather has run, and the accent ramp is only
               guaranteed legible down to --color-panel. */}
-          <p
+          {/* A heading, not a paragraph. This is the chapter's title in every sense that
+              matters — it is the largest thing in the section and the sentence the section
+              exists to say — and as a <p> it left Chapter 3 absent from the document
+              outline entirely: a reader navigating by heading went from the hero straight
+              to Chapter 6 and never met the philosophy. The size is carried by the classes
+              either way, so nothing about the composition changes. */}
+          <h2
             data-about-payoff
             className="m-0 max-w-[13ch] text-[clamp(2.75rem,9vw,8rem)] font-semibold leading-[0.9] tracking-[-0.05em] text-ink will-change-transform"
           >
             Great work doesn&rsquo;t happen in silos.
-          </p>
+          </h2>
 
           {/* Four lines, set as one stanza. The three &ldquo;between&rdquo; lines are a
               cadence — each is a fragment of the sentence above it, so they are set at one
