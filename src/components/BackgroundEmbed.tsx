@@ -1,5 +1,5 @@
 type BackgroundEmbedProps = {
-  /** The player URL, already carrying its `video` parameter. */
+  /** The player URL, already identifying the clip it plays. */
   src: string;
   title: string;
 };
@@ -7,26 +7,28 @@ type BackgroundEmbedProps = {
 /**
  * Player parameters that turn an embed into a background.
  *
- * `mute` is not a setting. Autoplay is only granted to muted video in the first place, and a
- * background that can make noise is not a background — a visitor who scrolls into a section
- * and gets sound has been interrupted by something they did not ask to play. It is fixed
- * here rather than defaulted so there is nowhere for it to be turned off.
+ * Written in the embedder's own syntax: every option the player API documents in camelCase
+ * arrives here snake-cased and nested under `player[...]`, and URLSearchParams encodes the
+ * brackets on the way out.
  *
- * The rest strips the player back to picture: no controls, no logo, no start-screen
- * furniture, no queue, no sharing.
+ * `muted` is not a setting. Autoplay is only granted to muted video in the first place, and
+ * a background that can make noise is not a background — a visitor who scrolls into a
+ * section and gets sound has been interrupted by something they did not ask to play. It is
+ * fixed here rather than defaulted so there is nowhere for it to be turned off.
+ *
+ * The rest strips the player back to picture: no controls, no play button, no logo, and no
+ * context menu on a frame that is not meant to be clickable in the first place.
  */
 function playerUrl(src: string): string {
   const join = src.includes("?") ? "&" : "?";
   return `${src}${join}${new URLSearchParams({
-    mute: "true",
-    autoplay: "true",
-    loop: "true",
-    controls: "false",
-    "ui-logo": "false",
-    "ui-start-screen-info": "false",
-    "queue-enable": "false",
-    "queue-autoplay-next": "false",
-    "sharing-enable": "false",
+    "player[muted]": "true",
+    "player[autoplay_mode]": "always",
+    "player[loop]": "true",
+    "player[controls]": "false",
+    "player[big_play_button]": "false",
+    "player[show_logo]": "false",
+    "player[hide_context_menu]": "true",
   })}`;
 }
 
@@ -44,7 +46,7 @@ function playerUrl(src: string): string {
  *
  * There was a sound toggle here. It is gone, and with it the client component this had to be
  * — the whole thing renders on the server now. Unmuting also reloaded the player and
- * restarted the clip, because holding position would have meant loading Dailymotion's SDK on
+ * restarted the clip, because holding position would have meant loading the player's SDK on
  * first paint to issue a mute command; none of that has to be reasoned about any more.
  */
 export function BackgroundEmbed({ src, title }: BackgroundEmbedProps) {
@@ -56,17 +58,16 @@ export function BackgroundEmbed({ src, title }: BackgroundEmbedProps) {
           title={title}
           /**
            * Lazy, for the same reason EmbedAsset is, which this component should have been
-           * from the start. It sits in a section below the fold and it was fetching on first
-           * paint — a Lighthouse run put 980 KiB of Dailymotion on the homepage's initial
-           * load, plus 439 KiB of Google IMA and 35 KiB of Doubleclick that the player pulls
-           * in behind it. Three of its fonts landed on the critical path at 5.6s, 5.6s and
-           * 6.8s, which is what set the 6,849 ms critical path and a 13.3 s Speed Index.
+           * from the start. It sits in a section below the fold, and eager it fetched on
+           * first paint: against the player this replaced, a Lighthouse run put close to a
+           * megabyte of player, ad SDK and player fonts on the homepage's initial load and
+           * three of those fonts on the critical path, for a 13.3 s Speed Index.
            *
            * A muted background loop nobody has scrolled to has no business doing any of that
            * before the hero has finished painting.
            */
           loading="lazy"
-          allow="autoplay; web-share"
+          allow="autoplay; encrypted-media"
           referrerPolicy="strict-origin-when-cross-origin"
           tabIndex={-1}
           className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 border-0"

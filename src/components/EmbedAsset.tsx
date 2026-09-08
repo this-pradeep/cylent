@@ -24,7 +24,7 @@ export function EmbedAsset({ src, title, className }: EmbedAssetProps) {
           src={src}
           title={title}
           loading="lazy"
-          allow="web-share"
+          allow="encrypted-media; picture-in-picture"
           allowFullScreen
           referrerPolicy="strict-origin-when-cross-origin"
           className="absolute inset-0 h-full w-full border-0"
