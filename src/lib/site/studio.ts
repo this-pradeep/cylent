@@ -25,3 +25,14 @@ export const STUDIO_TIME_ZONE = "Asia/Kolkata";
 /** The registered entity. The site says "Cylent"; the filings say this. */
 export const LEGAL_NAME = "Cylent Solutions Pvt Ltd";
 export const STUDIO_NAME = "Cylent Solutions";
+
+/**
+ * Where the studio is, to the degree the sun cares about.
+ *
+ * Here rather than in the renderer that consumes them, for the same reason the city is
+ * here: this file is the one description of where the studio is, and coordinates are that
+ * same fact at a finer resolution. `lib/three/sun.ts` reads them to place the sun over
+ * Chapter 3's room.
+ */
+export const STUDIO_LATITUDE = 22.7196;
+export const STUDIO_LONGITUDE = 75.8577;
