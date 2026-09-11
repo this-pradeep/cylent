@@ -78,7 +78,7 @@ export const roomFragmentShader = /* glsl */ `
     // is what makes it read as light thrown through an opening rather than as a stripe
     // painted on the screen.
     //
-    // `t` runs 0 at the window and 1 at the horizon, and is deliberately allowed past 1 on
+    // Runs 0 at the window and 1 at the horizon, and is deliberately allowed past 1 on
     // the near floor so the beam keeps travelling toward the viewer instead of stopping at
     // the wall line.
     float t = clamp((WINDOW_Y - uv.y) / (WINDOW_Y - HORIZON), 0.0, 2.2);
