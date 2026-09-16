@@ -22,7 +22,7 @@ export function ProjectMediaView({ media, aspectRatio, priority }: ProjectMediaV
     // A player needs a box with height before it can size itself into one.
     return (
       <div className={aspectRatio === "16:9" ? "aspect-video w-full" : "h-full w-full"}>
-        <EmbedAsset src={media.src} title={media.title} />
+        <EmbedAsset src={media.src} title={media.title} poster={media.poster} />
       </div>
     );
   }

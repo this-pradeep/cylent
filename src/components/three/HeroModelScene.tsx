@@ -27,6 +27,17 @@ const DRAG_SENSITIVITY = 0.005;
 const HOME_X = 0.315;
 const HOME_Y = 0.06;
 /**
+ * Below md none of that reasoning holds. There is no headline beside the model there —
+ * the scene is a band across the top of the hero and the statement sits under it — so an
+ * offset that exists to clear type sitting to its left just parks the model off-centre in
+ * an empty field. On a phone it returns to the centre line of its band, and takes the size
+ * that being alone in the frame earns it.
+ */
+const PHONE_QUERY = "(max-width: 767px)";
+const PHONE_HOME_X = 0;
+const PHONE_HOME_Y = 0;
+const PHONE_TARGET_SIZE = 2.9;
+/**
  * Orientation the model holds the moment it appears. Rotation accumulates from here,
  * so this is the face a visitor always sees first.
  */
@@ -171,9 +182,30 @@ export function HeroModelScene({ className }: HeroModelSceneProps) {
     let halfHeight = 1;
     let viewAspect = 1;
 
+    /**
+     * Re-read on every resize rather than latched at setup: rotating a phone or dragging a
+     * desktop window across 768px has to re-frame the model, and the alternative is a scene
+     * that is composed for whichever width happened to load it.
+     */
+    let phone = window.matchMedia(PHONE_QUERY).matches;
+
+    // Held so crossing that breakpoint can re-scale the model in place. Re-loading the glb
+    // to change one number would be absurd, and the model may not have arrived yet when the
+    // first resize runs — hence the null check rather than an ordering assumption.
+    let holder: THREE.Group | null = null;
+    let longestEdge = 1;
+    const applyScale = () => {
+      if (!holder) return;
+      holder.scale.setScalar(
+        (phone ? PHONE_TARGET_SIZE : TARGET_SIZE) / longestEdge,
+      );
+    };
+
     const resize = () => {
       const rect = host.getBoundingClientRect();
       if (rect.width === 0 || rect.height === 0) return;
+      phone = window.matchMedia(PHONE_QUERY).matches;
+      applyScale();
       renderer.setSize(rect.width, rect.height, false);
       camera.aspect = rect.width / rect.height;
       camera.updateProjectionMatrix();
@@ -203,9 +235,12 @@ export function HeroModelScene({ className }: HeroModelSceneProps) {
 
       root.rotation.y = HOME_ROTATION_Y + current.ry + idle;
       root.rotation.x = current.rx;
-      root.position.x = HOME_X * halfHeight * viewAspect + current.px;
+      root.position.x =
+        (phone ? PHONE_HOME_X : HOME_X) * halfHeight * viewAspect + current.px;
       root.position.y =
-        HOME_Y * halfHeight + current.py + (reduced ? 0 : Math.sin(t * 0.5) * 0.05);
+        (phone ? PHONE_HOME_Y : HOME_Y) * halfHeight +
+        current.py +
+        (reduced ? 0 : Math.sin(t * 0.5) * 0.05);
 
       renderer.render(scene, camera);
     };
@@ -233,6 +268,13 @@ export function HeroModelScene({ className }: HeroModelSceneProps) {
       ]);
       if (disposed) return;
 
+      // Started before the bake, awaited after it. These two used to run in series and the
+      // order was the expensive way round: a ~1.1s synchronous bake, and only then a
+      // request for a megabyte of geometry. The bake needs no network and the fetch needs
+      // no main thread, so the fetch now runs underneath it and the model is usually in
+      // memory by the time the environment is ready.
+      const gltfPromise = new GLTFLoader().loadAsync(MODEL_URL);
+
       // Blur 0 keeps the environment's bright panels sharp, so the glass has crisp
       // highlights to reflect rather than a soft grey wash.
       envTexture = pmrem.fromScene(new RoomEnvironment(), 0).texture;
@@ -242,7 +284,7 @@ export function HeroModelScene({ className }: HeroModelSceneProps) {
       // envMapIntensity instead, which affects nothing else.
       scene.environmentIntensity = 0.85;
 
-      const gltf = await new GLTFLoader().loadAsync(MODEL_URL);
+      const gltf = await gltfPromise;
       if (disposed) return;
 
       const model = gltf.scene;
@@ -255,9 +297,10 @@ export function HeroModelScene({ className }: HeroModelSceneProps) {
       const longest = Math.max(size.x, size.y, size.z) || 1;
       model.position.sub(centre);
 
-      const holder = new THREE.Group();
+      holder = new THREE.Group();
       holder.add(model);
-      holder.scale.setScalar(TARGET_SIZE / longest);
+      longestEdge = longest;
+      applyScale();
       root.add(holder);
 
       // Respect what was authored; only repair what glTF cannot express.

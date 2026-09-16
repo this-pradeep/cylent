@@ -1,64 +1,87 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+
 type BackgroundEmbedProps = {
-  /** The player URL, already carrying its `video` parameter. */
-  src: string;
+  /** The clip as plain files — see ProjectMedia for why a backdrop does not take the player. */
+  sources: { webm: string; mp4: string };
+  /** Frame zero. What stands in before the clip loads, and what stands in for it entirely
+      under reduced motion. Required for that second reason: without it the frame is black. */
+  poster: string;
   title: string;
 };
 
 /**
- * Player parameters that turn an embed into a background.
+ * Footage used as a section ground: covering the frame, silent, looping, and inert to the
+ * pointer. There is nothing here to click.
  *
- * `mute` is not a setting. Autoplay is only granted to muted video in the first place, and a
- * background that can make noise is not a background — a visitor who scrolls into a section
- * and gets sound has been interrupted by something they did not ask to play. It is fixed
- * here rather than defaulted so there is nowhere for it to be turned off.
+ * This used to be a hosted player in an iframe, stripped of its interface with a dozen
+ * `player[...]` parameters until it behaved like footage. It was the most expensive thing on
+ * the site. `loading="lazy"` looked like it deferred the cost and did not — Chrome's lazy
+ * threshold is generous enough that a Lighthouse run fetched the whole thing during page
+ * load: 4.3MB of video, a 140KB player bundle from a third CDN, the player's own config and
+ * poster round-trips, and an analytics beacon, for a muted loop under a scrim that nobody
+ * had scrolled to. It was 64% of the page's weight and it arrived before the hero had
+ * finished painting.
  *
- * The rest strips the player back to picture: no controls, no logo, no start-screen
- * furniture, no queue, no sharing.
+ * A `<video>` renders the same picture with no script at all, so that is what this is now.
+ * The deferral is the same one VideoAsset uses and works for the same reason: `preload` is
+ * `none`, so nothing is fetched until the observer says the section is actually on screen.
+ *
+ * Client, where it had become a server component. That is the cost of the observer, and it
+ * is worth it — the alternative is an `autoplay` attribute, which asks the browser to start
+ * fetching as soon as it thinks it can, which is the behaviour being removed.
+ *
+ * Sizing is the standard cover: `object-fit` does the work an iframe had to be measured
+ * into place for.
  */
-function playerUrl(src: string): string {
-  const join = src.includes("?") ? "&" : "?";
-  return `${src}${join}${new URLSearchParams({
-    mute: "true",
-    autoplay: "true",
-    loop: "true",
-    controls: "false",
-    "ui-logo": "false",
-    "ui-start-screen-info": "false",
-    "queue-enable": "false",
-    "queue-autoplay-next": "false",
-    "sharing-enable": "false",
-  })}`;
-}
+export function BackgroundEmbed({ sources, poster, title }: BackgroundEmbedProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-/**
- * A hosted player used as a section background: covering the frame, stripped of its own
- * interface, silent, and inert to the pointer. There is nothing here to click.
- *
- * The iframe carries `pointer-events: none`, which is what makes this a background rather
- * than an embed that happens to be large — without it a stray click lands in someone else's
- * player and takes the visitor with it.
- *
- * Sizing is the standard cover: 16:9 held against both axes with `min-w-full` and
- * `min-h-full`, so whichever dimension is short gets overflowed rather than letterboxed. An
- * iframe cannot be `object-fit`-ed; it has to be measured into place.
- *
- * There was a sound toggle here. It is gone, and with it the client component this had to be
- * — the whole thing renders on the server now. Unmuting also reloaded the player and
- * restarted the clip, because holding position would have meant loading Dailymotion's SDK on
- * first paint to issue a mute command; none of that has to be reasoned about any more.
- */
-export function BackgroundEmbed({ src, title }: BackgroundEmbedProps) {
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Under reduced motion the poster is the backdrop. motion-system.md is explicit that
+    // motion is never the only carrier of meaning, and here it carries none: the frame is
+    // a graded ground for the type either way.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          void video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      // Lower than VideoAsset's 0.25: this frame is the full height of the viewport, so a
+      // quarter of it is most of a screen and the clip would still be still when the type
+      // over it has been readable for a while.
+      { threshold: 0.05 },
+    );
+    observer.observe(video);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
-        <iframe
-          src={playerUrl(src)}
+        <video
+          ref={videoRef}
+          poster={poster}
           title={title}
-          allow="autoplay; web-share"
-          referrerPolicy="strict-origin-when-cross-origin"
+          muted
+          loop
+          playsInline
+          preload="none"
           tabIndex={-1}
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2 border-0"
-        />
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        >
+          <source src={sources.webm} type="video/webm" />
+          <source src={sources.mp4} type="video/mp4" />
+        </video>
       </div>
 
       {/* Same grade a photograph gets, and for the same reason: white type over footage

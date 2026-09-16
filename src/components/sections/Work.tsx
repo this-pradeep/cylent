@@ -57,7 +57,11 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
   return (
     <div className="relative flex min-h-svh flex-col justify-end overflow-hidden bg-ink min-[820px]:h-svh motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen">
       {backdrop ? (
-        <BackgroundEmbed src={backdrop.src} title={backdrop.title} />
+        <BackgroundEmbed
+          sources={backdrop.backdrop}
+          poster={backdrop.poster}
+          title={backdrop.title}
+        />
       ) : (
         <div
           data-chapter-plate
@@ -92,12 +96,12 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
           >
             {project.client ? `${project.client} · ${project.sector}` : project.sector}
           </p>
-          <h4
+          <h3
             data-chapter-lead
             className="m-0 max-w-[13ch] whitespace-pre-line text-[clamp(2rem,5.6vw,4.25rem)] font-semibold leading-[0.95] tracking-[-0.045em] text-surface"
           >
             {project.headline}
-          </h4>
+          </h3>
 
           {project.url ? (
             <a
@@ -303,12 +307,12 @@ export function Work() {
                   and the masthead reveal animates clip-path to inset(0 0 0 0), which clips
                   to exactly that box. The matching negative margin keeps the room out of
                   the layout, so the tight leading still reads as tight. */}
-              <h3
+              <h2
                 data-chapter-masthead
                 className="m-0 -mb-[0.14em] pb-[0.14em] text-[clamp(3.25rem,12vw,11rem)] font-semibold leading-[0.84] tracking-[-0.055em] text-ink min-[820px]:col-start-1 min-[820px]:row-start-2"
               >
                 {discipline.label}
-              </h3>
+              </h2>
 
               {/* The chapter's tagline, set like the lead-in line in Chapter 3. Both are a
                   short statement standing under a display heading, and they were carrying

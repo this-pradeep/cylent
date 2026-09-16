@@ -259,6 +259,77 @@ body {
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/*
+ * Social discs. Three of the site's own devices arriving together on one gesture: the ring
+ * lights and turns, the ground lifts off the surface, and the mark redraws itself in the
+ * accent ramp.
+ *
+ * Rotating the ::after is what turns the ring — a conic gradient's own angle is not
+ * animatable, but the box carrying it is, and a square with a 50% radius is still the same
+ * circle at every angle. Paused rather than unmounted at rest, so three invisible rings are
+ * not being composited down the length of the page.
+ */
+.fx-disc {
+  --ring-opacity: 0;
+}
+
+.fx-disc::after {
+  animation: ring-spin 14s linear infinite;
+  animation-play-state: paused;
+}
+
+.fx-ico:hover .fx-disc,
+.fx-ico:focus-visible .fx-disc {
+  --ring-opacity: 1;
+  border-color: transparent;
+  background-color: var(--color-surface);
+  box-shadow: 0 10px 30px rgba(20, 18, 15, 0.09);
+}
+
+.fx-ico:hover .fx-disc::after,
+.fx-ico:focus-visible .fx-disc::after {
+  animation-play-state: running;
+}
+
+/*
+ * Traced icons.
+ *
+ * At rest only the muted glyph shows; the copy stacked over it is a full dash offset away
+ * from being drawn. On hover or focus that offset runs to zero one stroke at a time, so the
+ * mark draws itself in the active colour — the same gesture as the index leader resolving
+ * into a rule, one scale down.
+ *
+ * The delay lives in the hover rule rather than the base rule on purpose: strokes arrive in
+ * sequence, and all of them leave at once. A staggered retreat reads as lag, not as craft.
+ */
+.ico-trace > * {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* A dot has no length to draw, so it arrives by scale. `fill-box` puts the origin at the
+   dot's own centre rather than the corner of the 24-unit canvas. */
+.ico-trace > .ico-dot {
+  transform: scale(0);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fx-ico:focus-visible .ico-trace > *,
+.fx-ico:focus-visible .ico-trace > .ico-dot {
+  transition-delay: calc(var(--ico-i, 0) * 0.07s);
+}
+
+.fx-ico:focus-visible .ico-trace > * {
+  stroke-dashoffset: 0;
+}
+
+.fx-ico:focus-visible .ico-trace > .ico-dot {
+  transform: scale(1);
+}
+
 /* The statement swap: the biggest line on the page answers the row you are pointing at. */
 .fx-pitch,
 .fx-alt {
@@ -295,6 +366,19 @@ body {
   .fx-row:hover .fx-leader::after {
     transform: scaleX(1);
   }
+
+  .fx-ico:hover .ico-trace > *,
+  .fx-ico:hover .ico-trace > .ico-dot {
+    transition-delay: calc(var(--ico-i, 0) * 0.07s);
+  }
+
+  .fx-ico:hover .ico-trace > * {
+    stroke-dashoffset: 0;
+  }
+
+  .fx-ico:hover .ico-trace > .ico-dot {
+    transform: scale(1);
+  }
 }
 
 /* Driven by React state, so it works for focus as well as hover — keyboard users get the
@@ -318,8 +402,14 @@ body {
   .cbtn-arrow,
   .fx-leader::after,
   .fx-pitch,
-  .fx-alt {
+  .fx-alt,
+  .ico-trace > *,
+  .ico-trace > .ico-dot {
     transition: none;
+  }
+
+  .fx-disc::after {
+    animation: none;
   }
 }
 
@@ -336,6 +426,9 @@ body {
   pointer-events: none;
   padding: 1.4px;
   opacity: var(--ring-opacity, 1);
+  /* So a ring can be brought in rather than simply being there. Only the discs set
+     --ring-opacity; everywhere else it stays at 1 and this transition never runs. */
+  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   background: conic-gradient(
     from 140deg,
     rgba(255, 92, 168, 0.65),

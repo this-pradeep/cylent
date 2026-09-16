@@ -6,10 +6,14 @@
  * gives one project the full frame and lets the rest support it. That is the brand's own
  * portfolio philosophy: a few exceptional projects are worth more than many average ones.
  *
- * ⚠ EVERY PROJECT BELOW IS A PLACEHOLDER. The photographs are stock and no result is
- * measurable. The composition is built to carry real work and will not flatter what is here.
- * Replacing this array is the highest-value change available to this section — nothing about
- * the layout will fix it.
+ * ⚠ TWO OF THE FOUR PROJECTS BELOW ARE STILL PLACEHOLDERS. `product-launch` and
+ * `editorial-identity` carry stock photography and results nobody measured; the composition
+ * is built to carry real work and will not flatter what is there. Replacing them is the
+ * highest-value change available to this section — nothing about the layout will fix it.
+ *
+ * `zen-data-shastra` and `aurea-dental` are real: real builds, real screenshots, live URLs.
+ * Aurea is self-initiated and says so in its sector, because a concept presented as an
+ * engagement is the one kind of portfolio entry that costs more than it earns.
  *
  * There is no `name` and nothing is numbered. The placeholders had been "Project One",
  * "Two" and "Four", which is a sequence with a hole in it and read as a mistake rather than
@@ -88,8 +92,34 @@ export type ProjectMedia =
       fit?: "cover" | "contain";
     }
   | { kind: "video"; src: string; alt?: undefined; fit?: undefined }
-  /** A third-party player. Always contained — it has its own controls and its own branding. */
-  | { kind: "embed"; src: string; title: string; alt?: undefined; fit?: undefined };
+  /**
+   * A third-party player. Always contained — it has its own controls and its own branding.
+   *
+   * `poster` is required, not optional. Until the visitor asks for the clip we show the
+   * poster and nothing else: the player, its scripts and the video itself are a 4.4MB
+   * third-party payload that was being fetched on first load for a frame most visitors
+   * never reach. Making the field required means a new embed cannot quietly reintroduce
+   * that — there is no shape of this type that has a player and no still to stand in for it.
+   */
+  | {
+      kind: "embed";
+      /** The player page, for the surfaces that want a player: controls, scrubbing, fullscreen. */
+      src: string;
+      /**
+       * The same clip as plain video files, for the surfaces that want footage.
+       *
+       * Two URLs for one asset, because they are two genuinely different treatments of it.
+       * A lead frame uses the clip as its ground — graded, silent, looping, no interface —
+       * and loading a whole hosted player to achieve that cost ~1MB of script, an analytics
+       * beacon and a third-party frame to render something a `<video>` renders natively.
+       * `webm` first for the browsers that take VP9, `mp4` behind it for the ones that don't.
+       */
+      backdrop: { webm: string; mp4: string };
+      title: string;
+      poster: string;
+      alt?: undefined;
+      fit?: undefined;
+    };
 
 type BaseProject = {
   slug: string;
@@ -162,6 +192,26 @@ export const PROJECTS: readonly Project[] = [
     },
   },
   {
+    slug: "aurea-dental",
+    discipline: "web",
+    /**
+     * Self-initiated, so there is no client and the sector says so outright rather than
+     * leaving a reader to assume one. The studio, the dentists and the address on the site
+     * are invented for the concept; naming any of them here would put a client on the
+     * portfolio that does not exist.
+     */
+    sector: "Dental — concept",
+    url: "https://dental-clinic-iota-eight-65.vercel.app",
+    summary: "A dental studio in Zürich, treated like an editorial brand rather than a clinic.",
+    media: {
+      kind: "image",
+      src: "/images/aurea-dental.webp",
+      alt: "The Aurea dental studio concept site shown on a desktop, laptop, tablet and phone",
+      // A device mockup, so it is shown whole. Cropping it to fill would cut the devices.
+      fit: "contain",
+    },
+  },
+  {
     slug: "product-launch",
     discipline: "video",
     lead: true,
@@ -175,8 +225,19 @@ export const PROJECTS: readonly Project[] = [
     ),
     media: {
       kind: "embed",
-      src: "https://geo.dailymotion.com/player.html?video=xa0acvc",
+      src: "https://player.cloudinary.com/embed/?cloud_name=gdzpcyo9&public_id=calling_all_units",
+      // Same public_id, delivered as files rather than as a player page. `q_auto:eco` is
+      // chosen for where these are used: under a 78% ink scrim, where a higher rate buys
+      // detail the grade immediately throws away.
+      backdrop: {
+        webm: "https://res.cloudinary.com/gdzpcyo9/video/upload/w_1280,q_auto:eco,vc_vp9,f_webm/calling_all_units",
+        mp4: "https://res.cloudinary.com/gdzpcyo9/video/upload/w_1280,q_auto:eco,vc_h264,f_mp4/calling_all_units",
+      },
       title: "Product launch film",
+      // Frame zero, pulled from the source once and served from our own origin. Fetching
+      // it from the video host at runtime would keep the third-party connection we are
+      // removing — the point is that nothing leaves our origin until the clip is asked for.
+      poster: "/images/product-launch-poster.webp",
     },
   },
   {

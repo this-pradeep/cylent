@@ -272,14 +272,38 @@ than many average ones, so exactly one project per discipline gets the screen.
 
 ---
 
-## Chapter 7 — Attention To Detail
+## Chapter 7 — The Process
 
-Cut, along with Chapter 5.
+### Objective
 
-Both carried the **Confidence** beat in the emotional journey above — "they know how to
-execute" and "they genuinely care about quality." Nothing carries it now. Chapter 6 proves
-capability and Chapter 8 asks for the meeting, so the page moves from what we make straight
-to the ask. Worth knowing before that beat is either replaced or deliberately abandoned.
+Carry the **Confidence** beat: "they know how to execute."
+
+Chapters 5 and 7 both carried it and both were cut, which left the page moving from what we
+make straight to the ask. This chapter claims it back. It is not a new idea — it is the
+decision the previous note here left open, resolved. Chapter 5 stays cut: it sat before the
+proof, and this sits after it.
+
+It also answers a claim the page already makes and never supports. Chapter 3 says the work
+happens "in the space between ideas and execution." This is what happens in that space.
+
+### Position
+
+After Chapter 6, before Chapter 8. The method answers the question the work provokes rather
+than pre-empting it, and it keeps the work as high on the page as it was.
+
+### Structure
+
+Four stages — Discover, Design, Build, Deliver — as stations on a single accent hairline
+drawn across the section as it is scrolled. Each station lights as the drawing front reaches
+it.
+
+Not four cards. A process is a thing with an order, and a line drawn through four points
+states that order without a word of it being claimed. The chapter is linear where Chapter 3
+is radial, so the page's two abstract diagrams read as different instruments.
+
+### User Thought
+
+"They know how they work."
 
 ---
 

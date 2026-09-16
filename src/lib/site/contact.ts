@@ -1,3 +1,5 @@
+import type { GlyphName } from "@/components/icons/TracedIcon";
+
 /**
  * Normalise a human-written phone number to E.164: one leading plus, digits only.
  * Returns "" when there is nothing to dial, so callers can omit the link rather than
@@ -32,6 +34,14 @@ export function mailtoHref(email: string, subject = ""): string {
 export const SITE_DOMAIN = "cylent.in";
 export const SITE_URL = `https://${SITE_DOMAIN}`;
 
+/**
+ * The one-line description, shared by the page metadata and the Organization schema.
+ *
+ * Both have to say the same thing — a description in the markup that disagrees with the one
+ * in the structured data is the sort of mismatch a search engine reads as untrustworthy.
+ */
+export const SITE_DESCRIPTION = "We create digital experiences.";
+
 export const CONTACT_EMAIL = "contact@cylent.in";
 
 /** The studio line. WhatsApp is what it is for — the number is not offered to dial. */
@@ -43,7 +53,7 @@ export type ContactChannel = {
   /** The actionable thing itself, shown on the button. */
   value: string;
   href: string;
-  icon: "mail" | "whatsapp";
+  icon: GlyphName;
   /** WhatsApp opens a third-party surface and should leave the page; mail should not. */
   external?: boolean;
 };
@@ -74,3 +84,38 @@ const ALL_CHANNELS: ContactChannel[] = [
 export const CONTACT_CHANNELS: ContactChannel[] = ALL_CHANNELS.filter(
   (channel) => channel.href !== "",
 );
+
+export type SocialLink = {
+  /** Shown as the link text. The platform's own name, spelled the way it spells it. */
+  label: string;
+  href: string;
+  /** The platform's own mark. Kept beside the label rather than instead of it — a glyph
+      alone asks the visitor to recognise three logos at 18px, and one of these is Dribbble. */
+  icon: GlyphName;
+};
+
+/**
+ * Where the work already lives. These sit directly under the contact channels: the buttons
+ * are for starting a conversation, and these are for going and looking first — which is the
+ * step most people take before they write. Order runs from the most active profile to the
+ * least.
+ *
+ * Dribbble rather than Behance — that is where the design work is actually posted.
+ */
+export const SOCIAL_LINKS: SocialLink[] = [
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/cylent.studio",
+    icon: "instagram",
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/cylent",
+    icon: "linkedin",
+  },
+  {
+    label: "Dribbble",
+    href: "https://dribbble.com/cylent-solutions",
+    icon: "dribbble",
+  },
+];

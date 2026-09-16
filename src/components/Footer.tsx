@@ -5,16 +5,15 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CircularButton } from "@/components/CircularButton";
+import { Logo } from "@/components/Logo";
 import { FOOTER_LINKS, goTo, hrefFor, isOnThisPage, type NavLink } from "@/lib/site/nav-links";
 import {
   CONTACT_CHANNELS,
   CONTACT_EMAIL,
   mailtoHref,
 } from "@/lib/site/contact";
-import {
-  MailIcon,
-  WhatsAppIcon,
-} from "@/components/icons/ContactIcons";
+import { IconGradientDefs, TracedIcon } from "@/components/icons/TracedIcon";
+import { SocialDiscs } from "@/components/SocialDiscs";
 
 /**
  * Both rows share these tracks, so the statement lines up above the index and the circular
@@ -41,11 +40,6 @@ const SECOND_ROW = "min-[860px]:row-start-2 min-[860px]:pt-[clamp(30px,4.5vw,56p
 const INDEX_LABEL =
   "block text-[clamp(1.05rem,1.8vw,1.35rem)] font-semibold tracking-[-0.025em] whitespace-nowrap";
 
-const CHANNEL_ICONS = {
-  mail: MailIcon,
-  whatsapp: WhatsAppIcon,
-};
-
 /**
  * Hovering an index row rewrites the largest line on the page. Split into two spans rather
  * than markup in a string, so nothing needs dangerouslySetInnerHTML.
@@ -58,15 +52,9 @@ const BLURBS: Record<string, { lead: string; tail: string }> = {
   contact: { lead: "Tell us what it is", tail: "actually for." },
 };
 
-// TODO: real profile URLs before launch — these are placeholders.
-const SOCIALS = [
-  { label: "Instagram", href: "#" },
-  { label: "LinkedIn", href: "#" },
-  { label: "Behance", href: "#" },
-];
-
 export function Footer() {
   const pitchRef = useRef<HTMLDivElement>(null);
+  const markRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<NavLink | null>(null);
 
   useEffect(() => {
@@ -104,11 +92,74 @@ export function Footer() {
     };
   }, []);
 
+  /**
+   * The watermark drifts against the scroll.
+   *
+   * A wordmark this size holding perfectly still would be the one fixed object on a page
+   * where the beam sways and the ramp drifts, and it would read as a flat sticker laid over
+   * the footer rather than as ground beneath it. Scrubbed rather than played: it is tied to
+   * the scroll position, so it behaves like a layer at a different depth instead of an
+   * animation that happens at you. 12% of its own height, inside motion-system.md's 5–20%
+   * parallax band, and transform-only so it never costs a layout.
+   */
+  useEffect(() => {
+    const mark = markRef.current;
+    if (!mark) return;
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (prefersReducedMotion) return;
+
+    const tween = gsap.fromTo(
+      mark,
+      { yPercent: 12 },
+      {
+        yPercent: -4,
+        ease: "none",
+        scrollTrigger: {
+          trigger: mark,
+          start: "top bottom",
+          end: "bottom bottom",
+          scrub: 0.6,
+        },
+      },
+    );
+
+    return () => {
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
+  }, []);
+
   const blurb = active ? BLURBS[active.id] : undefined;
 
   return (
-    <footer id="contact" className="relative border-t border-ink/10 bg-surface">
-      <div className="px-6 pb-8 pt-[clamp(38px,5.5vw,74px)] md:px-[6vw]">
+    <footer
+      id="contact"
+      className="relative overflow-hidden border-t border-ink/10 bg-surface"
+    >
+      <IconGradientDefs />
+
+      {/* The mark as ground, not as a graphic.
+
+          The footer is the last thing anyone sees, and website-story.md asks it to leave a
+          feeling rather than a list — so the studio's own name is what the closing chapter is
+          built on top of. Full width and anchored to the foot, at an opacity where it reads
+          as a tone in the paper rather than as a second logo competing with the one in the
+          baseline strip: catch it and it resolves into the word, glance past it and it is
+          just the page being warmer at the bottom.
+
+          Out of the accessibility tree and out of the hit test — the name is already in the
+          strip below it, and a decorative layer this large must never eat a click. */}
+      <div
+        ref={markRef}
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 select-none opacity-[0.055]"
+      >
+        <Logo alt="" fit="width" />
+      </div>
+      <div className="relative px-6 pb-8 pt-[clamp(38px,5.5vw,74px)] md:px-[6vw]">
         <p className="m-0 mb-[clamp(18px,2.6vw,28px)] font-mono text-[0.6rem] uppercase tracking-[0.2em] text-ink-muted">
           Contact
         </p>
@@ -218,65 +269,76 @@ export function Footer() {
               <p className="m-0 mb-0.5 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-ink-muted">
                 Or reach us direct
               </p>
-              {CONTACT_CHANNELS.map((channel) => {
-                const Icon = CHANNEL_ICONS[channel.icon];
-                return (
-                  <a
-                    key={channel.label}
-                    href={channel.href}
-                    aria-label={channel.label}
-                    data-cursor
-                    {...(channel.external
-                      ? { target: "_blank", rel: "noopener noreferrer" }
-                      : {})}
-                    className="group flex items-center gap-3.5 rounded-full border border-ink/15 px-5 py-3.5 transition-colors duration-300 hover:border-ink hover:bg-ink"
+              {CONTACT_CHANNELS.map((channel) => (
+                <a
+                  key={channel.label}
+                  href={channel.href}
+                  aria-label={channel.label}
+                  data-cursor
+                  {...(channel.external
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                  className="fx-ico group flex items-center gap-3.5 rounded-full border border-ink/15 px-5 py-3.5 outline-offset-4 transition-colors duration-300 hover:border-ink hover:bg-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+                >
+                  {/* The resting glyph drops to a ghost as the pill fills ink, and the
+                      traced copy draws the mark back in over it in surface. The icon is
+                      redrawn by the interaction rather than merely recoloured by it. */}
+                  <TracedIcon
+                    name={channel.icon}
+                    className="h-[1.75rem] w-[1.75rem] shrink-0 text-ink-muted transition-colors duration-300 group-hover:text-surface/25"
+                    traceClassName="text-surface"
+                  />
+                  <span className="flex-1 text-[clamp(1rem,1.3vw,1.15rem)] font-medium tracking-[-0.015em] text-ink transition-colors duration-300 group-hover:text-surface">
+                    {channel.value}
+                  </span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    className="h-3.5 w-3.5 shrink-0 -translate-x-1.5 text-surface opacity-0 transition-[transform,opacity] duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:translate-x-0 group-hover:opacity-100"
                   >
-                    <Icon className="h-[1.05rem] w-[1.05rem] shrink-0 text-ink-muted transition-colors duration-300 group-hover:text-surface" />
-                    <span className="flex-1 text-[clamp(1rem,1.3vw,1.15rem)] font-medium tracking-[-0.015em] text-ink transition-colors duration-300 group-hover:text-surface">
-                      {channel.value}
-                    </span>
-                    <svg
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                      className="h-3.5 w-3.5 shrink-0 -translate-x-1.5 text-surface opacity-0 transition-[transform,opacity] duration-500 ease-[cubic-bezier(.22,1,.36,1)] group-hover:translate-x-0 group-hover:opacity-100"
-                    >
-                      <path
-                        d="M7 17 L17 7 M9 7 H17 V15"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={1.8}
-                        strokeLinecap="square"
-                      />
-                    </svg>
-                  </a>
-                );
-              })}
+                    <path
+                      d="M7 17 L17 7 M9 7 H17 V15"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.8}
+                      strokeLinecap="square"
+                    />
+                  </svg>
+                </a>
+              ))}
+
+              {/* Directly under the channels, because they answer the question the
+                  channels raise: before writing to us, go and look. */}
+              <div className="mt-4">
+                <SocialDiscs />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-x-7 gap-y-2.5 border-t border-ink/10 px-6 py-[clamp(16px,2vw,22px)] font-mono text-[0.6rem] uppercase tracking-[0.13em] text-ink-muted md:px-[6vw]">
+      {/* Fine print, and only fine print.
+
+          This row has been emptied twice over. First the colophon naming our typeface and
+          framework went — technical trivia about us that no visitor needs, and the brand
+          voice rules it out. Then the socials moved up beside the contact channels, where
+          the decision they support is actually made.
+
+          What went last was a small copy of the wordmark sitting at the left of this line.
+          The watermark behind it is the mark now, at full width, and the two of them landed
+          within a hundred pixels of each other — the same name twice, the big one reading as
+          ground and the small one as a label for it. The dotted leader went with it: it was
+          drawn to connect the mark to the legal line, and with one end gone it led nowhere.
+
+          A page's last line should be the quietest thing on it. This one finally is. */}
+      <div className="relative border-t border-ink/10 px-6 py-[clamp(18px,2.2vw,26px)] md:px-[6vw]">
         {/* Prerendered at build time, re-evaluated on the client; they differ only across a
             new year, before the next deploy rebuilds the export. */}
-        <span suppressHydrationWarning>
+        <span
+          suppressHydrationWarning
+          className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-ink-muted"
+        >
           © {new Date().getFullYear()} Cylent Solutions Pvt Ltd
-        </span>
-        <span>Set in Manrope · Built with Next.js</span>
-        <span className="flex gap-2">
-          {SOCIALS.map((social, index) => (
-            <span key={social.label} className="flex gap-2">
-              <a
-                href={social.href}
-                className="transition-colors hover:text-ink"
-              >
-                {social.label}
-              </a>
-              {index < SOCIALS.length - 1 ? (
-                <span aria-hidden="true">·</span>
-              ) : null}
-            </span>
-          ))}
         </span>
       </div>
     </footer>
