@@ -57,7 +57,11 @@ function LeadFrame({ project, priority }: { project: LeadProject; priority: bool
   return (
     <div className="relative flex min-h-svh flex-col justify-end overflow-hidden bg-ink min-[820px]:h-svh motion-safe:min-[820px]:sticky motion-safe:min-[820px]:top-0 motion-safe:min-[820px]:h-screen">
       {backdrop ? (
-        <BackgroundEmbed src={backdrop.src} title={backdrop.title} />
+        <BackgroundEmbed
+          sources={backdrop.backdrop}
+          poster={backdrop.poster}
+          title={backdrop.title}
+        />
       ) : (
         <div
           data-chapter-plate

@@ -92,8 +92,34 @@ export type ProjectMedia =
       fit?: "cover" | "contain";
     }
   | { kind: "video"; src: string; alt?: undefined; fit?: undefined }
-  /** A third-party player. Always contained — it has its own controls and its own branding. */
-  | { kind: "embed"; src: string; title: string; alt?: undefined; fit?: undefined };
+  /**
+   * A third-party player. Always contained — it has its own controls and its own branding.
+   *
+   * `poster` is required, not optional. Until the visitor asks for the clip we show the
+   * poster and nothing else: the player, its scripts and the video itself are a 4.4MB
+   * third-party payload that was being fetched on first load for a frame most visitors
+   * never reach. Making the field required means a new embed cannot quietly reintroduce
+   * that — there is no shape of this type that has a player and no still to stand in for it.
+   */
+  | {
+      kind: "embed";
+      /** The player page, for the surfaces that want a player: controls, scrubbing, fullscreen. */
+      src: string;
+      /**
+       * The same clip as plain video files, for the surfaces that want footage.
+       *
+       * Two URLs for one asset, because they are two genuinely different treatments of it.
+       * A lead frame uses the clip as its ground — graded, silent, looping, no interface —
+       * and loading a whole hosted player to achieve that cost ~1MB of script, an analytics
+       * beacon and a third-party frame to render something a `<video>` renders natively.
+       * `webm` first for the browsers that take VP9, `mp4` behind it for the ones that don't.
+       */
+      backdrop: { webm: string; mp4: string };
+      title: string;
+      poster: string;
+      alt?: undefined;
+      fit?: undefined;
+    };
 
 type BaseProject = {
   slug: string;
@@ -200,7 +226,18 @@ export const PROJECTS: readonly Project[] = [
     media: {
       kind: "embed",
       src: "https://player.cloudinary.com/embed/?cloud_name=gdzpcyo9&public_id=calling_all_units",
+      // Same public_id, delivered as files rather than as a player page. `q_auto:eco` is
+      // chosen for where these are used: under a 78% ink scrim, where a higher rate buys
+      // detail the grade immediately throws away.
+      backdrop: {
+        webm: "https://res.cloudinary.com/gdzpcyo9/video/upload/w_1280,q_auto:eco,vc_vp9,f_webm/calling_all_units",
+        mp4: "https://res.cloudinary.com/gdzpcyo9/video/upload/w_1280,q_auto:eco,vc_h264,f_mp4/calling_all_units",
+      },
       title: "Product launch film",
+      // Frame zero, pulled from the source once and served from our own origin. Fetching
+      // it from the video host at runtime would keep the third-party connection we are
+      // removing — the point is that nothing leaves our origin until the clip is asked for.
+      poster: "/images/product-launch-poster.webp",
     },
   },
   {

@@ -268,6 +268,13 @@ export function HeroModelScene({ className }: HeroModelSceneProps) {
       ]);
       if (disposed) return;
 
+      // Started before the bake, awaited after it. These two used to run in series and the
+      // order was the expensive way round: a ~1.1s synchronous bake, and only then a
+      // request for a megabyte of geometry. The bake needs no network and the fetch needs
+      // no main thread, so the fetch now runs underneath it and the model is usually in
+      // memory by the time the environment is ready.
+      const gltfPromise = new GLTFLoader().loadAsync(MODEL_URL);
+
       // Blur 0 keeps the environment's bright panels sharp, so the glass has crisp
       // highlights to reflect rather than a soft grey wash.
       envTexture = pmrem.fromScene(new RoomEnvironment(), 0).texture;
@@ -277,7 +284,7 @@ export function HeroModelScene({ className }: HeroModelSceneProps) {
       // envMapIntensity instead, which affects nothing else.
       scene.environmentIntensity = 0.85;
 
-      const gltf = await new GLTFLoader().loadAsync(MODEL_URL);
+      const gltf = await gltfPromise;
       if (disposed) return;
 
       const model = gltf.scene;
