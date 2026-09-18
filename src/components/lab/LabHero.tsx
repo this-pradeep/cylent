@@ -2,299 +2,205 @@
 
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LabBrainScene } from "@/components/lab/LabBrainScene";
-import { STUDIO_LOCATION } from "@/lib/site/studio";
 
 /**
- * LAB — throwaway. Three hero concepts, sharing one brain model.
+ * LAB — throwaway. Three hero concepts, second pass.
  *
- * Each takes a different position on what the model is *for*, which is the actual question:
- * today it is a decorative object floating beside the headline, refracting a grid nobody can
- * see. `3D_interaction.md` — reference, not source of truth — still lands the rule worth
- * keeping: the 3D has to visualise something, not float.
+ * The first pass was centre-aligned, captioned with `Fig. 01` plate labels and set in mono —
+ * an archival register, and the one the studio had already rejected once. Current
+ * award-listed agency work is consistently the opposite: type-first, asymmetric, editorial
+ * grids, headlines at 80–120px, negative space carrying the composition, and explicitly away
+ * from centre-aligned templates.
+ *
+ * So all three below are type-first and asymmetric, carry no label furniture at all, and each
+ * is built on one distinct tactile idea rather than on a layout gimmick:
+ *
+ *   1. DISPLACE  — the words physically move away from the cursor
+ *   2. DRIFT     — an oversized line the scroll pulls sideways, skewing with velocity
+ *   3. STACK     — a staircase of lines that spreads as you scroll, the model in its gap
+ *
+ * All three parallax on scroll with per-layer rates, which is what `motion-system.md` means
+ * by depth through layering rather than through effects.
  */
 
-export type HeroVariant = "specimen" | "lens" | "masthead";
+gsap.registerPlugin(ScrollTrigger);
 
-/** Word-by-word mask reveal, the entrance `motion-system.md` asks for over a fade. */
-function useHeroEntrance(rootRef: React.RefObject<HTMLElement | null>, key: string) {
+export type HeroVariant = "displace" | "drift" | "stack";
+
+/**
+ * Film grain, as a data URI so it costs no request.
+ *
+ * `design-principles.md` warns off decorative effects, and this is not one: a flat expanse of
+ * #faf9f7 reads as a screen, and the same expanse with a trace of grain reads as paper. It is
+ * the cheapest material cue available and the difference is the whole gap between a page and
+ * a printed thing.
+ */
+const GRAIN =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.42'/%3E%3C/svg%3E\")";
+
+function Grain() {
+  return (
+    <span
+      aria-hidden="true"
+      // No mix-blend-mode, deliberately. Multiply looks marginally more like ink in paper,
+      // but a blended layer cannot be composited apart from its backdrop — and the backdrop
+      // here is a WebGL canvas redrawing every frame, so it would re-blend the whole
+      // viewport on every tick. That is the same mechanism that made the old About section
+      // stutter. A plain low-opacity overlay gets its own layer and costs nothing.
+      className="pointer-events-none absolute inset-0 z-20 opacity-[0.05]"
+      style={{ backgroundImage: GRAIN, backgroundSize: "160px 160px" }}
+    />
+  );
+}
+
+/** True when the visitor has a real pointer and wants motion. */
+function interactive(): boolean {
+  return (
+    window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+}
+
+/**
+ * The entrance. Lines rise out of their own clipping boxes, which is the reveal
+ * `motion-system.md` asks for in place of a fade.
+ */
+function useEntrance(rootRef: React.RefObject<HTMLElement | null>) {
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const words = root.querySelectorAll<HTMLElement>("[data-word] > span");
+    const lines = root.querySelectorAll<HTMLElement>("[data-line] > span");
     const rest = root.querySelectorAll<HTMLElement>("[data-fade]");
     const rules = root.querySelectorAll<HTMLElement>("[data-rule]");
 
-    if (reduced) {
-      gsap.set(words, { yPercent: 0 });
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.set(lines, { yPercent: 0 });
       gsap.set(rest, { opacity: 1, y: 0 });
       gsap.set(rules, { scaleX: 1 });
       return;
     }
 
     const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-    tl.fromTo(words, { yPercent: 108 }, { yPercent: 0, duration: 1.15, stagger: 0.055 }, 0)
-      .fromTo(rules, { scaleX: 0 }, { scaleX: 1, duration: 1.1, ease: "power3.out" }, 0.25)
+    tl.fromTo(lines, { yPercent: 112 }, { yPercent: 0, duration: 1.25, stagger: 0.09 }, 0)
+      .fromTo(rules, { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease: "power3.out" }, 0.4)
       .fromTo(
         rest,
-        { opacity: 0, y: 14 },
-        { opacity: 1, y: 0, duration: 0.8, stagger: 0.08, ease: "power3.out" },
-        0.5,
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.9, stagger: 0.1, ease: "power3.out" },
+        0.65,
       );
     return () => {
       tl.kill();
     };
-  }, [rootRef, key]);
+  }, [rootRef]);
 }
-
-/** A line of type whose words each ride in a clipped column. */
-function MaskedLine({ text, className }: { text: string; className?: string }) {
-  return (
-    <span className={`block ${className ?? ""}`}>
-      {text.split(" ").map((word, i) => (
-        <span
-          key={`${word}-${i}`}
-          data-word
-          className="mr-[0.26em] inline-block overflow-hidden pb-[0.08em] align-bottom"
-        >
-          <span className="inline-block will-change-transform">{word}</span>
-        </span>
-      ))}
-    </span>
-  );
-}
-
-/* ------------------------------------------------------------------ specimen */
 
 /**
- * SPECIMEN — the model is an object under examination, and the type annotates it.
+ * Per-layer scroll parallax.
  *
- * The glass refracts the studio's own words, which is the thing the current hero's
- * transmission is wasted on. Small mono annotations sit around the object like plate
- * captions, and the camera looks around it as the pointer moves rather than spinning it.
+ * Every layer leaves at its own rate, so the hero comes apart as it goes rather than sliding
+ * away in one piece. That separation is the depth — nothing here is scaled or blurred to fake
+ * it.
  */
-function Specimen() {
-  const ref = useRef<HTMLElement>(null);
-  useHeroEntrance(ref, "specimen");
-
-  return (
-    <section
-      ref={ref}
-      className="relative isolate flex min-h-svh flex-col justify-center overflow-hidden bg-surface"
-    >
-      <LabBrainScene
-        framing="center"
-        backdrop="text"
-        size={2.6}
-        text={["WORTH", "REMEMBERING"]}
-        orbit
-        className="inset-0"
-      />
-
-      {/* Plate captions. Deliberately small and deliberately off the object — the type is
-          the label, and the object is the exhibit. */}
-      <div className="pointer-events-none relative z-10 flex flex-1 flex-col justify-between px-6 py-[14vh] md:px-[6vw]">
-        <div className="flex items-start justify-between">
-          <p
-            data-fade
-            className="max-w-[18ch] font-mono text-[0.625rem] uppercase leading-[1.7] tracking-[0.2em] text-ink"
-          >
-            Fig. 01 — one studio,
-            <br />
-            three disciplines
-          </p>
-          <p
-            data-fade
-            className="max-w-[22ch] text-right font-mono text-[0.625rem] uppercase leading-[1.7] tracking-[0.2em] text-ink"
-          >
-            {STUDIO_LOCATION}
-          </p>
-        </div>
-
-        <div className="flex flex-col items-center gap-5 text-center">
-          <span data-rule aria-hidden="true" className="block h-px w-[34vw] origin-center bg-[image:var(--gradient-accent)]" />
-          <h1 className="text-[clamp(2.25rem,6.5vw,5.5rem)] font-semibold leading-[0.95] tracking-[-0.045em] text-ink">
-            <MaskedLine text="Websites, videos and designs" />
-            <MaskedLine text="worth remembering." />
-          </h1>
-          <p
-            data-fade
-            className="max-w-[46ch] text-[clamp(0.9375rem,1.35vw,1.125rem)] leading-[1.55] text-ink"
-          >
-            A small studio building websites, video and visual identity for brands who care
-            how they&rsquo;re experienced.
-          </p>
-        </div>
-
-        <div className="flex items-end justify-between font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink">
-          <span data-fade>Move to look around</span>
-          <span data-fade>Scroll ↓</span>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ---------------------------------------------------------------------- lens */
-
-/**
- * LENS — the hero is almost empty, and the cursor is the only way in.
- *
- * The headline sits in outline. Everything else — the model, the colour, the dispersion — is
- * behind a mask that only the pointer opens. `brand-guidelines.md` wants a visitor to feel
- * Curious first; this is the one concept where the page does not show its hand until it is
- * touched.
- *
- * The reveal is a CSS mask driven by two custom properties, so a pointer move costs one
- * composited repaint and never touches layout.
- */
-function Lens() {
-  const ref = useRef<HTMLElement>(null);
-  const maskRef = useRef<HTMLDivElement>(null);
-  useHeroEntrance(ref, "lens");
-
+function useScrollParallax(
+  rootRef: React.RefObject<HTMLElement | null>,
+  layers: { selector: string; y: number; scale?: number }[],
+) {
   useEffect(() => {
-    const host = maskRef.current;
-    if (!host) return;
+    const root = rootRef.current;
+    if (!root) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const tweens = layers.flatMap(({ selector, y, scale }) => {
+      const targets = Array.from(root.querySelectorAll<HTMLElement>(selector));
+      if (!targets.length) return [];
+      return [
+        gsap.to(targets, {
+          yPercent: y,
+          ...(scale === undefined ? {} : { scale }),
+          ease: "none",
+          scrollTrigger: {
+            trigger: root,
+            start: "top top",
+            end: "bottom top",
+            scrub: true,
+            invalidateOnRefresh: true,
+          },
+        }),
+      ];
+    });
 
-    // No pointer, or no motion wanted: the scene is simply open. The effect is a reward for
-    // having a cursor, never a requirement for seeing the page.
-    if (!fine || reduced) {
-      host.style.setProperty("--r", "140%");
-      return;
-    }
-
-    const target = { x: 0.5, y: 0.5, r: 0 };
-    const shown = { x: 0.5, y: 0.5, r: 0 };
-    let rafId = 0;
-
-    const onMove = (event: PointerEvent) => {
-      const rect = host.getBoundingClientRect();
-      target.x = (event.clientX - rect.left) / rect.width;
-      target.y = (event.clientY - rect.top) / rect.height;
-      target.r = 26;
-    };
-    const onLeave = () => {
-      target.r = 0;
-    };
-
-    const loop = () => {
-      shown.x += (target.x - shown.x) * 0.12;
-      shown.y += (target.y - shown.y) * 0.12;
-      shown.r += (target.r - shown.r) * 0.07;
-      host.style.setProperty("--x", `${(shown.x * 100).toFixed(2)}%`);
-      host.style.setProperty("--y", `${(shown.y * 100).toFixed(2)}%`);
-      host.style.setProperty("--r", `${shown.r.toFixed(2)}vmax`);
-      rafId = requestAnimationFrame(loop);
-    };
-    rafId = requestAnimationFrame(loop);
-
-    window.addEventListener("pointermove", onMove, { passive: true });
-    window.addEventListener("pointerleave", onLeave);
     return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerleave", onLeave);
+      for (const tween of tweens) {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      }
     };
-  }, []);
-
-  return (
-    <section
-      ref={ref}
-      className="relative isolate flex min-h-svh items-center overflow-hidden bg-surface"
-    >
-      {/* The scene, behind a mask the pointer opens. */}
-      <div
-        ref={maskRef}
-        className="absolute inset-0"
-        style={{
-          ["--x" as string]: "50%",
-          ["--y" as string]: "50%",
-          ["--r" as string]: "0vmax",
-          maskImage:
-            "radial-gradient(circle var(--r) at var(--x) var(--y), #000 0%, #000 58%, transparent 100%)",
-          WebkitMaskImage:
-            "radial-gradient(circle var(--r) at var(--x) var(--y), #000 0%, #000 58%, transparent 100%)",
-        }}
-      >
-        <LabBrainScene
-          framing="center"
-          backdrop="chroma"
-          size={3.0}
-          orbit={false}
-          className="inset-0"
-        />
-      </div>
-
-      <div className="pointer-events-none relative z-10 w-full px-6 md:px-[6vw]">
-        <h1
-          className="text-[clamp(2.5rem,11vw,10rem)] font-semibold leading-[0.88] tracking-[-0.055em]"
-          // Outline type, so the mask underneath is what fills it in. The fill is
-          // transparent and the stroke carries the letterform.
-          style={{
-            color: "transparent",
-            WebkitTextStroke: "1px var(--color-ink)",
-          }}
-        >
-          <MaskedLine text="Worth" />
-          <MaskedLine text="Remembering." />
-        </h1>
-        <div className="mt-[5vh] flex flex-wrap items-end justify-between gap-6">
-          <p
-            data-fade
-            className="max-w-[34ch] text-[clamp(0.9375rem,1.35vw,1.125rem)] leading-[1.55] text-ink"
-          >
-            Websites, video and visual identity — from one studio in {STUDIO_LOCATION}.
-          </p>
-          <p
-            data-fade
-            className="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-ink"
-          >
-            Move your cursor →
-          </p>
-        </div>
-      </div>
-    </section>
-  );
+  }, [rootRef, layers]);
 }
 
-/* ------------------------------------------------------------------ masthead */
+/* ------------------------------------------------------------------ displace */
 
 /**
- * MASTHEAD — a magazine cover. A hard vertical split, display type as the left column, the
- * model in its own aperture on the right.
+ * DISPLACE — the words get out of the cursor's way.
  *
- * The most `design-principles.md` Principle 6 of the three: strong typography, structured
- * layout, a grid broken on purpose. The two panes parallax against each other, which is the
- * only depth cue used and the only thing the pointer does.
+ * The headline is the composition: three left-aligned lines at 11vw with the model sitting
+ * large behind them, deliberately occluded by the type. Overlap is the depth cue, and letting
+ * the type cross the object is what stops the object reading as a sticker beside a headline.
+ *
+ * The cursor pushes each word aside by an amount that falls off with distance, and the words
+ * spring back. It is the most physical thing on the site and it makes an otherwise still hero
+ * feel alive under the hand.
  */
-function Masthead() {
+function Displace() {
   const ref = useRef<HTMLElement>(null);
-  useHeroEntrance(ref, "masthead");
+  useEntrance(ref);
+  useScrollParallax(ref, [
+    { selector: "[data-p-1]", y: -26 },
+    { selector: "[data-p-2]", y: -17 },
+    { selector: "[data-p-3]", y: -9 },
+    { selector: "[data-p-foot]", y: -4 },
+    // The model leaves slowest and shrinks a touch, so it recedes as the type overtakes it.
+    { selector: "[data-p-model]", y: 12, scale: 0.93 },
+  ]);
 
   useEffect(() => {
     const root = ref.current;
-    if (!root) return;
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!root || !interactive()) return;
 
-    const type = root.querySelector("[data-pane-type]");
-    const aperture = root.querySelector("[data-pane-aperture]");
-    if (!type || !aperture) return;
+    const words = Array.from(root.querySelectorAll<HTMLElement>("[data-word]"));
+    // quickTo keeps one interpolator per property per element, so a pointer move mutates a
+    // running tween instead of queueing a new one per frame.
+    const movers = words.map((word) => ({
+      el: word,
+      x: gsap.quickTo(word, "x", { duration: 0.55, ease: "power3.out" }),
+      y: gsap.quickTo(word, "y", { duration: 0.55, ease: "power3.out" }),
+    }));
+
+    const RADIUS = 190;
+    const PUSH = 34;
 
     const onMove = (event: PointerEvent) => {
-      const x = event.clientX / window.innerWidth - 0.5;
-      const y = event.clientY / window.innerHeight - 0.5;
-      // Opposed, and small. `motion-system.md` puts parallax at 5–20% and prefers subtle;
-      // opposing the two panes doubles the apparent depth for half the movement each.
-      gsap.to(type, { x: x * -18, y: y * -10, duration: 0.9, ease: "power3.out", overwrite: true });
-      gsap.to(aperture, { x: x * 26, y: y * 14, duration: 0.9, ease: "power3.out", overwrite: true });
+      for (const mover of movers) {
+        const rect = mover.el.getBoundingClientRect();
+        const dx = rect.left + rect.width / 2 - event.clientX;
+        const dy = rect.top + rect.height / 2 - event.clientY;
+        const distance = Math.hypot(dx, dy);
+        if (distance > RADIUS) {
+          mover.x(0);
+          mover.y(0);
+          continue;
+        }
+        // Falls off toward the edge of the radius, so a word never snaps as the cursor
+        // crosses the threshold.
+        const force = (1 - distance / RADIUS) ** 2 * PUSH;
+        mover.x((dx / (distance || 1)) * force);
+        mover.y((dy / (distance || 1)) * force);
+      }
     };
+
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => window.removeEventListener("pointermove", onMove);
   }, []);
@@ -302,62 +208,384 @@ function Masthead() {
   return (
     <section
       ref={ref}
-      className="relative isolate min-h-svh overflow-hidden bg-surface pt-[24vh] md:pt-[18vh]"
+      className="relative isolate flex min-h-svh flex-col justify-end overflow-hidden bg-surface pb-[9vh]"
     >
-      <div className="grid min-h-[70svh] grid-cols-1 items-stretch gap-8 px-6 md:grid-cols-[1.55fr_1fr] md:gap-[4vw] md:px-[6vw]">
-        <div data-pane-type className="flex flex-col justify-between">
-          <h1 className="text-[clamp(2.75rem,8.5vw,8rem)] font-semibold leading-[0.86] tracking-[-0.055em] text-ink">
-            <MaskedLine text="Websites." />
-            <MaskedLine text="Video." />
-            <MaskedLine text="Design." />
-          </h1>
-          <div className="mt-[6vh] flex flex-col gap-5">
-            <span data-rule aria-hidden="true" className="block h-px w-full origin-left bg-[image:var(--gradient-accent)]" />
-            <div className="flex flex-wrap items-start justify-between gap-6">
-              <p
-                data-fade
-                className="max-w-[38ch] text-[clamp(1rem,1.5vw,1.25rem)] font-medium leading-[1.45] tracking-[-0.015em] text-ink"
-              >
-                One studio, no hand-offs. We build the thing, shoot the thing, and make it
-                look like itself.
-              </p>
-              <p
-                data-fade
-                className="font-mono text-[0.625rem] uppercase leading-[1.7] tracking-[0.2em] text-ink"
-              >
-                Est. {STUDIO_LOCATION}
-                <br />
-                Scroll ↓
-              </p>
-            </div>
-          </div>
-        </div>
+      <div data-p-model className="absolute inset-0">
+        <LabBrainScene
+          framing="right"
+          backdrop="text"
+          size={3.4}
+          text={["WORTH", "REMEMBERING"]}
+          orbit={false}
+          className="inset-0"
+        />
+        {/* Grounding shadow. An object with no shadow floats, and floating is the thing that
+            made the old hero read as a stock 3D asset dropped on a page. */}
+        <span
+          aria-hidden="true"
+          className="absolute left-[58%] top-[62%] h-[16vh] w-[42vw] -translate-x-1/2 rounded-[50%] opacity-[0.09] blur-2xl"
+          style={{ background: "radial-gradient(ellipse, var(--color-ink), transparent 70%)" }}
+        />
+      </div>
 
-        {/* The aperture. A panel the model lives inside, so the right column is a window
-            rather than a background — the model has an edge to be contained by, which is
-            what stops it floating. */}
+      <div className="relative z-10 px-6 md:px-[6vw]">
+        <h1 className="text-[clamp(3rem,11vw,10.5rem)] font-semibold leading-[0.84] tracking-[-0.055em] text-ink">
+          {[
+            { text: "Websites,", p: "data-p-1" },
+            { text: "videos and designs", p: "data-p-2" },
+            { text: "worth remembering.", p: "data-p-3" },
+          ].map((line) => (
+            <span
+              key={line.text}
+              data-line
+              {...{ [line.p]: true }}
+              className="block overflow-hidden pb-[0.06em]"
+            >
+              <span className="block will-change-transform">
+                {line.text.split(" ").map((word, i) => (
+                  <span
+                    key={`${word}-${i}`}
+                    data-word
+                    className="mr-[0.22em] inline-block will-change-transform"
+                  >
+                    {word}
+                  </span>
+                ))}
+              </span>
+            </span>
+          ))}
+        </h1>
+
         <div
-          data-pane-aperture
-          className="relative min-h-[42svh] overflow-hidden rounded-[2px] bg-panel md:min-h-0"
+          data-p-foot
+          className="mt-[6vh] flex flex-wrap items-end justify-between gap-6"
         >
-          <LabBrainScene
-            framing="center"
-            backdrop="grid"
-            size={2.3}
-            orbit
-            className="inset-0"
-          />
-          <span className="absolute bottom-3 left-3 font-mono text-[0.5625rem] uppercase tracking-[0.2em] text-ink opacity-50">
-            Fig. 01
-          </span>
+          <p
+            data-fade
+            className="max-w-[40ch] text-[clamp(1rem,1.5vw,1.3125rem)] font-medium leading-[1.45] tracking-[-0.015em] text-ink"
+          >
+            One studio for the build, the film and the identity. No hand-offs, no
+            translation loss.
+          </p>
+          <p data-fade className="text-[0.9375rem] font-medium text-ink opacity-50">
+            Scroll
+          </p>
         </div>
       </div>
+
+      <Grain />
+    </section>
+  );
+}
+
+/* --------------------------------------------------------------------- drift */
+
+/**
+ * DRIFT — one line, wider than the screen, pulled sideways by the scroll.
+ *
+ * The headline is a single enormous line that does not fit and is not meant to. Scrolling
+ * pulls it horizontally while the second line pulls the other way, so the hero shears apart
+ * as you leave it. The model sits between the two lines, in the only still part of the frame.
+ *
+ * The cursor's contribution is skew driven by pointer *velocity* rather than position: move
+ * slowly and nothing happens, move fast and the type leans and recovers. A hero that responds
+ * to how you move, not just where you are.
+ */
+function Drift() {
+  const ref = useRef<HTMLElement>(null);
+  useEntrance(ref);
+  useScrollParallax(ref, [
+    { selector: "[data-p-model]", y: 8, scale: 0.95 },
+    { selector: "[data-p-foot]", y: -6 },
+  ]);
+
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    // Horizontal drift is its own scrub, because it moves on x where the parallax helper
+    // moves layers on y.
+    const lineA = root.querySelector("[data-drift-a]");
+    const lineB = root.querySelector("[data-drift-b]");
+    const tweens: gsap.core.Tween[] = [];
+    if (lineA && lineB) {
+      const options = {
+        ease: "none" as const,
+        scrollTrigger: {
+          trigger: root,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+          invalidateOnRefresh: true,
+        },
+      };
+      tweens.push(gsap.to(lineA, { xPercent: -12, ...options }));
+      tweens.push(gsap.to(lineB, { xPercent: 10, ...options }));
+    }
+
+    let skewCleanup: (() => void) | undefined;
+    if (interactive()) {
+      const type = root.querySelectorAll<HTMLElement>("[data-skew]");
+      const setSkew = gsap.quickTo(type, "skewX", { duration: 0.7, ease: "power3.out" });
+      let lastX = 0;
+      let lastT = 0;
+
+      const onMove = (event: PointerEvent) => {
+        const now = performance.now();
+        const dt = Math.max(1, now - lastT);
+        // Pixels per millisecond, clamped. Unclamped it spikes hard on a flick and the type
+        // snaps rather than leans.
+        const velocity = (event.clientX - lastX) / dt;
+        lastX = event.clientX;
+        lastT = now;
+        setSkew(gsap.utils.clamp(-9, 9, -velocity * 5));
+      };
+
+      window.addEventListener("pointermove", onMove, { passive: true });
+      // Recovers to upright whenever the pointer is still, so the lean never sticks.
+      const settle = window.setInterval(() => {
+        if (performance.now() - lastT > 90) setSkew(0);
+      }, 120);
+
+      skewCleanup = () => {
+        window.removeEventListener("pointermove", onMove);
+        window.clearInterval(settle);
+      };
+    }
+
+    return () => {
+      for (const tween of tweens) {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      }
+      skewCleanup?.();
+    };
+  }, []);
+
+  return (
+    <section
+      ref={ref}
+      className="relative isolate flex min-h-svh flex-col justify-center overflow-hidden bg-surface"
+    >
+      <div data-p-model className="absolute inset-0">
+        <LabBrainScene
+          framing="center"
+          backdrop="grid"
+          size={2.8}
+          orbit
+          className="inset-0"
+        />
+      </div>
+
+      <div className="relative z-10 flex flex-col gap-[3vh]">
+        {/* Deliberately past the edge. A line that runs off the frame reads as confident;
+            a line shrunk to fit reads as cautious. */}
+        <span
+          data-drift-a
+          data-line
+          data-skew
+          className="block overflow-hidden whitespace-nowrap pb-[0.06em] pl-6 will-change-transform md:pl-[6vw]"
+        >
+          <span className="block text-[clamp(3.5rem,15vw,16rem)] font-semibold leading-[0.8] tracking-[-0.06em] text-ink will-change-transform">
+            Worth Remembering
+          </span>
+        </span>
+
+        <span
+          data-drift-b
+          data-line
+          data-skew
+          className="block overflow-hidden whitespace-nowrap pb-[0.06em] pl-[22vw] will-change-transform"
+        >
+          <span className="block text-[clamp(3.5rem,15vw,16rem)] font-semibold leading-[0.8] tracking-[-0.06em] text-ink opacity-[0.16] will-change-transform">
+            Worth Remembering
+          </span>
+        </span>
+      </div>
+
+      <div
+        data-p-foot
+        className="absolute inset-x-0 bottom-[8vh] z-10 flex flex-wrap items-end justify-between gap-6 px-6 md:px-[6vw]"
+      >
+        <p
+          data-fade
+          className="max-w-[36ch] text-[clamp(1rem,1.5vw,1.3125rem)] font-medium leading-[1.45] tracking-[-0.015em] text-ink"
+        >
+          Websites, video and visual identity — built by one studio that does all three.
+        </p>
+        <p data-fade className="text-[0.9375rem] font-medium text-ink opacity-50">
+          Scroll
+        </p>
+      </div>
+
+      <Grain />
+    </section>
+  );
+}
+
+/* --------------------------------------------------------------------- stack */
+
+/**
+ * STACK — a staircase of lines, and the model in the gap the staircase leaves.
+ *
+ * Four short lines, each indented further than the last. The indent is what makes the
+ * composition asymmetric, and the triangle of empty paper it opens on the right is not
+ * leftover space — it is where the object goes. The layout makes the hole; the model fills
+ * it. `design-principles.md` Principle 3: the white space is doing the work.
+ *
+ * On scroll the staircase *spreads* — each line slides further right than the one above — so
+ * the composition opens out as it leaves rather than merely translating.
+ *
+ * The cursor moves a light source. The model's shadow swings opposite the pointer, which is
+ * the cue that reads as a real object on a real surface.
+ */
+function Stack() {
+  const ref = useRef<HTMLElement>(null);
+  useEntrance(ref);
+  useScrollParallax(ref, [
+    { selector: "[data-p-model]", y: -14, scale: 1.04 },
+    { selector: "[data-p-foot]", y: -5 },
+  ]);
+
+  useEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const tweens: gsap.core.Tween[] = [];
+
+    if (!reduced) {
+      // The spread. Each line takes a larger share, so the staircase widens rather than
+      // sliding as a block.
+      const lines = Array.from(root.querySelectorAll<HTMLElement>("[data-stair]"));
+      lines.forEach((line, i) => {
+        tweens.push(
+          gsap.to(line, {
+            x: () => window.innerWidth * 0.035 * i,
+            yPercent: -8 - i * 3,
+            ease: "none",
+            scrollTrigger: {
+              trigger: root,
+              start: "top top",
+              end: "bottom top",
+              scrub: true,
+              invalidateOnRefresh: true,
+            },
+          }),
+        );
+      });
+    }
+
+    let shadowCleanup: (() => void) | undefined;
+    if (interactive()) {
+      const shadow = root.querySelector<HTMLElement>("[data-shadow]");
+      if (shadow) {
+        const x = gsap.quickTo(shadow, "x", { duration: 0.8, ease: "power2.out" });
+        const y = gsap.quickTo(shadow, "y", { duration: 0.8, ease: "power2.out" });
+        const onMove = (event: PointerEvent) => {
+          // Opposite the pointer: the cursor is the lamp, so the shadow falls away from it.
+          x((0.5 - event.clientX / window.innerWidth) * 120);
+          y((0.5 - event.clientY / window.innerHeight) * 40);
+        };
+        window.addEventListener("pointermove", onMove, { passive: true });
+        shadowCleanup = () => window.removeEventListener("pointermove", onMove);
+      }
+    }
+
+    return () => {
+      for (const tween of tweens) {
+        tween.scrollTrigger?.kill();
+        tween.kill();
+      }
+      shadowCleanup?.();
+    };
+  }, []);
+
+  return (
+    <section
+      ref={ref}
+      className="relative isolate flex min-h-svh flex-col justify-center overflow-hidden bg-surface"
+    >
+      {/* Parked in the triangle the staircase opens: upper right, clear of every line. */}
+      <div data-p-model className="absolute inset-0">
+        <LabBrainScene
+          framing="right"
+          backdrop="text"
+          size={2.4}
+          text={["ONE", "STUDIO"]}
+          orbit
+          className="inset-0 bottom-[30%] md:bottom-[22%]"
+        />
+        <span
+          data-shadow
+          aria-hidden="true"
+          className="absolute right-[8%] top-[46%] h-[10vh] w-[26vw] rounded-[50%] opacity-[0.11] blur-2xl will-change-transform"
+          style={{ background: "radial-gradient(ellipse, var(--color-ink), transparent 70%)" }}
+        />
+      </div>
+
+      <div className="relative z-10 px-6 md:px-[6vw]">
+        <h1 className="text-[clamp(2.5rem,8.5vw,8rem)] font-semibold leading-[0.9] tracking-[-0.05em] text-ink">
+          {["We build.", "We film.", "We design.", "One studio."].map((line, i) => (
+            <span
+              key={line}
+              data-stair
+              className="block will-change-transform"
+              // The staircase. Each line starts further in than the last, which is the whole
+              // asymmetry of the composition.
+              style={{ paddingLeft: `${i * 7}%` }}
+            >
+              <span data-line className="block overflow-hidden pb-[0.06em]">
+                <span
+                  className="block will-change-transform"
+                  // The last line is the claim the first three earn, so it is the only one
+                  // that takes the accent.
+                  style={
+                    i === 3
+                      ? {
+                          backgroundImage: "var(--gradient-accent)",
+                          WebkitBackgroundClip: "text",
+                          backgroundClip: "text",
+                          color: "transparent",
+                        }
+                      : undefined
+                  }
+                >
+                  {line}
+                </span>
+              </span>
+            </span>
+          ))}
+        </h1>
+
+        <div data-p-foot className="mt-[7vh] flex flex-col gap-5">
+          <span
+            data-rule
+            aria-hidden="true"
+            className="block h-px w-full origin-left bg-[image:var(--gradient-accent)]"
+          />
+          <div className="flex flex-wrap items-start justify-between gap-6">
+            <p
+              data-fade
+              className="max-w-[38ch] text-[clamp(1rem,1.5vw,1.3125rem)] font-medium leading-[1.45] tracking-[-0.015em] text-ink"
+            >
+              Websites, video and visual identity for brands who care how they&rsquo;re
+              experienced.
+            </p>
+            <p data-fade className="text-[0.9375rem] font-medium text-ink opacity-50">
+              Scroll
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <Grain />
     </section>
   );
 }
 
 export function LabHero({ variant }: { variant: HeroVariant }) {
-  if (variant === "specimen") return <Specimen />;
-  if (variant === "lens") return <Lens />;
-  return <Masthead />;
+  if (variant === "displace") return <Displace />;
+  if (variant === "drift") return <Drift />;
+  return <Stack />;
 }

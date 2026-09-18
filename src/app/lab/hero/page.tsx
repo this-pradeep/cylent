@@ -15,22 +15,22 @@ import { LabNav, type NavVariant } from "@/components/lab/LabNav";
 
 const HEROES: { id: HeroVariant; name: string; nav: NavVariant; note: string }[] = [
   {
-    id: "specimen",
-    name: "Specimen",
+    id: "displace",
+    name: "Displace",
     nav: "plate",
-    note: "The model is an exhibit and the glass refracts the headline itself. Type annotates it like plate captions. Pointer looks around the object rather than spinning it.",
+    note: "Three lines at 11vw, model large behind them and deliberately occluded by the type. CURSOR: the words physically push away from your pointer and spring back. SCROLL: each line leaves at its own rate while the model recedes.",
   },
   {
-    id: "lens",
-    name: "Lens",
+    id: "drift",
+    name: "Drift",
     nav: "letters",
-    note: "Outline type on an almost empty page. The model, the colour and the dispersion are behind a mask only the cursor opens. Nothing is shown until the page is touched.",
+    note: "One line at 15vw, wider than the screen and not meant to fit. CURSOR: the type skews with pointer VELOCITY — move slowly, nothing; flick, it leans and recovers. SCROLL: the two lines shear apart horizontally.",
   },
   {
-    id: "masthead",
-    name: "Masthead",
+    id: "stack",
+    name: "Stack",
     nav: "masthead",
-    note: "A magazine cover. Display type as the left column, the model in its own aperture on the right. The two panes parallax in opposition.",
+    note: "A staircase of four short lines; the model sits in the triangle of empty paper the indents open. CURSOR: your pointer is the light source and the shadow swings away from it. SCROLL: the staircase spreads open as it leaves.",
   },
 ];
 
